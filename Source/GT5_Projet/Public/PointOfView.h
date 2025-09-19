@@ -37,11 +37,14 @@ protected:
 
 	UArrowComponent* ForwardDirectionComponent;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 	UCameraComponent* CameraComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	APointOfView* Back;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FString MapText;
 
 	static constexpr float EyeHeight = 150.0F;
 };
