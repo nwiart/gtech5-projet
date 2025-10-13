@@ -33,3 +33,19 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString Text;
 };
+
+
+UCLASS(BlueprintType, Blueprintable)
+class GT5_PROJET_API UDialogueLineObject : public UObject
+{
+	GENERATED_BODY()
+
+public:
+
+	UDialogueLineObject()
+	{
+	}
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TArray<FDialogueLine> Lines;
+};
