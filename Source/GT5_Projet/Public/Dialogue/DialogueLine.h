@@ -26,6 +26,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	EDialoguePose Pose;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool LeftSide;
 };
 
 
