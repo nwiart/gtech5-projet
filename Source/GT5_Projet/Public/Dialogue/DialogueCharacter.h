@@ -11,9 +11,6 @@
 #include "DialogueCharacter.generated.h"
 
 
-class UDialogueCharacter;
-
-
 UCLASS(BlueprintType)
 class GT5_PROJET_API UDialogueCharacter : public UPrimaryDataAsset
 {
@@ -47,8 +44,8 @@ protected:
 	virtual FText GetAssetDisplayName() const override;
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;
 	virtual FLinearColor GetAssetColor() const override;
-	virtual TSoftClassPtr<UObject> GetAssetClass() const;
-	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const;
+	virtual TSoftClassPtr<UObject> GetAssetClass() const override;
+	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override;
 };
 
 UCLASS(HideCategories = Object)

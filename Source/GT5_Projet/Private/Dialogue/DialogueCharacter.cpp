@@ -65,7 +65,7 @@ UDialogueCharacterFactory::UDialogueCharacterFactory(const FObjectInitializer&)
 	SupportedClass = UDialogueCharacter::StaticClass();
 
 	// Make sure to set this to true, otherwise it wont create the asset
-	bCreateNew = true; 
+	bCreateNew = true;
 
 	// Set this to true, if you want to immediately start editing the asset after creation
 	bEditAfterNew = true;
