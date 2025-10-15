@@ -35,6 +35,17 @@ public:
 	bool LeftSide;
 };
 
+USTRUCT(BlueprintType)
+struct GT5_PROJET_API FDialogueChoice
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FString Text;
+};
+
 
 UCLASS(BlueprintType)
 class GT5_PROJET_API UDialogueLineSequence : public UPrimaryDataAsset
@@ -44,6 +55,9 @@ class GT5_PROJET_API UDialogueLineSequence : public UPrimaryDataAsset
 public:
 
 	UDialogueLineSequence();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool HasChoice() const;
 
 
 	// Start character sprites (displayed before the first line).
@@ -66,8 +80,11 @@ public:
 
 
 	// Optional choice at the end of this sequence. Leave empty for no selection.
-	//UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	//TArray<FString> Choices;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Choice")
+	FString ChoiceQuestion;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Choice")
+	TArray<FDialogueChoice> ChoiceOptions;
 };
 
 UCLASS()

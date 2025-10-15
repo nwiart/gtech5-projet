@@ -16,6 +16,11 @@ UDialogueLineSequence::UDialogueLineSequence()
 {
 }
 
+bool UDialogueLineSequence::HasChoice() const
+{
+	return !ChoiceOptions.IsEmpty();
+}
+
 
 // Asset definition.
 
