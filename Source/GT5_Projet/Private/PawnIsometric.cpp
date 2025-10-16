@@ -58,7 +58,7 @@ void APawnIsometric::Tick(float DeltaTime)
 		GEngine->GameViewport->GetViewportSize(viewportSize);
 
 		mousePos = mousePos / viewportSize * 2.0 - 1.0;
-		mousePos.Y *= -1.0F;
+		mousePos.Y *= -1.0;
 
 		FIntVector2 tilePos = GetPointedTile(mousePos.X, mousePos.Y);
 
@@ -78,23 +78,23 @@ void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("SelectTile", EInputEvent::IE_Released, this, &APawnIsometric::Input_SelectTile);
 }
 
-FVector APawnIsometric::ViewportToWorld(float viewportX, float viewportY) const
+FVector APawnIsometric::ViewportToWorld(double viewportX, double viewportY) const
 {
-	const float halfHeight = Camera->OrthoWidth * 0.5F;
+	const double halfHeight = Camera->OrthoWidth * 0.5;
 	FVector off =
 		viewportX * halfHeight * Camera->AspectRatio * Camera->GetRightVector() +
 		viewportY * halfHeight * Camera->GetUpVector();
 
-	float t = -(off.Z - GetActorLocation().Z) / cameraForwardVector.Z;
+	double t = -(off.Z - GetActorLocation().Z) / cameraForwardVector.Z;
 
 	return GetActorLocation() + off + t * cameraForwardVector;
 }
 
-FIntVector2 APawnIsometric::GetPointedTile(float viewportX, float viewportY) const
+FIntVector2 APawnIsometric::GetPointedTile(double viewportX, double viewportY) const
 {
 	FVector pos = ViewportToWorld(viewportX, viewportY);
 
-	return FIntVector2(FMath::FloorToInt(pos.X / 100.0F), FMath::FloorToInt(pos.Y / 100.0F));
+	return FIntVector2(FMath::FloorToInt(pos.X / 100.0), FMath::FloorToInt(pos.Y / 100.0));
 }
 
 

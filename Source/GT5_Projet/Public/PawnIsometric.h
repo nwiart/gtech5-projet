@@ -29,17 +29,17 @@ protected:
 	void Input_SelectTile();
 
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	FVector ViewportToWorld(float viewportX, float viewportY) const;
+	FVector ViewportToWorld(double viewportX, double viewportY) const;
 
 	// Gets the tile coordinate based on a cursor position in viewport space (-1; 1).
-	FIntVector2 GetPointedTile(float viewportX, float viewportY) const;
+	FIntVector2 GetPointedTile(double viewportX, double viewportY) const;
 
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
