@@ -5,6 +5,9 @@
 
 #include "Camera/CameraComponent.h"
 
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/PlayerController.h"
+
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -12,6 +15,7 @@
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
+	, cursorActor(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -37,6 +41,7 @@ void APawnIsometric::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
 }
 
 // Called every frame
@@ -44,6 +49,21 @@ void APawnIsometric::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (cursorActor) {
+		// TODO : Move to function library.
+		APlayerController* playerController = GetPlayerState()->GetPlayerController();
+		FVector2D mousePos;
+		FVector2D viewportSize;
+		playerController->GetMousePosition(mousePos.X, mousePos.Y);
+		GEngine->GameViewport->GetViewportSize(viewportSize);
+
+		mousePos = mousePos / viewportSize * 2.0 - 1.0;
+		mousePos.Y *= -1.0F;
+
+		FIntVector2 tilePos = GetPointedTile(mousePos.X, mousePos.Y);
+
+		cursorActor->SetActorLocation(FVector(tilePos.X * 100 + 50, tilePos.Y * 100 + 50, 1.0F));
+	}
 }
 
 // Called to bind functionality to input
@@ -54,6 +74,27 @@ void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("PanCameraX", this, &APawnIsometric::Input_PanCameraX);
 	PlayerInputComponent->BindAxis("PanCameraY", this, &APawnIsometric::Input_PanCameraY);
 	PlayerInputComponent->BindAxis("ZoomCamera", this, &APawnIsometric::Input_ZoomCamera);
+
+	PlayerInputComponent->BindAction("SelectTile", EInputEvent::IE_Released, this, &APawnIsometric::Input_SelectTile);
+}
+
+FVector APawnIsometric::ViewportToWorld(float viewportX, float viewportY) const
+{
+	const float halfHeight = Camera->OrthoWidth * 0.5F;
+	FVector off =
+		viewportX * halfHeight * Camera->AspectRatio * Camera->GetRightVector() +
+		viewportY * halfHeight * Camera->GetUpVector();
+
+	float t = -(off.Z - GetActorLocation().Z) / cameraForwardVector.Z;
+
+	return GetActorLocation() + off + t * cameraForwardVector;
+}
+
+FIntVector2 APawnIsometric::GetPointedTile(float viewportX, float viewportY) const
+{
+	FVector pos = ViewportToWorld(viewportX, viewportY);
+
+	return FIntVector2(FMath::FloorToInt(pos.X / 100.0F), FMath::FloorToInt(pos.Y / 100.0F));
 }
 
 
@@ -80,4 +121,8 @@ void APawnIsometric::Input_ZoomCamera(float w)
 	w = 1.0F / (w * 0.1F + 1.0F);
 
 	Camera->OrthoWidth = FMath::Clamp(Camera->OrthoWidth * w, CameraMinWidth, CameraMaxWidth);
+}
+
+void APawnIsometric::Input_SelectTile()
+{
 }

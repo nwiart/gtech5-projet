@@ -26,6 +26,8 @@ protected:
 	void Input_PanCameraY(float w);
 	void Input_ZoomCamera(float w);
 
+	void Input_SelectTile();
+
 
 public:	
 	// Called every frame
@@ -33,6 +35,11 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	FVector ViewportToWorld(float viewportX, float viewportY) const;
+
+	// Gets the tile coordinate based on a cursor position in viewport space (-1; 1).
+	FIntVector2 GetPointedTile(float viewportX, float viewportY) const;
 
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
@@ -47,8 +54,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
 	float CameraMaxWidth;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> CursorClass;
+
 
 private:
+
+	AActor* cursorActor;
 
 	FVector cameraForwardVector;
 };
