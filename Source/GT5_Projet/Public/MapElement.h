@@ -24,6 +24,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetTilePosition(int& outX, int& outY) const;
+
+	FIntPoint GetTilePosition() const;
+
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnPlayerHit();
 };

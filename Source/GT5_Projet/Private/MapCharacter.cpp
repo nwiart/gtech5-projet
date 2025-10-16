@@ -3,7 +3,12 @@
 
 #include "MapCharacter.h"
 
+#include "VNGamemode.h"
 #include "VNTileMapLibrary.h"
+
+#include "MapElement.h"
+
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -32,6 +37,17 @@ void AMapCharacter::Tick(float DeltaTime)
 	if (moving) {
 		SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(targetPosition));
 		moving = false;
+
+		AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
+		if (gamemode) {
+			for (AMapElement* elem : gamemode->GetAllMapElements()) {
+				FIntPoint pos = elem->GetTilePosition();
+				if (pos == targetPosition) {
+					elem->OnPlayerHit();
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -44,13 +60,12 @@ void AMapCharacter::MoveTo(int X, int Y)
 
 void AMapCharacter::GetTilePosition(int& outX, int& outY) const
 {
-	FVector pos = GetActorLocation();
-	outX = FMath::FloorToInt(pos.X / 100.0);
-	outY = FMath::FloorToInt(pos.Y / 100.0);
+	FIntPoint pos = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
+	outX = pos.X;
+	outY = pos.Y;
 }
 
 FIntPoint AMapCharacter::GetTilePosition() const
 {
-	FVector pos = GetActorLocation();
-	return FIntPoint(FMath::FloorToInt(pos.X / 100.0), FMath::FloorToInt(pos.Y / 100.0));
+	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 }

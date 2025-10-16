@@ -3,6 +3,13 @@
 
 #include "MapElement.h"
 
+#include "VNTileMapLibrary.h"
+
+#include "VNGamemode.h"
+
+#include "Kismet/GameplayStatics.h"
+
+
 // Sets default values
 AMapElement::AMapElement()
 {
@@ -17,6 +24,10 @@ void AMapElement::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
+	if (gamemode) {
+		gamemode->GetAllMapElements().Add(this);
+	}
 }
 
 // Called every frame
@@ -24,4 +35,17 @@ void AMapElement::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+
+void AMapElement::GetTilePosition(int& outX, int& outY) const
+{
+	FIntPoint pos = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
+	outX = pos.X;
+	outY = pos.Y;
+}
+
+FIntPoint AMapElement::GetTilePosition() const
+{
+	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 }
