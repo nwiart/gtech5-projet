@@ -39,7 +39,7 @@ public:
 	FVector ViewportToWorld(double viewportX, double viewportY) const;
 
 	// Gets the tile coordinate based on a cursor position in viewport space (-1; 1).
-	FIntVector2 GetPointedTile(double viewportX, double viewportY) const;
+	FIntPoint GetPointedTile(double viewportX, double viewportY) const;
 
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
@@ -63,4 +63,6 @@ private:
 	AActor* cursorActor;
 
 	FVector cameraForwardVector;
+
+	FIntPoint cursorPosition;
 };

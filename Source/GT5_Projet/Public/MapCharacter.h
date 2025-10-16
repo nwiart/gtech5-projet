@@ -23,13 +23,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void MoveTo(int X, int Y);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetTilePosition(int& outX, int& outY) const;
 
-	FIntVector2 GetTilePosition() const;
+	FIntPoint GetTilePosition() const;
 
 
 private:
 
-	FIntVector2 targetPosition;
+	FIntPoint targetPosition;
+
+	bool moving;
 };

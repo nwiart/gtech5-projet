@@ -3,8 +3,12 @@
 
 #include "MapCharacter.h"
 
+#include "VNTileMapLibrary.h"
+
+
 // Sets default values
 AMapCharacter::AMapCharacter()
+	: moving(false)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,8 +29,18 @@ void AMapCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (moving) {
+		SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(targetPosition));
+		moving = false;
+	}
 }
 
+
+void AMapCharacter::MoveTo(int X, int Y)
+{
+	targetPosition = FIntPoint(X, Y);
+	moving = true;
+}
 
 void AMapCharacter::GetTilePosition(int& outX, int& outY) const
 {
@@ -35,8 +49,8 @@ void AMapCharacter::GetTilePosition(int& outX, int& outY) const
 	outY = FMath::FloorToInt(pos.Y / 100.0);
 }
 
-FIntVector2 AMapCharacter::GetTilePosition() const
+FIntPoint AMapCharacter::GetTilePosition() const
 {
 	FVector pos = GetActorLocation();
-	return FIntVector2(FMath::FloorToInt(pos.X / 100.0), FMath::FloorToInt(pos.Y / 100.0));
+	return FIntPoint(FMath::FloorToInt(pos.X / 100.0), FMath::FloorToInt(pos.Y / 100.0));
 }

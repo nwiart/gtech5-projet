@@ -11,6 +11,10 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "VNTileMapLibrary.h"
+#include "VNPlayerController.h"
+#include "MapCharacter.h"
+
 
 // Sets default values
 APawnIsometric::APawnIsometric()
@@ -49,21 +53,6 @@ void APawnIsometric::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (cursorActor) {
-		// TODO : Move to function library.
-		APlayerController* playerController = GetPlayerState()->GetPlayerController();
-		FVector2D mousePos;
-		FVector2D viewportSize;
-		playerController->GetMousePosition(mousePos.X, mousePos.Y);
-		GEngine->GameViewport->GetViewportSize(viewportSize);
-
-		mousePos = mousePos / viewportSize * 2.0 - 1.0;
-		mousePos.Y *= -1.0;
-
-		FIntVector2 tilePos = GetPointedTile(mousePos.X, mousePos.Y);
-
-		cursorActor->SetActorLocation(FVector(tilePos.X * 100 + 50, tilePos.Y * 100 + 50, 1.0F));
-	}
 }
 
 // Called to bind functionality to input
@@ -90,11 +79,9 @@ FVector APawnIsometric::ViewportToWorld(double viewportX, double viewportY) cons
 	return GetActorLocation() + off + t * cameraForwardVector;
 }
 
-FIntVector2 APawnIsometric::GetPointedTile(double viewportX, double viewportY) const
+FIntPoint APawnIsometric::GetPointedTile(double viewportX, double viewportY) const
 {
-	FVector pos = ViewportToWorld(viewportX, viewportY);
-
-	return FIntVector2(FMath::FloorToInt(pos.X / 100.0), FMath::FloorToInt(pos.Y / 100.0));
+	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(ViewportToWorld(viewportX, viewportY));
 }
 
 
@@ -125,4 +112,19 @@ void APawnIsometric::Input_ZoomCamera(float w)
 
 void APawnIsometric::Input_SelectTile()
 {
+	if (!cursorActor) return;
+
+	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
+	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
+
+	// Clicked the same tile.
+	if (tilePos == cursorPosition) {
+		AVNPlayerController* pc = Cast<AVNPlayerController>(GetPlayerState()->GetPlayerController());
+		if (pc) {
+			pc->PlayerCharacter->MoveTo(cursorPosition.X, cursorPosition.Y);
+		}
+	}
+
+	cursorPosition = tilePos;
+	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, 0.5));
 }
