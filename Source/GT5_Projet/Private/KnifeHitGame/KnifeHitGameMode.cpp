@@ -62,7 +62,7 @@ void AKnifeHitGameMode::LaunchMatch() {
         
 		FVector SpawnLocation = TargetLocation + FVector(0.0f, 0.0f, -300.0f);
         
-		FRotator SpawnRotation = FRotator(0.0f, 90.0f, 0.0f);
+		FRotator SpawnRotation = CurrentTarget->GetActorRotation();
         
 		AMatchProjectile* NewMatch = GetWorld()->SpawnActor<AMatchProjectile>(
 			MatchClass,
@@ -78,11 +78,17 @@ void AKnifeHitGameMode::LaunchMatch() {
 	}
 }
 
-void AKnifeHitGameMode::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning) {
+void AKnifeHitGameMode::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, AMatchProjectile* Match) {
 	if (!bStillBurning)
 	{
 		OnMatchCollision();
 		return;
+	}
+
+	// Add the match to the stuck matches array
+	if (Match)
+	{
+		StuckMatches.Add(Match);
 	}
 
 	if (bHitCriticalPoint)
@@ -158,9 +164,19 @@ void AKnifeHitGameMode::CheckTargetComplete() {
 void AKnifeHitGameMode::OnTargetComplete() {
 	if (CurrentTarget)
 	{
+		// Destroy all stuck projectiles before destroying the target
+		for (AMatchProjectile* Match : StuckMatches)
+		{
+			if (Match)
+			{
+				Match->Destroy();
+			}
+		}
+		StuckMatches.Empty();
+
 		CurrentTarget->Destroy();
 		CurrentTarget = nullptr;
 
-		UE_LOG(LogTemp, Log, TEXT("Target Complete! Target destroyed."));
+		UE_LOG(LogTemp, Log, TEXT("Target Complete! Target and projectiles destroyed."));
 	}
 }

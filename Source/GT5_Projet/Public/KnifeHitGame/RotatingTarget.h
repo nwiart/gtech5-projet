@@ -26,17 +26,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UStaticMeshComponent* TargetMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class USceneComponent* CriticalPoint1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* CriticalPoint1;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class USceneComponent* CriticalPoint2;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* CriticalPoint2;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class USceneComponent* CriticalPoint3;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* CriticalPoint3;
 
 	UPROPERTY(EditAnywhere, Category = "Rotation")
-	float RotationSpeed = 60.0f; // Degrees per second
+	float RotationSpeed = 100.0f; 
 
 	UPROPERTY(EditAnywhere, Category = "Rotation")
 	bool bRandomizeSpeed = true;
@@ -45,10 +45,10 @@ public:
 	FVector2D SpeedRange = FVector2D(30.0f, 120.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Target")
-	bool IsNearCriticalPoint(FVector HitLocation, float Tolerance = 50.0f);
+	bool IsNearCriticalPoint(FVector HitLocation, float Tolerance = 20.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Target")
-	USceneComponent* GetHitCriticalPoint(FVector HitLocation, float Tolerance = 50.0f);
+	USceneComponent* GetHitCriticalPoint(FVector HitLocation, float Tolerance = 20.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Target")
 	void DestroyCriticalPoint(USceneComponent* CriticalPoint);

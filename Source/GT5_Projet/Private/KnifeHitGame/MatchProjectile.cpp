@@ -86,7 +86,6 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 		SetActorLocation(Hit.Location);
 
 		FRotator HitRotation = Hit.Normal.Rotation();
-		HitRotation.Yaw += 180.0f;
 		SetActorRotation(HitRotation);
 
 		FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
@@ -102,7 +101,7 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 
 		if (GameModeRef)
 		{
-			GameModeRef->OnMatchHit(bHitCritical, bIsBurning);
+			GameModeRef->OnMatchHit(bHitCritical, bIsBurning, this);
 		}
 	}
 }
