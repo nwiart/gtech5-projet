@@ -13,7 +13,6 @@ ARotatingTarget::ARotatingTarget()
 	USceneComponent* Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 
-	// Target mesh (cylinder or custom mesh)
 	TargetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TargetMesh"));
 	TargetMesh->SetupAttachment(RootComponent);
 	TargetMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -23,18 +22,23 @@ ARotatingTarget::ARotatingTarget()
 	TargetMesh->SetNotifyRigidBodyCollision(true);
 	TargetMesh->SetGenerateOverlapEvents(true);
 
-	// Critical points (glyphs/symbols) - positioned around the target
-	CriticalPoint1 = CreateDefaultSubobject<USceneComponent>(TEXT("CriticalPoint1"));
-	CriticalPoint1->SetupAttachment(TargetMesh);
-	CriticalPoint1->SetRelativeLocation(FVector(100.0f, 0.0f, 50.0f));
+	CriticalPoint1 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CriticalPointMesh1"));
+	CriticalPoint1->SetupAttachment(RootComponent);
+	CriticalPoint1->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CriticalPoint1->SetCollisionResponseToAllChannels(ECR_Overlap);
+	CriticalPoint1->SetGenerateOverlapEvents(true);
 
-	CriticalPoint2 = CreateDefaultSubobject<USceneComponent>(TEXT("CriticalPoint2"));
-	CriticalPoint2->SetupAttachment(TargetMesh);
-	CriticalPoint2->SetRelativeLocation(FVector(100.0f, 0.0f, -50.0f));
-
-	CriticalPoint3 = CreateDefaultSubobject<USceneComponent>(TEXT("CriticalPoint3"));
-	CriticalPoint3->SetupAttachment(TargetMesh);
-	CriticalPoint3->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
+	CriticalPoint2 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CriticalPointMesh2"));
+	CriticalPoint2->SetupAttachment(RootComponent);
+	CriticalPoint2->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CriticalPoint2->SetCollisionResponseToAllChannels(ECR_Overlap);
+	CriticalPoint2->SetGenerateOverlapEvents(true);
+	
+	CriticalPoint3 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CriticalPointMesh3"));
+	CriticalPoint3->SetupAttachment(RootComponent);
+	CriticalPoint3->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CriticalPoint3->SetCollisionResponseToAllChannels(ECR_Overlap);
+	CriticalPoint3->SetGenerateOverlapEvents(true);
 
 }
 
@@ -63,9 +67,9 @@ void ARotatingTarget::Tick(float DeltaTime)
 }
 
 bool ARotatingTarget::IsNearCriticalPoint(FVector HitLocation, float Tolerance) {
-	TArray<USceneComponent*> CriticalPoints = {CriticalPoint1, CriticalPoint2, CriticalPoint3};
+	TArray<UStaticMeshComponent*> CriticalPoints = {CriticalPoint1, CriticalPoint2, CriticalPoint3};
 
-	for (USceneComponent* Point : CriticalPoints)
+	for (UStaticMeshComponent* Point : CriticalPoints)
 	{
 		if (Point && Point->IsVisible())
 		{
@@ -81,9 +85,9 @@ bool ARotatingTarget::IsNearCriticalPoint(FVector HitLocation, float Tolerance) 
 }
 
 USceneComponent* ARotatingTarget::GetHitCriticalPoint(FVector HitLocation, float Tolerance) {
-	TArray<USceneComponent*> CriticalPoints = {CriticalPoint1, CriticalPoint2, CriticalPoint3};
+	TArray<UStaticMeshComponent*> CriticalPoints = {CriticalPoint1, CriticalPoint2, CriticalPoint3};
 
-	for (USceneComponent* Point : CriticalPoints)
+	for (UStaticMeshComponent* Point : CriticalPoints)
 	{
 		if (Point && Point->IsVisible())
 		{

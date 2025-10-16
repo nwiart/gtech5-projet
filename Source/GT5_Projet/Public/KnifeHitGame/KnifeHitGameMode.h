@@ -40,7 +40,7 @@ public:
 	void LaunchMatch();
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
-	void OnMatchHit(bool bHitCriticalPoint, bool bStillBurning);
+	void OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, class AMatchProjectile* Match = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	void OnMatchCollision(); 
