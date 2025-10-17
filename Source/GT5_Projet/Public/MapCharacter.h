@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TestActor.generated.h"
+#include "MapCharacter.generated.h"
 
 UCLASS()
-class GT5_PROJET_API ATestActor : public AActor
+class GT5_PROJET_API AMapCharacter : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATestActor();
+	AMapCharacter();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,4 +23,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void MoveTo(int X, int Y);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetTilePosition(int& outX, int& outY) const;
+
+	FIntPoint GetTilePosition() const;
+
+
+private:
+
+	FIntPoint targetPosition;
+
+	bool moving;
 };
