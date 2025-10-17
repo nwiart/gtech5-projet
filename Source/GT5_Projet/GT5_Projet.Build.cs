@@ -12,6 +12,10 @@ public class GT5_Projet : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
+		// Making custom assets.
+		PublicDependencyModuleNames.AddRange(new[] { "AssetDefinition", "UnrealEd", });
+
+
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		
