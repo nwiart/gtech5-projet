@@ -17,6 +17,7 @@ AKnifeHitGameMode::AKnifeHitGameMode()
 	ConnectionScore = 0;
 	CriticalPointsHit = 0;
 	bGameActive = false;
+	ReadyMatch = nullptr;
 }
 
 void AKnifeHitGameMode::BeginPlay() {
@@ -29,14 +30,15 @@ void AKnifeHitGameMode::BeginPlay() {
 	{
 		FVector SpawnLocation(0.0f, 0.0f, 200.0f);
 		FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
-        
+
 		CurrentTarget = GetWorld()->SpawnActor<ARotatingTarget>(
-			TargetClass, 
-			SpawnLocation, 
+			TargetClass,
+			SpawnLocation,
 			SpawnRotation
 		);
 	}
 
+	SpawnReadyMatch();
 }
 
 void AKnifeHitGameMode::Tick(float DeltaTime) {
@@ -54,27 +56,30 @@ void AKnifeHitGameMode::Tick(float DeltaTime) {
 }
 
 void AKnifeHitGameMode::LaunchMatch() {
-	if (!bGameActive || RemainingMatches <= 0 || !CurrentTarget) return;
+	if (!bGameActive || RemainingMatches <= 0 || !CurrentTarget || !ReadyMatch) return;
 
-	if (MatchClass)
+	ReadyMatch->Launch(CurrentTarget);
+	RemainingMatches--;
+
+	ReadyMatch = nullptr;
+}
+
+void AKnifeHitGameMode::SpawnReadyMatch() {
+	if (!MatchClass || !CurrentTarget) return;
+
+	FVector TargetLocation = CurrentTarget->GetActorLocation();
+	FVector SpawnLocation = TargetLocation + FVector(0.0f, 0.0f, -ReadyMatchDistance);
+	FRotator SpawnRotation = FRotator(-90.0f, 0.0f, 0.0f); 
+
+	ReadyMatch = GetWorld()->SpawnActor<AMatchProjectile>(
+		MatchClass,
+		SpawnLocation,
+		SpawnRotation
+	);
+
+	if (ReadyMatch)
 	{
-		FVector TargetLocation = CurrentTarget->GetActorLocation();
-        
-		FVector SpawnLocation = TargetLocation + FVector(0.0f, 0.0f, -300.0f);
-        
-		FRotator SpawnRotation = CurrentTarget->GetActorRotation();
-        
-		AMatchProjectile* NewMatch = GetWorld()->SpawnActor<AMatchProjectile>(
-			MatchClass,
-			SpawnLocation,
-			SpawnRotation
-		);
-
-		if (NewMatch)
-		{
-			NewMatch->Launch(CurrentTarget);
-			RemainingMatches--;
-		}
+		ReadyMatch->SetReadyState(true);
 	}
 }
 
@@ -85,7 +90,6 @@ void AKnifeHitGameMode::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, A
 		return;
 	}
 
-	// Add the match to the stuck matches array
 	if (Match)
 	{
 		StuckMatches.Add(Match);
@@ -94,6 +98,11 @@ void AKnifeHitGameMode::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, A
 	if (bHitCriticalPoint)
 	{
 		CriticalPointsHit++;
+	}
+
+	if (RemainingMatches > 0)
+	{
+		SpawnReadyMatch();
 	}
 
 	CheckTargetComplete();
@@ -164,7 +173,6 @@ void AKnifeHitGameMode::CheckTargetComplete() {
 void AKnifeHitGameMode::OnTargetComplete() {
 	if (CurrentTarget)
 	{
-		// Destroy all stuck projectiles before destroying the target
 		for (AMatchProjectile* Match : StuckMatches)
 		{
 			if (Match)

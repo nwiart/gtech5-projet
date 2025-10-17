@@ -31,6 +31,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
 	float LaunchSpeed = 1000.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
+	float CriticalPointTolerance = 15.0f;
+
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -43,6 +46,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Match")
 	void Extinguish();
+
+	UFUNCTION(BlueprintCallable, Category = "Match")
+	void SetReadyState(bool bReady);
 
 protected:
 	// Called when the game starts or when spawned
