@@ -69,7 +69,7 @@ void AKnifeHitGameMode::SpawnReadyMatch() {
 
 	FVector TargetLocation = CurrentTarget->GetActorLocation();
 	FVector SpawnLocation = TargetLocation + FVector(0.0f, 0.0f, -ReadyMatchDistance);
-	FRotator SpawnRotation = FRotator(-90.0f, 0.0f, 0.0f); 
+	FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f); 
 
 	ReadyMatch = GetWorld()->SpawnActor<AMatchProjectile>(
 		MatchClass,
