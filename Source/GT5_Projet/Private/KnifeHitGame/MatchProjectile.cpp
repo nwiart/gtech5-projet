@@ -2,6 +2,7 @@
 
 
 #include "KnifeHitGame/MatchProjectile.h"
+
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "KnifeHitGame/KnifeHitGameMode.h"
@@ -13,13 +14,20 @@ AMatchProjectile::AMatchProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	CollisionComp->InitSphereRadius(5.0f); 
+	CollisionComp->SetNotifyRigidBodyCollision(true);
+
+	RootComponent = CollisionComp;
+
 	MatchMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MatchMesh"));
-	RootComponent = MatchMesh;
+	MatchMesh->SetupAttachment(RootComponent); 
 	MatchMesh->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
-	MatchMesh->SetNotifyRigidBodyCollision(true);
+	MatchMesh->SetNotifyRigidBodyCollision(false);
+	MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	ProjectileMovement->UpdatedComponent = MatchMesh;
+	ProjectileMovement->UpdatedComponent = RootComponent;
 	ProjectileMovement->InitialSpeed = 0.0f;
 	ProjectileMovement->MaxSpeed = LaunchSpeed;
 	ProjectileMovement->bRotationFollowsVelocity = false;
@@ -36,7 +44,7 @@ void AMatchProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MatchMesh->OnComponentHit.AddDynamic(this, &AMatchProjectile::OnHit);
+	CollisionComp->OnComponentHit.AddDynamic(this, &AMatchProjectile::OnHit);
 
 	GameModeRef = Cast<AKnifeHitGameMode>(UGameplayStatics::GetGameMode(this));
 }
@@ -81,7 +89,7 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 		ProjectileMovement->StopMovementImmediately();
 		ProjectileMovement->SetActive(false);
 
-		MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		const FVector DirectionIntoTarget = -Hit.Normal;
 		const FRotator BaseRotation = DirectionIntoTarget.Rotation();
@@ -114,7 +122,7 @@ void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 	BurnTimer = 0.0f;
 
 	// Enable collision
-	MatchMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	if (ProjectileMovement)
 	{
