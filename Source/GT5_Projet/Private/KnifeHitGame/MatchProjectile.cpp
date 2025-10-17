@@ -15,14 +15,14 @@ AMatchProjectile::AMatchProjectile()
 
 	MatchMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MatchMesh"));
 	RootComponent = MatchMesh;
-	MatchMesh->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
+	MatchMesh->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 	MatchMesh->SetNotifyRigidBodyCollision(true);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->UpdatedComponent = MatchMesh;
 	ProjectileMovement->InitialSpeed = 0.0f;
 	ProjectileMovement->MaxSpeed = LaunchSpeed;
-	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bRotationFollowsVelocity = false;
 	ProjectileMovement->ProjectileGravityScale = 0.0f;
 
 	bIsBurning = true;
@@ -83,15 +83,15 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 
 		MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		SetActorLocation(Hit.Location);
-
-		FRotator HitRotation = Hit.Normal.Rotation();
-		SetActorRotation(HitRotation);
+		const FVector DirectionIntoTarget = -Hit.Normal;
+		const FRotator BaseRotation = DirectionIntoTarget.Rotation();
+		const FRotator FinalRotation = BaseRotation + FRotator(90.0f, 0.0f, 0.0f);
+		SetActorRotation(FinalRotation);
 
 		FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
 		AttachToComponent(OtherComp, AttachRules);
 
-		USceneComponent* HitCriticalPoint = HitTarget->GetHitCriticalPoint(Hit.Location, 50.0f);
+		USceneComponent* HitCriticalPoint = HitTarget->GetHitCriticalPoint(Hit.Location, CriticalPointTolerance);
 		bool bHitCritical = HitCriticalPoint != nullptr;
 
 		if (bHitCritical)
@@ -109,10 +109,41 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 	TargetRef = Target;
 
+	// Start burning when launched
+	bIsBurning = true;
+	BurnTimer = 0.0f;
+
+	// Enable collision
+	MatchMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
 	if (ProjectileMovement)
 	{
+		ProjectileMovement->SetActive(true);
 		FVector DirectionToTarget = (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 		ProjectileMovement->Velocity = DirectionToTarget * LaunchSpeed;
+
+		FRotator BaseRotation = DirectionToTarget.Rotation();
+		FRotator FinalRotation = BaseRotation + FRotator(90.0f, 0.0f, 0.0f);
+
+		SetActorRotation(FinalRotation);
+	}
+}
+
+void AMatchProjectile::SetReadyState(bool bReady) {
+	if (bReady)
+	{
+		// In ready state: not burning, not moving, no collision with other matches
+		bIsBurning = false;
+		BurnTimer = 0.0f;
+
+		if (ProjectileMovement)
+		{
+			ProjectileMovement->SetActive(false);
+			ProjectileMovement->Velocity = FVector::ZeroVector;
+		}
+
+		MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	}
 }
 

@@ -70,8 +70,16 @@ protected:
 	UPROPERTY()
 	TArray<class AMatchProjectile*> StuckMatches;
 
+	UPROPERTY()
+	class AMatchProjectile* ReadyMatch;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawn")
+	float ReadyMatchDistance = 200.0f;
+
 private:
 	bool bGameActive;
+
+	void SpawnReadyMatch();
 };
 
 	
