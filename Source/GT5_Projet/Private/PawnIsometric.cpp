@@ -84,6 +84,15 @@ FIntPoint APawnIsometric::GetPointedTile(double viewportX, double viewportY) con
 	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(ViewportToWorld(viewportX, viewportY));
 }
 
+void APawnIsometric::RecenterViewOnPlayer()
+{
+	AVNPlayerController* playerController = Cast<AVNPlayerController>(GetPlayerState()->GetPlayerController());
+	if (playerController) {
+		FIntPoint tilePos = playerController->PlayerCharacter->GetTilePosition();
+		SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos));
+	}
+}
+
 
 void APawnIsometric::Input_PanCameraX(float w)
 {

@@ -41,6 +41,9 @@ public:
 	// Gets the tile coordinate based on a cursor position in viewport space (-1; 1).
 	FIntPoint GetPointedTile(double viewportX, double viewportY) const;
 
+	UFUNCTION(BlueprintCallable)
+	void RecenterViewOnPlayer();
+
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
 	UCameraComponent* Camera;
