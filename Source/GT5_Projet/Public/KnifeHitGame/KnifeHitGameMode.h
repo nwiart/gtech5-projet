@@ -27,7 +27,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Game State")
 	int32 ConnectionScore;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Game Settings")
 	int32 TotalMatches = 8;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
@@ -35,6 +35,43 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Score")
 	int32 CriticalPointsHit;
+
+	// UI Display Properties
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	FString MapName = TEXT("KNIFE HIT GAME");
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Settings")
+	int32 TotalCriticalPoints = 3;
+
+	// UI Helper Functions
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	int32 GetMatchesUsed() const { return TotalMatches - RemainingMatches; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	float GetCriticalPointsProgress() const { return TotalCriticalPoints > 0 ? CriticalPointsHit / TotalCriticalPoints : 0.0f; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	bool IsGameActive() const { return bGameActive; }
+
+	// Mission Status
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	bool IsMissionCriticalPointsComplete() const { return CriticalPointsHit >= TotalCriticalPoints; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	bool IsMissionAllKnivesComplete() const { return RemainingMatches == 0; }
+
+	// Win/Lose Screens
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UUserWidget> WinScreenClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UUserWidget> LoseScreenClass;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowWinScreen();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowLoseScreen();
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	void LaunchMatch();

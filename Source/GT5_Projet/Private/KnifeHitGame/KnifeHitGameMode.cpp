@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "KnifeHitGame/KnifeHitPlayerController.h"
 #include "KnifeHitGame/RotatingTarget.h"
+#include "Blueprint/UserWidget.h"
 
 
 AKnifeHitGameMode::AKnifeHitGameMode()
@@ -22,7 +23,7 @@ AKnifeHitGameMode::AKnifeHitGameMode()
 
 void AKnifeHitGameMode::BeginPlay() {
 	Super::BeginPlay();
-
+				
 	RemainingMatches = TotalMatches;
 	bGameActive = true;
 
@@ -125,7 +126,9 @@ void AKnifeHitGameMode::OnMatchCollision() {
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over - Collision!"));
-	
+
+	// Show lose screen
+	ShowLoseScreen();
 }
 
 void AKnifeHitGameMode::RestartGame() {
@@ -158,6 +161,12 @@ void AKnifeHitGameMode::CalculateFinalScore() {
 	if (ConnectionScore <= -100)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Connection too low - Chapter Failed!"));
+		ShowLoseScreen();
+	}
+	else
+	{
+		// All knives hit successfully - Win!
+		ShowWinScreen();
 	}
 }
 
@@ -186,5 +195,37 @@ void AKnifeHitGameMode::OnTargetComplete() {
 		CurrentTarget = nullptr;
 
 		UE_LOG(LogTemp, Log, TEXT("Target Complete! Target and projectiles destroyed."));
+	}
+}
+
+void AKnifeHitGameMode::ShowWinScreen() {
+	if (WinScreenClass)
+	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+		if (PC)
+		{
+			UUserWidget* WinWidget = CreateWidget<UUserWidget>(PC, WinScreenClass);
+			if (WinWidget)
+			{
+				WinWidget->AddToViewport(10); 
+				UE_LOG(LogTemp, Log, TEXT("Win Screen Displayed!"));
+			}
+		}
+	}
+}
+
+void AKnifeHitGameMode::ShowLoseScreen() {
+	if (LoseScreenClass)
+	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+		if (PC)
+		{
+			UUserWidget* LoseWidget = CreateWidget<UUserWidget>(PC, LoseScreenClass);
+			if (LoseWidget)
+			{
+				LoseWidget->AddToViewport(10);
+				UE_LOG(LogTemp, Log, TEXT("Lose Screen Displayed!"));
+			}
+		}
 	}
 }
