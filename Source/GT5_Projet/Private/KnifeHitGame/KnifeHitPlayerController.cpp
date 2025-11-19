@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "KnifeHitGame/KnifeHitGameMode.h"
+#include "Blueprint/UserWidget.h"
 
 AKnifeHitPlayerController::AKnifeHitPlayerController()
 {
@@ -29,9 +30,22 @@ void AKnifeHitPlayerController::BeginPlay()
 
 	GameModeRef = Cast<AKnifeHitGameMode>(UGameplayStatics::GetGameMode(this));
 
-	FInputModeGameOnly InputMode;
+	// Create and display HUD widget
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
+
+	// Enable mouse cursor and allow both game and UI input
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetHideCursorDuringCapture(false);
 	SetInputMode(InputMode);
-	bShowMouseCursor = false;
+	bShowMouseCursor = true;
 }
 
 void AKnifeHitPlayerController::SetupInputComponent() {

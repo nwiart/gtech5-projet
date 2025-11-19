@@ -18,9 +18,8 @@ public class GT5_Projet : ModuleRules
 			PrivateDefinitions.Add("EDITOR_BUILD");
 		}
 
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		// UMG UI support
+		PublicDependencyModuleNames.AddRange(new string[] { "UMG", "Slate", "SlateCore" });
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
