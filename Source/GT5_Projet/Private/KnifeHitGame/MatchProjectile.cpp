@@ -88,8 +88,8 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 
 		ProjectileMovement->StopMovementImmediately();
 		ProjectileMovement->SetActive(false);
-
-		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 		const FVector DirectionIntoTarget = -Hit.Normal;
 		const FRotator BaseRotation = DirectionIntoTarget.Rotation();
@@ -140,9 +140,10 @@ void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 void AMatchProjectile::SetReadyState(bool bReady) {
 	if (bReady)
 	{
-		// In ready state: not burning, not moving, no collision with other matches
+		// In ready state: not burning, not moving, no collision
 		bIsBurning = false;
 		BurnTimer = 0.0f;
+		bHasStuck = false;
 
 		if (ProjectileMovement)
 		{
@@ -150,8 +151,8 @@ void AMatchProjectile::SetReadyState(bool bReady) {
 			ProjectileMovement->Velocity = FVector::ZeroVector;
 		}
 
-		MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+		// Disable collision until launched
+		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

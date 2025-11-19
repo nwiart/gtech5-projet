@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "Minigame/BaseMinigameGameMode.h"
 #include "KnifeHitGameMode.generated.h"
 
 /**
- * 
+ * Knife Hit minigame - throw matches at a rotating target
  */
 UCLASS()
-class GT5_PROJET_API AKnifeHitGameMode : public AGameModeBase
+class GT5_PROJET_API AKnifeHitGameMode : public ABaseMinigameGameMode
 {
 	GENERATED_BODY()
 
@@ -60,18 +60,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
 	bool IsMissionAllKnivesComplete() const { return RemainingMatches == 0; }
 
-	// Win/Lose Screens
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<class UUserWidget> WinScreenClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<class UUserWidget> LoseScreenClass;
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ShowWinScreen();
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ShowLoseScreen();
+	// Override base class methods to provide knife-specific data
+	virtual float GetProgressPercentage_Implementation() const override;
+	virtual FText GetObjectiveText_Implementation() const override;
+	virtual FMinigameResult BuildMinigameResult_Implementation(bool bSuccess) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	void LaunchMatch();
