@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "MatchProjectile.generated.h"
 
@@ -17,19 +18,25 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UStaticMeshComponent* MatchMesh;
+	UStaticMeshComponent* MatchMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UParticleSystemComponent* FireParticle;
+	UParticleSystemComponent* FireParticle;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Projectile")
+	USphereComponent* CollisionComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
 	float BurnDuration = 3.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
 	float LaunchSpeed = 1000.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Match Settings")
+	float CriticalPointTolerance = 15.0f;
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
@@ -43,6 +50,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Match")
 	void Extinguish();
+
+	UFUNCTION(BlueprintCallable, Category = "Match")
+	void SetReadyState(bool bReady);
 
 protected:
 	// Called when the game starts or when spawned
