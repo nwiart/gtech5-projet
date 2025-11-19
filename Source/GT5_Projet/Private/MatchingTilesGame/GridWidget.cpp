@@ -56,9 +56,12 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
             int TileID = Tiles[index];
 
             UTileWidget* Tile = CreateWidget<UTileWidget>(this, TileWidgetClass);
-            Tile->TileValue = Tiles[index];
+            Tile->TypeID = Tiles[index];
+            Tile->Col = x;
+            Tile->Row = y;
             Tile->TileSizeBox->SetWidthOverride(FinalTileSize);
             Tile->TileSizeBox->SetHeightOverride(FinalTileSize);
+            Tile->OnTileClicked.AddDynamic(this, &UGridWidget::OnTileClicked);
 
             FString RowNameStr = FString::Printf(TEXT("Tile_%d"), TileID);
             FTileTypeData* TileData = TileTypeDataTable->FindRow<FTileTypeData>(FName(*RowNameStr), TEXT(""));
@@ -74,4 +77,9 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
     }
 
     UE_LOG(LogTemp, Log, TEXT("Grid built successfully"));
+}
+
+void UGridWidget::OnTileClicked(UTileWidget* clickedTile)
+{
+    UE_LOG(LogTemp, Log, TEXT("Tile clicked! TypeID=%d Row=%d Col=%d"), clickedTile->TypeID, clickedTile->Row, clickedTile->Col);
 }
