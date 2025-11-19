@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include <Components/Image.h>
+#include <Components/SizeBox.h>
 #include "Blueprint/UserWidget.h"
 #include "TileWidget.generated.h"
 
@@ -20,9 +21,14 @@ class GT5_PROJET_API UTileWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    virtual void NativeConstruct() override;
+
     UPROPERTY(BlueprintReadWrite)
     int32 TileValue;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
     UImage* TileImage;
+
+    UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+    USizeBox* TileSizeBox;
 };

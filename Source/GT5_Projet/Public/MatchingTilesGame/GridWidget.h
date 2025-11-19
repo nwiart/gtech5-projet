@@ -7,6 +7,7 @@
 #include "GridGeneratorComponent.h"
 #include "MatchingTileGame.h"
 #include "Components/GridPanel.h"
+#include <Components/SizeBox.h>
 #include <Components/UniformGridPanel.h>
 #include "Blueprint/UserWidget.h"
 #include "GridWidget.generated.h"
@@ -19,9 +20,6 @@ class GT5_PROJET_API UGridWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-    UGridPanel* GridPanel;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map")
     UDataTable* MapDataTable;
 
@@ -39,7 +37,15 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map")
     UDataTable* TileTypeDataTable;
 
-private:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    FVector2D GridSize = FVector2D(800.f, 600.f);
 
+private:
     void BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tiles);
+
+    UPROPERTY(meta = (BindWidget))
+    USizeBox* GridSizeBox;
+
+    UPROPERTY(meta = (BindWidget))
+    UGridPanel* GridPanel;
 };

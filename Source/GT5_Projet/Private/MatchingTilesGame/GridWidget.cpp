@@ -7,11 +7,16 @@ void UGridWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
+    if (GridSizeBox)
+    {
+        GridSizeBox->SetWidthOverride(GridSize.X);
+        GridSizeBox->SetHeightOverride(GridSize.Y);
+    }
+
     if (!Generator)
     {
         Generator = NewObject<UGridGeneratorComponent>(this);
         Generator->MapDataTable = MapDataTable;
-        MapRowName = FName("Map0");
     }
 
     int32 Width = 0;
@@ -38,6 +43,10 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
     }
 
     GridPanel->ClearChildren();
+    float TileW = GridSize.X / Width;
+    float TileH = GridSize.Y / Height;
+    float FinalTileSize = FMath::Min(TileW, TileH);
+    UE_LOG(LogTemp, Log, TEXT("size %f"), FinalTileSize);
 
     for (int y = 0; y < Height; ++y)
     {
@@ -48,12 +57,19 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
 
             UTileWidget* Tile = CreateWidget<UTileWidget>(this, TileWidgetClass);
             Tile->TileValue = Tiles[index];
+            Tile->TileSizeBox->SetWidthOverride(FinalTileSize);
+            Tile->TileSizeBox->SetHeightOverride(FinalTileSize);
+
             FString RowNameStr = FString::Printf(TEXT("Tile_%d"), TileID);
             FTileTypeData* TileData = TileTypeDataTable->FindRow<FTileTypeData>(FName(*RowNameStr), TEXT(""));
             if (TileData && Tile->TileImage)
                 Tile->TileImage->SetBrushFromTexture(TileData->TileTexture);
+         
+
             UGridSlot* slot = GridPanel->AddChildToGrid(Tile, y, x);
             slot->SetPadding(FMargin(2.f));
+            
+
         }
     }
 
