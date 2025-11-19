@@ -43,6 +43,9 @@ public:
 private:
     void BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tiles);
 
+    UFUNCTION()
+    void OnTileClicked(UTileWidget* clickedTile);
+
     UPROPERTY(meta = (BindWidget))
     USizeBox* GridSizeBox;
 
