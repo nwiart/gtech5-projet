@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Match")
 	void SetReadyState(bool bReady);
 
+	UFUNCTION(BlueprintCallable, Category = "Match")
+	void UpdateFireScale(float FireIntensity);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

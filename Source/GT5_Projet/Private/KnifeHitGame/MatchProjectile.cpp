@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "KnifeHitGame/KnifeHitGameMode.h"
 #include "KnifeHitGame/RotatingTarget.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 AMatchProjectile::AMatchProjectile()
@@ -21,10 +22,15 @@ AMatchProjectile::AMatchProjectile()
 	RootComponent = CollisionComp;
 
 	MatchMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MatchMesh"));
-	MatchMesh->SetupAttachment(RootComponent); 
+	MatchMesh->SetupAttachment(RootComponent);
 	MatchMesh->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 	MatchMesh->SetNotifyRigidBodyCollision(false);
-	MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+	MatchMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	FireParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("FireParticle"));
+	FireParticle->SetupAttachment(MatchMesh);
+	FireParticle->bAutoActivate = false;
+	FireParticle->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->UpdatedComponent = RootComponent;
@@ -65,6 +71,11 @@ void AMatchProjectile::Tick(float DeltaTime) {
 
 void AMatchProjectile::Extinguish() {
 	bIsBurning = false;
+
+	if (FireParticle)
+	{
+		FireParticle->Deactivate();
+	}
 }
 
 void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -93,7 +104,7 @@ void AMatchProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, U
 
 		const FVector DirectionIntoTarget = -Hit.Normal;
 		const FRotator BaseRotation = DirectionIntoTarget.Rotation();
-		const FRotator FinalRotation = BaseRotation + FRotator(90.0f, 0.0f, 0.0f);
+		const FRotator FinalRotation = BaseRotation + FRotator(-90.0f, 0.0f, 0.0f);
 		SetActorRotation(FinalRotation);
 
 		FAttachmentTransformRules AttachRules(EAttachmentRule::KeepWorld, true);
@@ -121,6 +132,12 @@ void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 	bIsBurning = true;
 	BurnTimer = 0.0f;
 
+	// Activate fire particle effect
+	if (FireParticle)
+	{
+		FireParticle->Activate(true);
+	}
+
 	// Enable collision
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
@@ -131,7 +148,7 @@ void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 		ProjectileMovement->Velocity = DirectionToTarget * LaunchSpeed;
 
 		FRotator BaseRotation = DirectionToTarget.Rotation();
-		FRotator FinalRotation = BaseRotation + FRotator(90.0f, 0.0f, 0.0f);
+		FRotator FinalRotation = BaseRotation + FRotator(-90.0f, 0.0f, 0.0f);
 
 		SetActorRotation(FinalRotation);
 	}
@@ -140,10 +157,15 @@ void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 void AMatchProjectile::SetReadyState(bool bReady) {
 	if (bReady)
 	{
-		// In ready state: not burning, not moving, no collision
-		bIsBurning = false;
+		bIsBurning = true;  // Keep fire burning in ready state
 		BurnTimer = 0.0f;
 		bHasStuck = false;
+
+		// Activate fire particle for ready match
+		if (FireParticle)
+		{
+			FireParticle->Activate(true);
+		}
 
 		if (ProjectileMovement)
 		{
@@ -151,8 +173,17 @@ void AMatchProjectile::SetReadyState(bool bReady) {
 			ProjectileMovement->Velocity = FVector::ZeroVector;
 		}
 
-		// Disable collision until launched
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AMatchProjectile::UpdateFireScale(float FireIntensity) {
+	if (FireParticle && bIsBurning)
+	{
+		// Keep minimum scale at 0.3 so fire doesn't disappear too early
+		float MinScale = 0.3f;
+		float FireScale = FMath::Lerp(MinScale, 1.0f, FireIntensity);
+		FireParticle->SetRelativeScale3D(FVector(FireScale));
 	}
 }
 
