@@ -38,7 +38,14 @@ protected:
 	// Input callback functions
 	void OnLaunchMatch();
 
+	// UI Widget
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UUserWidget> HUDWidgetClass;
+
+	UPROPERTY()
+	class UUserWidget* HUDWidget;
+
 private:
 	class AKnifeHitGameMode* GameModeRef;
-	
+
 };
