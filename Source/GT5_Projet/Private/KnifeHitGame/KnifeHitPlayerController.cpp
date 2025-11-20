@@ -17,7 +17,7 @@ void AKnifeHitPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = 
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->ClearAllMappings();
@@ -51,15 +51,15 @@ void AKnifeHitPlayerController::BeginPlay()
 void AKnifeHitPlayerController::SetupInputComponent() {
 	Super::SetupInputComponent();
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = 
+	if (UEnhancedInputComponent* EnhancedInputComponent =
 		Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		if (LaunchMatchAction)
 		{
 			EnhancedInputComponent->BindAction(
-				LaunchMatchAction, 
-				ETriggerEvent::Started, 
-				this, 
+				LaunchMatchAction,
+				ETriggerEvent::Started,
+				this,
 				&AKnifeHitPlayerController::OnLaunchMatch
 			);
 		}

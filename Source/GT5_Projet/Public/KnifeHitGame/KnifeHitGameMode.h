@@ -33,6 +33,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	float MatchBurnDuration = 3.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Fire Timer")
+	float InitialFireTime = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Fire Timer")
+	float MaxBonusTime = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Fire Timer")
+	float MinBonusTime = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Game State")
+	float CurrentFireTime;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Score")
 	int32 CriticalPointsHit;
 
@@ -52,6 +64,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
 	bool IsGameActive() const { return bGameActive; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	float GetFireTimeRemaining() const { return CurrentFireTime; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
+	float GetFireIntensity() const { return InitialFireTime > 0.0f ? FMath::Clamp(CurrentFireTime / InitialFireTime, 0.0f, 1.0f) : 0.0f; }
 
 	// Mission Status
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
@@ -102,6 +120,9 @@ protected:
 	UPROPERTY()
 	class AMatchProjectile* ReadyMatch;
 
+	UPROPERTY()
+	class AMatchProjectile* FlyingMatch;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Spawn")
 	float ReadyMatchDistance = 200.0f;
 
@@ -109,6 +130,8 @@ private:
 	bool bGameActive;
 
 	void SpawnReadyMatch();
+	void OnFireTimerExpired();
+	float CalculateTimeBonusForThrow() const;
 };
 
 	
