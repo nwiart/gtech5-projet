@@ -157,13 +157,14 @@ void AMatchProjectile::Launch(class ARotatingTarget* Target) {
 void AMatchProjectile::SetReadyState(bool bReady) {
 	if (bReady)
 	{
-		bIsBurning = false;
+		bIsBurning = true;  // Keep fire burning in ready state
 		BurnTimer = 0.0f;
 		bHasStuck = false;
 
+		// Activate fire particle for ready match
 		if (FireParticle)
 		{
-			FireParticle->Deactivate();
+			FireParticle->Activate(true);
 		}
 
 		if (ProjectileMovement)
@@ -173,6 +174,16 @@ void AMatchProjectile::SetReadyState(bool bReady) {
 		}
 
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AMatchProjectile::UpdateFireScale(float FireIntensity) {
+	if (FireParticle && bIsBurning)
+	{
+		// Keep minimum scale at 0.3 so fire doesn't disappear too early
+		float MinScale = 0.3f;
+		float FireScale = FMath::Lerp(MinScale, 1.0f, FireIntensity);
+		FireParticle->SetRelativeScale3D(FVector(FireScale));
 	}
 }
 
