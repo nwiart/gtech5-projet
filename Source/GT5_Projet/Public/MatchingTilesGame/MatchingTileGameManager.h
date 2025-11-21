@@ -30,6 +30,12 @@ public:
     UFUNCTION()
     void OnTileClicked(UTileWidget* ClickedTile);
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FString WinSceneName = "WinScene";
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FString LoseSceneName = "LoseScene";
+
 private:
     UPROPERTY()
     TArray<UTileWidget*> Tiles;
@@ -43,4 +49,6 @@ private:
     void CheckMatch();
     bool AreTilesConnected(UTileWidget* TileA, UTileWidget* TileB);
     void ClearMatchedTiles();
+    bool HasAnyPossibleMatch();
+    void CheckEndConditions();
 };
