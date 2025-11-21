@@ -36,10 +36,10 @@ public:
 	class UStaticMeshComponent* CriticalPoint3;
 
 	UPROPERTY(EditAnywhere, Category = "Rotation")
-	float RotationSpeed = 100.0f; 
+	float RotationSpeed = 150.0f; 
 
 	UPROPERTY(EditAnywhere, Category = "Rotation")
-	bool bRandomizeSpeed = true;
+	bool bRandomizeSpeed = false;
 
 	UPROPERTY(EditAnywhere, Category = "Rotation")
 	FVector2D SpeedRange = FVector2D(30.0f, 120.0f);
