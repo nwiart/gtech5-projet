@@ -6,6 +6,7 @@
 #include "TileWidget.h"
 #include "GridGeneratorComponent.h"
 #include "MatchingTileGame.h"
+#include "MatchingTileGameManager.h"
 #include "Components/GridPanel.h"
 #include <Components/SizeBox.h>
 #include <Components/UniformGridPanel.h>
@@ -51,4 +52,8 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UGridPanel* GridPanel;
+
+    AMatchingTileGameManager* GameManager;
+
+    TArray<UTileWidget*> AllTiles;
 };
