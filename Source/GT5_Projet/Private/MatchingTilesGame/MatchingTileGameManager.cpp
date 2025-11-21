@@ -2,6 +2,7 @@
 
 
 #include "MatchingTilesGame/MatchingTileGameManager.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 AMatchingTileGameManager::AMatchingTileGameManager()
@@ -60,6 +61,7 @@ void AMatchingTileGameManager::CheckMatch()
         {
             UE_LOG(LogTemp, Log, TEXT("Tiles match and are connected!"));
             ClearMatchedTiles();
+            CheckEndConditions();
             // anim
         }
         else
@@ -76,20 +78,93 @@ void AMatchingTileGameManager::CheckMatch()
     SecondSelectedTile = nullptr;
 }
 
-bool AMatchingTileGameManager::AreTilesConnected(UTileWidget* TileA, UTileWidget* TileB)
-{
-    int32 dx = FMath::Abs(TileA->Col - TileB->Col);
-    int32 dy = FMath::Abs(TileA->Row - TileB->Row);
 
-    return (dx <= 1 && dy <= 1);
+bool AMatchingTileGameManager::AreTilesConnected(UTileWidget* A, UTileWidget* B)
+{
+    /*  int32 dx = FMath::Abs(TileA->Col - TileB->Col);
+   int32 dy = FMath::Abs(TileA->Row - TileB->Row);
+    return (dx <= 1 && dy <= 1);*/
+
+    if (!A || !B) return false;
+    if (A->TypeID != B->TypeID) return false;
+
+    const int ax = A->Col;
+    const int ay = A->Row;
+    const int bx = B->Col;
+    const int by = B->Row;
+
+    auto IsEmpty = [&](int x, int y)
+        {
+            for (UTileWidget* T : Tiles)
+            {
+                if (T->Col == x && T->Row == y)
+                {
+                    return T->TypeID == -1;
+                }
+            }
+            return true;
+        };
+
+    // Adjacent check
+    if (FMath::Abs(ax - bx) <= 1 && FMath::Abs(ay - by) <= 1)
+        return true;
+
+    // Same Row 
+    if (ay == by)
+    {
+        int start = FMath::Min(ax, bx) + 1;
+        int end = FMath::Max(ax, bx);
+        bool clear = true;
+
+        for (int x = start; x < end; x++)
+            if (!IsEmpty(x, ay)) clear = false;
+
+        if (clear) return true;
+    }
+
+    //  Same Column
+    if (ax == bx)
+    {
+        int start = FMath::Min(ay, by) + 1;
+        int end = FMath::Max(ay, by);
+        bool clear = true;
+
+        for (int y = start; y < end; y++)
+            if (!IsEmpty(ax, y)) clear = false;
+
+        if (clear) return true;
+    }
+
+    // Diagonal
+    if (FMath::Abs(ax - bx) == FMath::Abs(ay - by))
+    {
+        int dx = (bx > ax) ? 1 : -1;
+        int dy = (by > ay) ? 1 : -1;
+
+        int x = ax + dx;
+        int y = ay + dy;
+
+        bool clear = true;
+        while (x != bx)
+        {
+            if (!IsEmpty(x, y)) clear = false;
+            x += dx;
+            y += dy;
+        }
+
+        if (clear) return true;
+    }
+
+    return false;
 }
+
 
 void AMatchingTileGameManager::ClearMatchedTiles()
 {
     if (FirstSelectedTile && SecondSelectedTile)
     {
-        if (FirstSelectedTile->IsValidLowLevel()) FirstSelectedTile->RemoveFromParent();
-        if (SecondSelectedTile->IsValidLowLevel()) SecondSelectedTile->RemoveFromParent();
+        FirstSelectedTile->SetVisibility(ESlateVisibility::Hidden);
+        SecondSelectedTile->SetVisibility(ESlateVisibility::Hidden);
 
         Tiles.Remove(FirstSelectedTile);
         Tiles.Remove(SecondSelectedTile);
@@ -97,3 +172,42 @@ void AMatchingTileGameManager::ClearMatchedTiles()
 }
 
 
+void AMatchingTileGameManager::CheckEndConditions()
+{
+    if (Tiles.Num() == 0)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("You win !"));
+        UGameplayStatics::OpenLevel(this, *WinSceneName);
+        return;
+    }
+
+    if (!HasAnyPossibleMatch())
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("You loose !"));
+        UGameplayStatics::OpenLevel(this, *LoseSceneName);
+        return;
+    }
+}
+
+bool AMatchingTileGameManager::HasAnyPossibleMatch()
+{
+    for (int32 i = 0; i < Tiles.Num(); i++)
+    {
+        for (int32 j = i + 1; j < Tiles.Num(); j++)
+        {
+            UTileWidget* A = Tiles[i];
+            UTileWidget* B = Tiles[j];
+
+            if (!A || !B)
+                continue;
+
+            if (A->TypeID != B->TypeID)
+                continue;
+
+            if (AreTilesConnected(A, B))
+                return true;
+        }
+    }
+
+    return false;
+}
