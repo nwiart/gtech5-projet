@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "EngineUtils.h"
 #include "MatchingTilesGame/GridWidget.h"
 #include "Components/GridSlot.h"
 
@@ -47,6 +48,14 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
     float TileH = GridSize.Y / Height;
     float FinalTileSize = FMath::Min(TileW, TileH);
     UE_LOG(LogTemp, Log, TEXT("size %f"), FinalTileSize);
+    AllTiles.Empty();
+
+    for (TActorIterator<AMatchingTileGameManager> It(GetWorld()); It; ++It)
+    {
+        GameManager = *It;
+        break;
+    }
+
 
     for (int y = 0; y < Height; ++y)
     {
@@ -61,22 +70,25 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
             Tile->Row = y;
             Tile->TileSizeBox->SetWidthOverride(FinalTileSize);
             Tile->TileSizeBox->SetHeightOverride(FinalTileSize);
-            Tile->OnTileClicked.AddDynamic(this, &UGridWidget::OnTileClicked);
+            Tile->OnTileClicked.AddDynamic(GameManager, &AMatchingTileGameManager::OnTileClicked);
 
             FString RowNameStr = FString::Printf(TEXT("Tile_%d"), TileID);
             FTileTypeData* TileData = TileTypeDataTable->FindRow<FTileTypeData>(FName(*RowNameStr), TEXT(""));
             if (TileData && Tile->TileImage)
                 Tile->TileImage->SetBrushFromTexture(TileData->TileTexture);
-         
+
 
             UGridSlot* slot = GridPanel->AddChildToGrid(Tile, y, x);
             slot->SetPadding(FMargin(2.f));
-            
+
+            AllTiles.Add(Tile);
 
         }
     }
 
     UE_LOG(LogTemp, Log, TEXT("Grid built successfully"));
+
+    GameManager->InitializeGame(AllTiles, Width, Height);
 }
 
 void UGridWidget::OnTileClicked(UTileWidget* clickedTile)
