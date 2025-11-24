@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "PaperZDCharacter.h"
 #include "MapCharacter.generated.h"
 
 UCLASS()
-class GT5_PROJET_API AMapCharacter : public AActor
+class GT5_PROJET_API AMapCharacter : public APaperZDCharacter
 {
 	GENERATED_BODY()
 	
