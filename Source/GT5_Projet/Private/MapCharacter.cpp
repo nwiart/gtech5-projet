@@ -5,15 +5,21 @@
 
 #include "VNGamemode.h"
 #include "VNTileMapLibrary.h"
+#include "PathfindingLibrary.h"
 
 #include "MapElement.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
 AMapCharacter::AMapCharacter()
-	: moving(false)
+	: CurrentWaypointIndex(0)
+	, MovementProgress(0.f)
+	, bIsMoving(false)
+	, CharacterZOffset(0.f)
+	, MovementSpeed(3.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -23,8 +29,14 @@ AMapCharacter::AMapCharacter()
 void AMapCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	targetPosition = GetTilePosition();
+	CharacterZOffset = GetActorLocation().Z;
+	CurrentWorldPosition = GetActorLocation();
+	TargetWorldPosition = CurrentWorldPosition;
+	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+
+	FRotator CurrentRotation = GetActorRotation();
+	SetActorRotation(FRotator(CurrentRotation.Pitch, 40, CurrentRotation.Roll));
+
 }
 
 // Called every frame
@@ -32,28 +44,104 @@ void AMapCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (moving) {
-		SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(targetPosition));
-		moving = false;
+	if (!bIsMoving || PathToFollow.Num() == 0)
+	{
+		GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		return;
+	}
 
-		AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
-		if (gamemode) {
-			for (AMapElement* elem : gamemode->GetAllMapElements()) {
-				FIntPoint pos = elem->GetTilePosition();
-				if (pos == targetPosition) {
-					elem->OnPlayerHit();
-					break;
+	MovementProgress += DeltaTime * MovementSpeed;
+
+	if (MovementProgress >= 1.0f)
+	{
+		CurrentWaypointIndex++;
+
+		if (CurrentWaypointIndex >= PathToFollow.Num())
+		{
+			SetActorLocation(TargetWorldPosition);
+			bIsMoving = false;
+
+			GetCharacterMovement()->Velocity = FVector::ZeroVector;
+
+			FIntPoint finalTile = PathToFollow.Last();
+			AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
+			if (gamemode)
+			{
+				for (AMapElement* elem : gamemode->GetAllMapElements())
+				{
+					FIntPoint pos = elem->GetTilePosition();
+					if (pos == finalTile)
+					{
+						elem->OnPlayerHit();
+						break;
+					}
 				}
 			}
+
+			PathToFollow.Empty();
+			return;
 		}
+
+		MovementProgress = 0.0f;
+		CurrentWorldPosition = TargetWorldPosition;
+		FVector TilePos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PathToFollow[CurrentWaypointIndex]);
+		TargetWorldPosition = FVector(TilePos.X, TilePos.Y, CharacterZOffset);
+	}
+
+	FVector NewPosition = FMath::Lerp(CurrentWorldPosition, TargetWorldPosition, MovementProgress);
+	SetActorLocation(NewPosition);
+
+	// Calculate velocity for animation (direction * speed)
+	FVector MovementDirection = (TargetWorldPosition - CurrentWorldPosition).GetSafeNormal();
+	FVector TileSize = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(FIntPoint(1, 0)) - UVNTileMapLibrary::GetWorldPosFromTileCoordinates(FIntPoint(0, 0));
+	float TileDistance = TileSize.Size();
+	GetCharacterMovement()->Velocity = MovementDirection * (MovementSpeed * TileDistance);
+
+	if (!MovementDirection.IsNearlyZero())
+	{
+		float TargetYaw = 40.0f; // Default
+
+		if (FMath::Abs(MovementDirection.X) > FMath::Abs(MovementDirection.Y))
+		{
+			TargetYaw = (MovementDirection.X > 0) ? 40.0f : 46.0f;  // +X → 40°, -X → 46°
+		}
+		else
+		{
+			TargetYaw = (MovementDirection.Y > 0) ? 46.0f : 40.0f;  // +Y → 46°, -Y → 40°
+		}
+
+		FRotator CurrentRotation = GetActorRotation();
+		SetActorRotation(FRotator(CurrentRotation.Pitch, TargetYaw, CurrentRotation.Roll));
 	}
 }
 
 
 void AMapCharacter::MoveTo(int X, int Y)
 {
-	targetPosition = FIntPoint(X, Y);
-	moving = true;
+	FIntPoint StartTile = GetTilePosition();
+	FIntPoint EndTile(X, Y);
+
+	// Calculate path using A* algorithm with obstacle detection
+	TArray<FIntPoint> NewPath;
+	bool bPathFound = UPathfindingLibrary::FindPath(StartTile, EndTile, NewPath, this);
+
+	if (bPathFound && NewPath.Num() > 0)
+	{
+		PathToFollow = NewPath;
+		CurrentWaypointIndex = 0;
+		MovementProgress = 0.0f;
+		bIsMoving = true;
+
+		// Set initial positions
+		CurrentWorldPosition = GetActorLocation();
+		FVector FirstTilePos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PathToFollow[CurrentWaypointIndex]);
+		TargetWorldPosition = FVector(FirstTilePos.X, FirstTilePos.Y, CharacterZOffset);
+	}
+	else
+	{
+		// No path found, optionally log a warning
+		UE_LOG(LogTemp, Warning, TEXT("No path found from (%d, %d) to (%d, %d)"), StartTile.X, StartTile.Y, EndTile.X, EndTile.Y);
+	}
 }
 
 void AMapCharacter::GetTilePosition(int& outX, int& outY) const

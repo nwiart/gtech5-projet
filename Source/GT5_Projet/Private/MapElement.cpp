@@ -2,16 +2,14 @@
 
 
 #include "MapElement.h"
-
 #include "VNTileMapLibrary.h"
-
 #include "VNGamemode.h"
-
 #include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
 AMapElement::AMapElement()
+	: bBlocksMovement(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
