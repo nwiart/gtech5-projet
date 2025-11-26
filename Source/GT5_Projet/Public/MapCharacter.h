@@ -34,7 +34,26 @@ public:
 
 private:
 
-	FIntPoint targetPosition;
+	// Path calculated by A* algorithm
+	TArray<FIntPoint> PathToFollow;
 
-	bool moving;
+	// Current waypoint index in the path
+	int32 CurrentWaypointIndex;
+
+	// Current position in world space for interpolation
+	FVector CurrentWorldPosition;
+
+	// Target world position for current waypoint
+	FVector TargetWorldPosition;
+
+	// Movement progress (0.0 to 1.0) between current and target waypoint
+	float MovementProgress;
+
+	bool bIsMoving;
+
+	float CharacterZOffset;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float MovementSpeed; 
+
 };
