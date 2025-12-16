@@ -51,7 +51,7 @@ public:
 	void ShowLoseScreen();
 
 	// Called when minigame completes (success or failure)
-	UFUNCTION(BlueprintNativeEvent, Category = "Minigame")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Minigame")
 	void OnMinigameComplete(bool bSuccess);
 
 	// Abstract methods for subclasses to implement

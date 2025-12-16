@@ -22,17 +22,13 @@ struct FMinigameResult
 	UPROPERTY(BlueprintReadWrite, Category = "Result")
 	int32 ConnectionScoreDelta = 0;
 
-	// Completion Percentage (0.0 to 1.0)
-	UPROPERTY(BlueprintReadWrite, Category = "Result")
-	float CompletionPercentage = 0.0f;
-
 	// Minigame Name
 	UPROPERTY(BlueprintReadWrite, Category = "Result")
 	FString MinigameName;
 
 	// Custom Statistics (e.g., "Critical Hits", "Time Taken", "Accuracy")
 	UPROPERTY(BlueprintReadWrite, Category = "Result")
-	TMap<FString, int32> CustomStats;
+	TMap<FString, FText> CustomStats;
 
 	// Custom Text Data (e.g., "Rank", "Achievement Unlocked")
 	UPROPERTY(BlueprintReadWrite, Category = "Result")
@@ -45,7 +41,6 @@ struct FMinigameResult
 	FMinigameResult()
 		: bSuccess(false)
 		, ConnectionScoreDelta(0)
-		, CompletionPercentage(0.0f)
 		, MinigameName(TEXT(""))
 	{}
 };
