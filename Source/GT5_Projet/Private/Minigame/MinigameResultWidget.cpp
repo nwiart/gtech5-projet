@@ -8,7 +8,6 @@ void UMinigameResultWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Get the game mode and initialize with its result data
 	CachedGameMode = Cast<ABaseMinigameGameMode>(UGameplayStatics::GetGameMode(this));
 	if (CachedGameMode)
 	{
@@ -24,19 +23,6 @@ void UMinigameResultWidget::InitializeWithResult_Implementation(const FMinigameR
 		*Result.MinigameName, Result.bSuccess ? TEXT("Yes") : TEXT("No"));
 }
 
-int32 UMinigameResultWidget::GetCustomStat(const FString& StatName, bool& bFound) const
-{
-	const int32* StatValue = MinigameResult.CustomStats.Find(StatName);
-	bFound = (StatValue != nullptr);
-	return bFound ? *StatValue : 0;
-}
-
-FText UMinigameResultWidget::GetCustomTextData(const FString& Key, bool& bFound) const
-{
-	const FText* TextValue = MinigameResult.CustomTextData.Find(Key);
-	bFound = (TextValue != nullptr);
-	return bFound ? *TextValue : FText::GetEmpty();
-}
 
 bool UMinigameResultWidget::IsObjectiveCompleted(const FString& ObjectiveName, bool& bFound) const
 {
@@ -76,4 +62,16 @@ void UMinigameResultWidget::OnReturnToMainGamePressed()
 
 	// Remove this widget from viewport
 	RemoveFromParent();
+}
+
+FString UMinigameResultWidget::FormatCustomStats(const TMap<FString, FText>& CustomStats)
+{
+	FString Result;
+
+	for (const TPair<FString, FText>& StatPair : CustomStats)
+	{
+		Result += FString::Printf(TEXT("%s: %s\n"), *StatPair.Key, *StatPair.Value.ToString());
+	}
+
+	return Result;
 }

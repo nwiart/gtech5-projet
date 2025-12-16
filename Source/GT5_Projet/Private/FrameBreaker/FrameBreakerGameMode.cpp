@@ -303,15 +303,6 @@ void AFrameBreakerGameMode::OnGameLost()
 {
 	UE_LOG(LogTemp, Log, TEXT("Frame Breaker: DEFEAT! Ran out of knives"));
 
-	bIsMinigameActive = false;
-
-	// Build result
-	CurrentResult = BuildMinigameResult_Implementation(false);
-
-	// Show lose screen
-	ShowLoseScreen();
-
-	// Notify completion
 	OnMinigameComplete(false);
 }
 
@@ -319,15 +310,6 @@ void AFrameBreakerGameMode::OnGameWon()
 {
 	UE_LOG(LogTemp, Log, TEXT("Frame Breaker: VICTORY!"));
 
-	bIsMinigameActive = false;
-
-	// Build result
-	CurrentResult = BuildMinigameResult_Implementation(true);
-
-	// Show win screen
-	ShowWinScreen();
-
-	// Notify completion
 	OnMinigameComplete(true);
 }
 
@@ -335,7 +317,6 @@ FMinigameResult AFrameBreakerGameMode::BuildMinigameResult_Implementation(bool b
 {
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;
-	Result.CompletionPercentage = (float)FramesDestroyed / (float)TotalFrames;
 	Result.MinigameName = MinigameName;
 
 	// Calculate Connection Score based on performance
@@ -374,26 +355,15 @@ FMinigameResult AFrameBreakerGameMode::BuildMinigameResult_Implementation(bool b
 
 	Result.ConnectionScoreDelta = ConnectionDelta;
 
-	// Add custom stats
-	Result.CustomStats.Add(TEXT("FramesDestroyed"), FramesDestroyed);
-	Result.CustomStats.Add(TEXT("TotalFrames"), TotalFrames);
-	Result.CustomStats.Add(TEXT("KnivesRemaining"), KnivesRemaining);
-	Result.CustomStats.Add(TEXT("TotalKnives"), TotalKnives);
-	Result.CustomStats.Add(TEXT("Score"), CurrentScore);
+	Result.CustomStats.Add(TEXT("Frames Destroyed"),
+		FText::FromString(FString::Printf(TEXT("%d / %d"), FramesDestroyed, TotalFrames)));
+
+	Result.CustomStats.Add(TEXT("Knives Used"),
+		FText::FromString(FString::Printf(TEXT("%d / %d"), TotalKnives - KnivesRemaining, TotalKnives)));
+
+	Result.CustomStats.Add(TEXT("Knives Remaining"),
+		FText::AsNumber(KnivesRemaining));
 
 	return Result;
 }
 
-float AFrameBreakerGameMode::GetProgressPercentage_Implementation() const
-{
-	if (TotalFrames == 0)
-		return 0.0f;
-
-	return (float)FramesDestroyed / (float)TotalFrames;
-}
-
-FText AFrameBreakerGameMode::GetObjectiveText_Implementation() const
-{
-	return FText::FromString(FString::Printf(TEXT("Destroy all frames! %d / %d | Knives: %d / %d"),
-		FramesDestroyed, TotalFrames, KnivesRemaining, TotalKnives));
-}

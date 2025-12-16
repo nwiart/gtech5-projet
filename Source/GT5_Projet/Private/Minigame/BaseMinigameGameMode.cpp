@@ -90,7 +90,6 @@ FMinigameResult ABaseMinigameGameMode::BuildMinigameResult_Implementation(bool b
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;
 	Result.MinigameName = MinigameName;
-	Result.CompletionPercentage = GetProgressPercentage();
 	return Result;
 }
 
@@ -103,11 +102,9 @@ void ABaseMinigameGameMode::RestartMinigame()
 void ABaseMinigameGameMode::ReturnToMainGame()
 {
 	// TODO: This should be connected to your main game flow
-	// For now, just log - you'll need to implement this based on your game structure
 	UE_LOG(LogTemp, Warning, TEXT("ReturnToMainGame called - implement level transition logic"));
 
-	// Example: Load main game map
-	// UGameplayStatics::OpenLevel(this, FName("MainGameMap"), false);
+	UGameplayStatics::OpenLevel(this, FName("Test"), false);
 }
 
 UUserWidget* ABaseMinigameGameMode::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder)

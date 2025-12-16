@@ -236,13 +236,13 @@ FMinigameResult AKnifeHitGameMode::BuildMinigameResult_Implementation(bool bSucc
 	Result.bSuccess = bSuccess;
 	Result.MinigameName = MinigameName;
 	Result.ConnectionScoreDelta = ConnectionScore;
-	Result.CompletionPercentage = GetProgressPercentage();
 
-	// Add custom statistics
-	Result.CustomStats.Add(TEXT("Critical Points Hit"), CriticalPointsHit);
-	Result.CustomStats.Add(TEXT("Total Critical Points"), TotalCriticalPoints);
-	Result.CustomStats.Add(TEXT("Matches Used"), TotalMatches - RemainingMatches);
-	Result.CustomStats.Add(TEXT("Total Matches"), TotalMatches);
+	// Add custom statistics with formatted text
+	Result.CustomStats.Add(TEXT("Critical Points"),
+		FText::FromString(FString::Printf(TEXT("%d / %d"), CriticalPointsHit, TotalCriticalPoints)));
+
+	Result.CustomStats.Add(TEXT("Matches Used"),
+		FText::FromString(FString::Printf(TEXT("%d / %d"), TotalMatches - RemainingMatches, TotalMatches)));
 
 	// Add objectives completion status
 	Result.ObjectivesCompleted.Add(TEXT("Hit all critical points"), IsMissionCriticalPointsComplete());
