@@ -23,9 +23,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Minigame Result")
 	void InitializeWithResult(const FMinigameResult& Result);
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	bool IsObjectiveCompleted(const FString& ObjectiveName, bool& bFound) const;
-
 	// String formatting helpers static
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result", meta = (CompactNodeTitle = "Format Stats"))
 	static FString FormatCustomStats(const TMap<FString, FText>& CustomStats);

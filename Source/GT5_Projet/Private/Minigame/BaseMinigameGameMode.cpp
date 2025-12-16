@@ -72,21 +72,8 @@ void ABaseMinigameGameMode::OnMinigameComplete_Implementation(bool bSuccess)
 		*MinigameName, bSuccess ? TEXT("Yes") : TEXT("No"), CurrentResult.ConnectionScoreDelta);
 }
 
-float ABaseMinigameGameMode::GetProgressPercentage_Implementation() const
-{
-	// Default implementation - override in child classes
-	return 0.0f;
-}
-
-FText ABaseMinigameGameMode::GetObjectiveText_Implementation() const
-{
-	// Default implementation - override in child classes
-	return FText::FromString(TEXT("Complete the minigame"));
-}
-
 FMinigameResult ABaseMinigameGameMode::BuildMinigameResult_Implementation(bool bSuccess)
 {
-	// Default implementation - override in child classes
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;
 	Result.MinigameName = MinigameName;
