@@ -219,18 +219,6 @@ void AKnifeHitGameMode::OnTargetComplete() {
 	}
 }
 
-// Override base class methods to provide knife-specific data
-float AKnifeHitGameMode::GetProgressPercentage_Implementation() const {
-	if (TotalMatches <= 0) return 0.0f;
-	return static_cast<float>(TotalMatches - RemainingMatches) / static_cast<float>(TotalMatches);
-}
-
-FText AKnifeHitGameMode::GetObjectiveText_Implementation() const {
-	FString ObjectiveText = FString::Printf(TEXT("Hit %d/%d critical points - %d matches remaining"),
-	                                        CriticalPointsHit, TotalCriticalPoints, RemainingMatches);
-	return FText::FromString(ObjectiveText);
-}
-
 FMinigameResult AKnifeHitGameMode::BuildMinigameResult_Implementation(bool bSuccess) {
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;
@@ -244,10 +232,6 @@ FMinigameResult AKnifeHitGameMode::BuildMinigameResult_Implementation(bool bSucc
 	Result.CustomStats.Add(TEXT("Matches Used"),
 		FText::FromString(FString::Printf(TEXT("%d / %d"), TotalMatches - RemainingMatches, TotalMatches)));
 
-	// Add objectives completion status
-	Result.ObjectivesCompleted.Add(TEXT("Hit all critical points"), IsMissionCriticalPointsComplete());
-	Result.ObjectivesCompleted.Add(TEXT("Use all knives"), IsMissionAllKnivesComplete());
-
 	// Add text data
 	FString RankText;
 	if (CriticalPointsHit == TotalCriticalPoints) {
@@ -259,7 +243,6 @@ FMinigameResult AKnifeHitGameMode::BuildMinigameResult_Implementation(bool bSucc
 	else {
 		RankText = TEXT("Try Again");
 	}
-	Result.CustomTextData.Add(TEXT("Rank"), FText::FromString(RankText));
 
 	return Result;
 }

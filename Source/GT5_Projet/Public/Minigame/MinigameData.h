@@ -30,14 +30,6 @@ struct FMinigameResult
 	UPROPERTY(BlueprintReadWrite, Category = "Result")
 	TMap<FString, FText> CustomStats;
 
-	// Custom Text Data (e.g., "Rank", "Achievement Unlocked")
-	UPROPERTY(BlueprintReadWrite, Category = "Result")
-	TMap<FString, FText> CustomTextData;
-
-	// Objectives Status
-	UPROPERTY(BlueprintReadWrite, Category = "Result")
-	TMap<FString, bool> ObjectivesCompleted;
-
 	FMinigameResult()
 		: bSuccess(false)
 		, ConnectionScoreDelta(0)

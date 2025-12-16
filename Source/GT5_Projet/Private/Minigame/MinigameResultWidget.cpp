@@ -23,14 +23,6 @@ void UMinigameResultWidget::InitializeWithResult_Implementation(const FMinigameR
 		*Result.MinigameName, Result.bSuccess ? TEXT("Yes") : TEXT("No"));
 }
 
-
-bool UMinigameResultWidget::IsObjectiveCompleted(const FString& ObjectiveName, bool& bFound) const
-{
-	const bool* CompletionStatus = MinigameResult.ObjectivesCompleted.Find(ObjectiveName);
-	bFound = (CompletionStatus != nullptr);
-	return bFound ? *CompletionStatus : false;
-}
-
 void UMinigameResultWidget::OnContinuePressed()
 {
 	if (CachedGameMode)

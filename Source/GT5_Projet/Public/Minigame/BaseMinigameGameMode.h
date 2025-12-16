@@ -54,13 +54,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Minigame")
 	void OnMinigameComplete(bool bSuccess);
 
-	// Abstract methods for subclasses to implement
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Minigame")
-	float GetProgressPercentage() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Minigame")
-	FText GetObjectiveText() const;
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Minigame")
 	FMinigameResult BuildMinigameResult(bool bSuccess);
 

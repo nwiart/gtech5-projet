@@ -77,10 +77,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UI")
 	bool IsMissionAllKnivesComplete() const { return RemainingMatches == 0; }
-
-	// Override base class methods to provide knife-specific data
-	virtual float GetProgressPercentage_Implementation() const override;
-	virtual FText GetObjectiveText_Implementation() const override;
+	
 	virtual FMinigameResult BuildMinigameResult_Implementation(bool bSuccess) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
