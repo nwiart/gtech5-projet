@@ -22,35 +22,11 @@ public:
 	// Called automatically to initialize the widget with minigame result data
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Minigame Result")
 	void InitializeWithResult(const FMinigameResult& Result);
-
-	// Blueprint-accessible getters for result data
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	bool WasSuccessful() const { return MinigameResult.bSuccess; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	FString GetMinigameName() const { return MinigameResult.MinigameName; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	int32 GetConnectionScoreDelta() const { return MinigameResult.ConnectionScoreDelta; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	float GetCompletionPercentage() const { return MinigameResult.CompletionPercentage; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	int32 GetCustomStat(const FString& StatName, bool& bFound) const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	FText GetCustomTextData(const FString& Key, bool& bFound) const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	bool IsObjectiveCompleted(const FString& ObjectiveName, bool& bFound) const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	TMap<FString, int32> GetAllCustomStats() const { return MinigameResult.CustomStats; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result")
-	TMap<FString, bool> GetAllObjectives() const { return MinigameResult.ObjectivesCompleted; }
-
+	
+	// String formatting helpers static
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Minigame Result", meta = (CompactNodeTitle = "Format Stats"))
+	static FString FormatCustomStats(const TMap<FString, FText>& CustomStats);
+	
 	// Button actions
 	UFUNCTION(BlueprintCallable, Category = "Minigame Result")
 	void OnContinuePressed();

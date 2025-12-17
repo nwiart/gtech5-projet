@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Minigame/BaseMinigameGameMode.h"
 #include "TileWidget.h"
 #include "MatchingTileGameManager.generated.h"
 
 UCLASS()
-class GT5_PROJET_API AMatchingTileGameManager : public AActor
+class GT5_PROJET_API AMatchingTileGameManager : public ABaseMinigameGameMode
 {
 	GENERATED_BODY()
 	
@@ -30,11 +30,8 @@ public:
     UFUNCTION()
     void OnTileClicked(UTileWidget* ClickedTile);
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    FString WinSceneName = "WinScene";
+	virtual FMinigameResult BuildMinigameResult_Implementation(bool bSuccess) override;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    FString LoseSceneName = "LoseScene";
 
 private:
     UPROPERTY()

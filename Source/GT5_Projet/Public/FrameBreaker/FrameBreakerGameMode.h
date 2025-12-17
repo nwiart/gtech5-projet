@@ -152,6 +152,4 @@ protected:
 
 	// Override base class methods
 	virtual FMinigameResult BuildMinigameResult_Implementation(bool bSuccess) override;
-	virtual float GetProgressPercentage_Implementation() const override;
-	virtual FText GetObjectiveText_Implementation() const override;
 };
