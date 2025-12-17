@@ -161,6 +161,11 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 			UE_LOG(LogTemp, VeryVerbose, TEXT("Floor found at tile (%d, %d) - Actor: %s"),
 				TilePosition.X, TilePosition.Y, *HitResult.GetActor()->GetName());
 		}
+		if (HitResult.GetActor()->ActorHasTag(FName("Obstacle")))
+		{
+			UE_LOG(LogTemp, VeryVerbose, TEXT("Hit obstacle at tile (%d, %d) - Actor: %s"),
+				TilePosition.X, TilePosition.Y, *HitResult.GetActor()->GetName());
+		}
 		else
 		{
 			// Hit something but it doesn't have the "Floor" tag
@@ -170,9 +175,9 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 	}
 	else
 	{
-		// No collision detected
-		UE_LOG(LogTemp, Warning, TEXT("No floor collision at tile (%d, %d) - Check collision settings"),
-			TilePosition.X, TilePosition.Y);
+		// No collision detected (there's probably nothing here).
+		//UE_LOG(LogTemp, Warning, TEXT("No floor collision at tile (%d, %d) - Check collision settings"),
+			//TilePosition.X, TilePosition.Y);
 	}
 
 	if (!bHasFloor)
