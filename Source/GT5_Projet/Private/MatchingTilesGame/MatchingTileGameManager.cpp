@@ -50,6 +50,16 @@ void AMatchingTileGameManager::OnTileClicked(UTileWidget* ClickedTile)
     }
 }
 
+FMinigameResult AMatchingTileGameManager::BuildMinigameResult_Implementation(bool bSuccess) {
+    FMinigameResult Result;
+    Result.bSuccess = bSuccess;
+    Result.MinigameName = "Matching Tiles";
+    Result.ConnectionScoreDelta = bSuccess ? 10 : -5;
+
+    Result.CustomStats.Add("Tiles Remaining", FText::AsNumber(Tiles.Num()));
+    return Result;
+}
+
 void AMatchingTileGameManager::CheckMatch()
 {
     if (!FirstSelectedTile || !SecondSelectedTile)
@@ -177,14 +187,14 @@ void AMatchingTileGameManager::CheckEndConditions()
     if (Tiles.Num() == 0)
     {
         GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("You win !"));
-        UGameplayStatics::OpenLevel(this, *WinSceneName);
+        OnMinigameComplete(true);
         return;
     }
 
     if (!HasAnyPossibleMatch())
     {
         GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("You loose !"));
-        UGameplayStatics::OpenLevel(this, *LoseSceneName);
+        OnMinigameComplete(false);
         return;
     }
 }
