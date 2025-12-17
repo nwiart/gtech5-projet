@@ -6,6 +6,9 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "PathfindingLibrary.generated.h"
 
+class AMapElement;
+
+
 /**
  * Pathfinding utility library with A* algorithm implementation for grid-based navigation
  */
@@ -37,6 +40,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding", meta=(WorldContext="WorldContext"))
 	static bool IsTileWalkable(const FIntPoint& TilePosition, const UObject* WorldContext);
 
+	/**
+	 * Check if a tile is a map event, and return it if valid.
+	 * @param TilePosition - Tile coordinates to check
+	 * @param WorldContext - World context for checking obstacles
+	 * @return A pointer to the map event actor, if valid. Otherwise, NULL is returned.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding", meta=(WorldContext="WorldContext"))
+	static AMapElement* GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext);
+
 private:
 
 	// A* Node structure for pathfinding
@@ -66,5 +78,12 @@ private:
 
 	static float CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B);
 
+	static bool FindTileAt(FHitResult& OutResult, const FIntPoint& TilePosition, const UObject* WorldContext);
+
+	static bool IsTileFloor(AActor* HitActor);
+	static bool IsTileEvent(AActor* HitActor);
+
 	static void GetNeighbors(TInlineComponentArray<FIntPoint, 4>& out, const FIntPoint& Position);
+
+	static void DebugLogTile(const FHitResult& HitResult, const FIntPoint& TilePosition);
 };

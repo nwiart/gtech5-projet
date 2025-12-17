@@ -30,7 +30,7 @@ bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& 
 	bool bPathFound = false;
 	FAStarNode* EndNode = nullptr;
 
-	while (OpenSet.Num() > 0 && SearchCount < MaxSearchDistance)
+	while (OpenSet.Num() > 0 && SearchCount < MaxSearchDistance && !bPathFound)
 	{
 		SearchCount++;
 
@@ -55,6 +55,14 @@ bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& 
 			break;
 		}
 
+		// Stop on first met event.
+		if (GetTileEvent(CurrentNode->Position, WorldContext) != NULL)
+		{
+			bPathFound = true;
+			EndNode = CurrentNode;
+			break;
+		}
+
 		TInlineComponentArray<FIntPoint, 4> Neighbors;
 		GetNeighbors(Neighbors, CurrentNode->Position);
 		for (const FIntPoint& NeighborPos : Neighbors)
@@ -65,8 +73,17 @@ bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& 
 				continue;
 			}
 
+			FHitResult HitResult;
+			bool bHit = FindTileAt(HitResult, NeighborPos, WorldContext);
+			DebugLogTile(HitResult, NeighborPos);
+
+			if (!bHit || HitResult.GetActor() == NULL)
+			{
+				continue;			
+			}
+
 			// Check if the tile is walkable
-			if (!IsTileWalkable(NeighborPos, WorldContext))
+			if (!IsTileFloor(HitResult.GetActor()) && !IsTileEvent(HitResult.GetActor()))
 			{
 				continue;
 			}
@@ -122,92 +139,76 @@ bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& 
 
 bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UObject* WorldContext)
 {
-	if (!WorldContext)
-	{
-		return true;
-	}
-
-	UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull);
-	if (!World)
-	{
-		return true;
-	}
-
-	FVector TileWorldPos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(TilePosition);
-
-	FVector TraceStart = TileWorldPos + FVector(0, 0, 200.0f);
-	FVector TraceEnd = TileWorldPos + FVector(0, 0, -200.0f);
-
 	FHitResult HitResult;
-	FCollisionQueryParams QueryParams;
-	QueryParams.bTraceComplex = false;
-	QueryParams.bReturnPhysicalMaterial = false;
+	bool bHitFloor = FindTileAt(HitResult, TilePosition, WorldContext);
 
-	bool bHitFloor = World->LineTraceSingleByChannel(
-		HitResult,
-		TraceStart,
-		TraceEnd,
-		ECC_WorldStatic,
-		QueryParams
-	);
-
-
-	bool bHasFloor = false;
-	if (bHitFloor && HitResult.GetActor())
-	{
-		// Check if we hit something with the "Floor" tag
-		if (HitResult.GetActor()->ActorHasTag(FName("Floor")))
-		{
-			bHasFloor = true;
-			UE_LOG(LogTemp, VeryVerbose, TEXT("Floor found at tile (%d, %d) - Actor: %s"),
-				TilePosition.X, TilePosition.Y, *HitResult.GetActor()->GetName());
-		}
-		if (HitResult.GetActor()->ActorHasTag(FName("Obstacle")))
-		{
-			UE_LOG(LogTemp, VeryVerbose, TEXT("Hit obstacle at tile (%d, %d) - Actor: %s"),
-				TilePosition.X, TilePosition.Y, *HitResult.GetActor()->GetName());
-		}
-		else
-		{
-			// Hit something but it doesn't have the "Floor" tag
-			UE_LOG(LogTemp, Warning, TEXT("Tile (%d, %d) hit actor '%s' but it doesn't have 'Floor' tag"),
-				TilePosition.X, TilePosition.Y, *HitResult.GetActor()->GetName());
-		}
-	}
-	else
-	{
-		// No collision detected (there's probably nothing here).
-		//UE_LOG(LogTemp, Warning, TEXT("No floor collision at tile (%d, %d) - Check collision settings"),
-			//TilePosition.X, TilePosition.Y);
-	}
-
-	if (!bHasFloor)
+	if (!bHitFloor || HitResult.GetActor() == NULL)
 	{
 		return false;
 	}
 
-	AVNGamemode* Gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(WorldContext));
-	if (Gamemode)
-	{
-		for (AMapElement* Element : Gamemode->GetAllMapElements())
-		{
-			if (Element && Element->bBlocksMovement)
-			{
-				FIntPoint ElementPos = Element->GetTilePosition();
-				if (ElementPos == TilePosition)
-				{
-					return false; // This tile is blocked by a MapElement
-				}
-			}
-		}
+	return IsTileFloor(HitResult.GetActor()) || IsTileEvent(HitResult.GetActor());
+}
+
+AMapElement* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext)
+{
+	FHitResult HitResult;
+	bool bHitFloor = FindTileAt(HitResult, TilePosition, WorldContext);
+	AActor* Actor = HitResult.GetActor();
+
+	if (!bHitFloor || Actor == NULL) {
+		return NULL;
 	}
 
-	return true; // Floor exists and no blocking elements found, tile is walkable
+	return IsTileEvent(Actor) ? Cast<AMapElement>(Actor) : 0;
 }
 
 float UPathfindingLibrary::CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B)
 {
 	return FMath::Abs(A.X - B.X) + FMath::Abs(A.Y - B.Y);
+}
+
+bool UPathfindingLibrary::FindTileAt(FHitResult& OutResult, const FIntPoint& Pos, const UObject* WorldContext)
+{
+	if (!WorldContext)
+	{
+		return false;
+	}
+
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull);
+	if (!World)
+	{
+		return false;
+	}
+
+	// Perform a downward cast.
+	// Any obstacle obstructing a walkable tile will be hit first, so no need to manually filter.
+	FVector TileWorldPos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(Pos);
+
+	FVector TraceStart = TileWorldPos + FVector(0, 0, 200.0f);
+	FVector TraceEnd = TileWorldPos + FVector(0, 0, -200.0f);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.bTraceComplex = false;
+	QueryParams.bReturnPhysicalMaterial = false;
+
+	return World->LineTraceSingleByChannel(
+		OutResult,
+		TraceStart,
+		TraceEnd,
+		ECC_Visibility,
+		QueryParams
+	);
+}
+
+bool UPathfindingLibrary::IsTileFloor(AActor* HitActor)
+{
+	return HitActor->ActorHasTag(FName("Floor"));
+}
+
+bool UPathfindingLibrary::IsTileEvent(AActor* HitActor)
+{
+	return HitActor->ActorHasTag(FName("Event"));
 }
 
 void UPathfindingLibrary::GetNeighbors(TInlineComponentArray<FIntPoint, 4>& outNeighbors, const FIntPoint& Position)
@@ -216,4 +217,40 @@ void UPathfindingLibrary::GetNeighbors(TInlineComponentArray<FIntPoint, 4>& outN
 	outNeighbors.Add(FIntPoint(Position.X - 1, Position.Y));     // Left
 	outNeighbors.Add(FIntPoint(Position.X, Position.Y + 1));     // Up
 	outNeighbors.Add(FIntPoint(Position.X, Position.Y - 1));     // Down
+}
+
+void UPathfindingLibrary::DebugLogTile(const FHitResult& HitResult, const FIntPoint& TilePosition)
+{
+	AActor* Actor = HitResult.GetActor();
+
+	// No collision detected (there's probably nothing here).
+	if (Actor == NULL)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("No floor collision at tile (%d, %d) - Check collision settings"),
+			//TilePosition.X, TilePosition.Y);
+		return;	
+	}
+
+	// Check if we hit something with the "Floor" tag
+	if (Actor->ActorHasTag(FName("Floor")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Floor found at tile (%d, %d) - Actor: %s"),
+			TilePosition.X, TilePosition.Y, *Actor->GetName());
+	}
+	else if (Actor->ActorHasTag(FName("Obstacle")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit obstacle at tile (%d, %d) - Actor: %s"),
+			TilePosition.X, TilePosition.Y, *Actor->GetName());
+	}
+	else if (Actor->ActorHasTag(FName("Event")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit map event at tile (%d, %d) - Actor: %s"),
+			TilePosition.X, TilePosition.Y, *Actor->GetName());
+	}
+	else
+	{
+		// Hit something but it doesn't have a known tag
+		UE_LOG(LogTemp, Warning, TEXT("Tile (%d, %d) hit actor '%s' but it doesn't have any known tag"),
+			TilePosition.X, TilePosition.Y, *Actor->GetName());
+	}
 }
