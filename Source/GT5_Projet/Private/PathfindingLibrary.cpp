@@ -152,16 +152,16 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 
 
 	bool bHasFloor = false;
-	if (bHitFloor)
+	if (bHitFloor && HitResult.GetActor())
 	{
 		// Check if we hit something with the "Floor" tag
-		if (HitResult.GetActor() && HitResult.GetActor()->ActorHasTag(FName("Floor")))
+		if (HitResult.GetActor()->ActorHasTag(FName("Floor")))
 		{
 			bHasFloor = true;
 			UE_LOG(LogTemp, VeryVerbose, TEXT("Floor found at tile (%d, %d) - Actor: %s"),
 				TilePosition.X, TilePosition.Y, *HitResult.GetActor()->GetName());
 		}
-		else if (HitResult.GetActor())
+		else
 		{
 			// Hit something but it doesn't have the "Floor" tag
 			UE_LOG(LogTemp, Warning, TEXT("Tile (%d, %d) hit actor '%s' but it doesn't have 'Floor' tag"),
