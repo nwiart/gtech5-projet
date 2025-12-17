@@ -3,6 +3,7 @@
 #include "MatchingTilesGame/GridWidget.h"
 #include "EngineUtils.h"
 #include "Components/GridSlot.h"
+#include "Kismet/GameplayStatics.h"
 
 void UGridWidget::NativeConstruct()
 {
@@ -50,10 +51,10 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
     UE_LOG(LogTemp, Log, TEXT("size %f"), FinalTileSize);
     AllTiles.Empty();
 
-    for (TActorIterator<AMatchingTileGameManager> It(GetWorld()); It; ++It)
+    GameManager = Cast<AMatchingTileGameManager>(UGameplayStatics::GetGameMode(this));
+    if (!GameManager)
     {
-        GameManager = *It;
-        break;
+        return;
     }
 
 
