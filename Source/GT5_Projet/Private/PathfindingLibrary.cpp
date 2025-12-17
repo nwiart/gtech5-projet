@@ -55,7 +55,8 @@ bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& 
 			break;
 		}
 
-		TArray<FIntPoint> Neighbors = GetNeighbors(CurrentNode->Position);
+		TInlineComponentArray<FIntPoint, 4> Neighbors;
+		GetNeighbors(Neighbors, CurrentNode->Position);
 		for (const FIntPoint& NeighborPos : Neighbors)
 		{
 			// Skip if already evaluated
@@ -209,14 +210,10 @@ float UPathfindingLibrary::CalculateManhattanDistance(const FIntPoint& A, const 
 	return FMath::Abs(A.X - B.X) + FMath::Abs(A.Y - B.Y);
 }
 
-TArray<FIntPoint> UPathfindingLibrary::GetNeighbors(const FIntPoint& Position)
+void UPathfindingLibrary::GetNeighbors(TInlineComponentArray<FIntPoint, 4>& outNeighbors, const FIntPoint& Position)
 {
-	TArray<FIntPoint> Neighbors;
-
-	Neighbors.Add(FIntPoint(Position.X + 1, Position.Y));     // Right
-	Neighbors.Add(FIntPoint(Position.X - 1, Position.Y));     // Left
-	Neighbors.Add(FIntPoint(Position.X, Position.Y + 1));     // Up
-	Neighbors.Add(FIntPoint(Position.X, Position.Y - 1));     // Down
-
-	return Neighbors;
+	outNeighbors.Add(FIntPoint(Position.X + 1, Position.Y));     // Right
+	outNeighbors.Add(FIntPoint(Position.X - 1, Position.Y));     // Left
+	outNeighbors.Add(FIntPoint(Position.X, Position.Y + 1));     // Up
+	outNeighbors.Add(FIntPoint(Position.X, Position.Y - 1));     // Down
 }

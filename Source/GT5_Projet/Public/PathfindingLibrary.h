@@ -66,5 +66,5 @@ private:
 
 	static float CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B);
 
-	static TArray<FIntPoint> GetNeighbors(const FIntPoint& Position);
+	static void GetNeighbors(TInlineComponentArray<FIntPoint, 4>& out, const FIntPoint& Position);
 };
