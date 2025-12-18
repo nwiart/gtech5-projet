@@ -44,6 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RecenterViewOnPlayer();
 
+	UFUNCTION(BlueprintCallable)
+	void SetCursorActive(bool bActive);
+
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
 	UCameraComponent* Camera;

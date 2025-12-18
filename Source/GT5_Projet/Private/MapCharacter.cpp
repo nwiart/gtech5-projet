@@ -65,16 +65,12 @@ void AMapCharacter::Tick(float DeltaTime)
 
 			FIntPoint finalTile = PathToFollow.Last();
 			AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
-			if (gamemode)
-			{
-				for (AMapElement* elem : gamemode->GetAllMapElements())
-				{
-					FIntPoint pos = elem->GetTilePosition();
-					if (pos == finalTile)
-					{
-						elem->OnPlayerHit();
-						break;
-					}
+			if (gamemode) {
+				AMapElement* elem = UPathfindingLibrary::GetTileEvent(finalTile, this);
+				UE_LOG(LogTemp, Warning, TEXT("Actor: %s"),
+					elem ? (*elem->GetName()) : TEXT("nope..."));
+				if (elem != NULL) {
+					elem->OnPlayerHit();
 				}
 			}
 
