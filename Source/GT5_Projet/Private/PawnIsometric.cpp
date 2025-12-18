@@ -93,6 +93,11 @@ void APawnIsometric::RecenterViewOnPlayer()
 	}
 }
 
+void APawnIsometric::SetCursorActive(bool bActive)
+{
+	cursorActor->SetActorHiddenInGame(!bActive);
+}
+
 
 void APawnIsometric::Input_PanCameraX(float w)
 {
@@ -121,7 +126,7 @@ void APawnIsometric::Input_ZoomCamera(float w)
 
 void APawnIsometric::Input_SelectTile()
 {
-	if (!cursorActor) return;
+	if (!cursorActor || cursorActor->IsHidden()) return;
 
 	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
 	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
