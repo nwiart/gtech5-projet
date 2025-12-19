@@ -5,6 +5,10 @@
 
 #include "Character/MapCharacter.h"
 
+#include "Core/VNGameInstance.h"
+#include "Systems/VNTileMapLibrary.h"
+
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
@@ -18,7 +22,13 @@ void AVNPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FIntPoint spawn(0, 0);
+	UVNGameInstance* gameInstance = Cast<UVNGameInstance>(UGameplayStatics::GetGameInstance(this));
+	if (gameInstance != NULL) {
+		spawn = gameInstance->PlayerTilePosition;
+	}
+
 	FTransform transform;
-	transform.SetLocation(FVector(50, 50, 0));
+	transform.SetLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(spawn) + FVector(0, 0, 60.0));
 	PlayerCharacter = GetWorld()->SpawnActor<AMapCharacter>(PlayerCharacterClass, transform);
 }
