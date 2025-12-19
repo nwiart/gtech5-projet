@@ -19,11 +19,16 @@ class GT5_PROJET_API UVNGameInstance : public UGameInstance
 	
 public:
 
+	UVNGameInstance();
+
 	virtual void Init() override;
 
 	virtual void Shutdown() override;
 
-private:
 
+	UPROPERTY(BlueprintReadWrite)
+	FIntPoint PlayerTilePosition;
+
+	UPROPERTY(BlueprintReadOnly)
 	UVNSaveManager* SaveManager;
 };
