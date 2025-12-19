@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 
-#include "Core/VNSaveManager.h"
+#include "Save/VNSaveManager.h"
 
 #include "VNGameInstance.generated.h"
 
