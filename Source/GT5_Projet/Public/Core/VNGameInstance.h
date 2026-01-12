@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 
-#include "Save/VNSaveManager.h"
-
 #include "VNGameInstance.generated.h"
 
 /**
@@ -28,7 +26,4 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FIntPoint PlayerTilePosition;
-
-	UPROPERTY(BlueprintReadOnly)
-	UVNSaveManager* SaveManager;
 };

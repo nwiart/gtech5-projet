@@ -5,14 +5,15 @@
 
 #include "Kismet/GameplayStatics.h"
 
+#include "Save/VNSaveSubsystem.h"
 #include "Core/VNGameInstance.h"
 
 
 UVNSaveManager* USaveGameLibrary::GetSaveManager(const UObject* WorldContextObject)
 {
-	UVNGameInstance* gameInstance = Cast<UVNGameInstance>(UGameplayStatics::GetGameInstance(WorldContextObject));
-	if (gameInstance) {
-		return gameInstance->SaveManager;
+	UVNSaveSubsystem* subsystem = UGameplayStatics::GetGameInstance(WorldContextObject)->GetSubsystem<UVNSaveSubsystem>();
+	if (subsystem) {
+		return subsystem->SaveManager;
 	}
 	return 0;
 }
