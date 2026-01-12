@@ -6,21 +6,15 @@
 
 
 UVNGameInstance::UVNGameInstance()
-	: SaveManager(0)
 {
 }
 
 void UVNGameInstance::Init()
 {
 	Super::Init();
-
-	SaveManager = NewObject<UVNSaveManager>();
-	SaveManager->Load();
 }
 
 void UVNGameInstance::Shutdown()
 {
-	SaveManager->Save();
-
 	Super::Shutdown();
 }
