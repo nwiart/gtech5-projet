@@ -23,10 +23,13 @@ public:
 	UVNSaveManager();
 
 	UFUNCTION(BlueprintCallable)
-	void Load();
+	void Load(TSubclassOf<UVNSaveGame> SaveGameClass);
 
 	UFUNCTION(BlueprintCallable)
 	void Save();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const UClass* GetSaveGameClass() const;
 
 
 	UFUNCTION(BlueprintCallable)
@@ -36,6 +39,6 @@ public:
 	void SetEventData(const FGuid& Guid, const FTableEvents& Data);
 
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UVNSaveGame> SaveGame;
 };
