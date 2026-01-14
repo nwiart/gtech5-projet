@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 
+#include "Save/VNSaveGame.h"
+
 #include "VNGameInstance.generated.h"
+
 
 /**
  * 
@@ -23,6 +26,9 @@ public:
 
 	virtual void Shutdown() override;
 
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<UVNSaveGame> SaveGameClass;
 
 	UPROPERTY(BlueprintReadWrite)
 	FIntPoint PlayerTilePosition;

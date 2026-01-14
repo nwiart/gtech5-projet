@@ -5,6 +5,8 @@
 #include "Save/VNSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Core/VNGameInstance.h"
+
 
 UVNSaveManager::UVNSaveManager()
 	: SaveGame(0)
@@ -12,11 +14,17 @@ UVNSaveManager::UVNSaveManager()
 
 }
 
-void UVNSaveManager::Load(TSubclassOf<UVNSaveGame> saveGameClass)
+void UVNSaveManager::Load(const UObject* WorldContextObject)
 {
+	UVNGameInstance* gameInstance = Cast<UVNGameInstance>(UGameplayStatics::GetGameInstance(WorldContextObject));
+	if (gameInstance == NULL) {
+		UE_LOG(LogTemp, Warning, TEXT("Game instance not found!"));
+		return;
+	}
+
 	SaveGame = (UVNSaveGame*) UGameplayStatics::LoadGameFromSlot("Slot", 0);
 	if (SaveGame == NULL) {
-		SaveGame = NewObject<UVNSaveGame>(this, saveGameClass);
+		SaveGame = NewObject<UVNSaveGame>(this, gameInstance->SaveGameClass);
 	}
 }
 

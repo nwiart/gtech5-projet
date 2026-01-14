@@ -11,6 +11,7 @@ UVNSaveSubsystem::UVNSaveSubsystem()
 void UVNSaveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	SaveManager = NewObject<UVNSaveManager>();
+	SaveManager->Load(this);
 }
 
 void UVNSaveSubsystem::Deinitialize()
