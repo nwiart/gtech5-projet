@@ -22,8 +22,8 @@ public:
 
 	UVNSaveManager();
 
-	UFUNCTION(BlueprintCallable)
-	void Load(TSubclassOf<UVNSaveGame> SaveGameClass);
+	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
+	void Load(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
 	void Save();
