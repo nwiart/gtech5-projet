@@ -27,9 +27,15 @@ public:
 	bool OpenChapter(FName ChapterName, const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
+	void TriggerMinigame(FGuid MapEventGuid);
+
+	UFUNCTION(BlueprintCallable)
 	void NotifyChapterComplete();
 
 
 	UPROPERTY(BlueprintReadOnly)
 	FName CurrentChapterName;
+
+	UPROPERTY(BlueprintReadOnly)
+	FGuid LastMinigameGuid;
 };
