@@ -2,7 +2,7 @@
 
 
 #include "Widgets/PerformanceBarWidget.h"
-#include "Subsystems/PlayerPerformanceSubsystem.h"
+#include "Core/VNChapterSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
 void UPerformanceBarWidget::NativeConstruct()
@@ -15,16 +15,16 @@ void UPerformanceBarWidget::NativeConstruct()
         return;
     }
 
-    if (UPlayerPerformanceSubsystem* PerfSubsystem =
-        GetGameInstance()->GetSubsystem<UPlayerPerformanceSubsystem>())
+    if (UVNChapterSubsystem* PerfSubsystem =
+        GetGameInstance()->GetSubsystem<UVNChapterSubsystem>())
     {
-        PerfSubsystem->OnPerformanceChanged.AddDynamic(
+        PerfSubsystem->OnConnectionChanged.AddDynamic(
             this,
             &UPerformanceBarWidget::OnPerformanceUpdated
         );
 
         int32 InitialValue;
-        PerfSubsystem->GetPerformanceData(MinValue, MaxValue, InitialValue);
+        PerfSubsystem->GetConnectionData(MinValue, MaxValue, InitialValue);
 
         UpdateBar(InitialValue);
     }
