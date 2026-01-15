@@ -1,0 +1,35 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Engine/GameInstance.h"
+
+#include "Save/VNSaveGame.h"
+
+#include "VNGameInstance.generated.h"
+
+
+/**
+ * 
+ */
+UCLASS()
+class GT5_PROJET_API UVNGameInstance : public UGameInstance
+{
+	GENERATED_BODY()
+	
+public:
+
+	UVNGameInstance();
+
+	virtual void Init() override;
+
+	virtual void Shutdown() override;
+
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<UVNSaveGame> SaveGameClass;
+
+	UPROPERTY(BlueprintReadWrite)
+	FIntPoint PlayerTilePosition;
+};
