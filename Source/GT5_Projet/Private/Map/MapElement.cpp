@@ -28,19 +28,11 @@ void AMapElement::BeginPlay()
 	}
 }
 
-// Called every frame
-void AMapElement::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
-}
-
-
-void AMapElement::GetTilePosition(int& outX, int& outY) const
+void AMapElement::GetTilePosition(FIntPoint& out) const
 {
 	FIntPoint pos = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
-	outX = pos.X;
-	outY = pos.Y;
+	out = pos;
 }
 
 FIntPoint AMapElement::GetTilePosition() const
