@@ -23,7 +23,7 @@ void UVNSaveManager::Load(const UObject* WorldContextObject)
 	}
 
 	SaveGame = (UVNSaveGame*) UGameplayStatics::LoadGameFromSlot("Slot", 0);
-	if (SaveGame == NULL) {
+	if (SaveGame == NULL || SaveGame->GetClass() != gameInstance->SaveGameClass) {
 		SaveGame = NewObject<UVNSaveGame>(this, gameInstance->SaveGameClass);
 	}
 }
