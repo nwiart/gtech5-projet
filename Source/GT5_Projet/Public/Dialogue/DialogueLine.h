@@ -42,6 +42,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString Text;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UDialogueLineSequence* NextDialogue;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	int ConnectionPoints;
 };
 
 
