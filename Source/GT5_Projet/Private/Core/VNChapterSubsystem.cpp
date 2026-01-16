@@ -29,9 +29,17 @@ bool UVNChapterSubsystem::OpenChapter(FName ChapterName, const UObject* WorldCon
 
 	UGameplayStatics::OpenLevel(WorldContextObject, ChapterName);
 
+	Connection = 0;
+
 	CurrentChapterName = ChapterName;
 	LastMinigameGuid.Invalidate();
 	return true;
+}
+
+void UVNChapterSubsystem::ModifyConnection(int32 Delta)
+{
+	Connection = FMath::Clamp(Connection + Delta, ConnectionMinValue, ConnectionMaxValue);
+	OnConnectionChanged.Broadcast(Connection);
 }
 
 void UVNChapterSubsystem::TriggerMinigame(FGuid MapEventGuid)
@@ -42,4 +50,16 @@ void UVNChapterSubsystem::TriggerMinigame(FGuid MapEventGuid)
 void UVNChapterSubsystem::NotifyChapterComplete()
 {
 	CurrentChapterName = NAME_None;
+}
+
+
+void UVNChapterSubsystem::GetConnectionData(
+	int32& OutMin,
+	int32& OutMax,
+	int32& OutValue
+) const
+{
+	OutMin = ConnectionMinValue;
+	OutMax = ConnectionMaxValue;
+	OutValue = Connection;
 }
