@@ -87,10 +87,18 @@ FIntPoint APawnIsometric::GetPointedTile(double viewportX, double viewportY) con
 void APawnIsometric::RecenterViewOnPlayer()
 {
 	AVNPlayerController* playerController = Cast<AVNPlayerController>(GetPlayerState()->GetPlayerController());
-	if (playerController) {
-		FIntPoint tilePos = playerController->PlayerCharacter->GetTilePosition();
-		SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos));
+	if (!playerController || !playerController->PlayerCharacter) {
+		UE_LOG(LogTemp, Error, TEXT("Couldn't recenter view on player (could not find playerController, or map character isn't spawned yet."));
+		return;
 	}
+
+	FIntPoint tilePos = playerController->PlayerCharacter->GetTilePosition();
+	SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos));
+}
+
+void APawnIsometric::SetViewCenteredOnTile(const FIntPoint& TilePos)
+{
+	SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(TilePos));
 }
 
 void APawnIsometric::SetCursorActive(bool bActive)

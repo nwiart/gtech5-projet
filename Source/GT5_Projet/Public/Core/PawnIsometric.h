@@ -45,6 +45,9 @@ public:
 	void RecenterViewOnPlayer();
 
 	UFUNCTION(BlueprintCallable)
+	void SetViewCenteredOnTile(const FIntPoint& TilePos);
+
+	UFUNCTION(BlueprintCallable)
 	void SetCursorActive(bool bActive);
 
 
