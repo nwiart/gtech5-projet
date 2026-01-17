@@ -9,11 +9,13 @@
 #include "Core/VNGameInstance.h"
 
 
-UVNSaveManager* USaveGameLibrary::GetSaveManager(const UObject* WorldContextObject)
+UVNSaveGame* USaveGameLibrary::GetSaveGame(const UObject* WorldContextObject)
 {
 	UVNSaveSubsystem* subsystem = UGameplayStatics::GetGameInstance(WorldContextObject)->GetSubsystem<UVNSaveSubsystem>();
-	if (subsystem) {
-		return subsystem->SaveManager;
+	if (!subsystem || !subsystem->SaveGame) {
+		UE_LOG(LogTemp, Warning, TEXT("Non-existent save subsystem or save game object! Be sure that the save is loaded before calling USaveGameLibrary::GetSaveGame()."));
+		return 0;
 	}
-	return 0;
+
+	return subsystem->SaveGame;
 }

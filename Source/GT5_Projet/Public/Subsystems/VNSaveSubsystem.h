@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 
-#include "Save/VNSaveManager.h"
+#include "Save/VNSaveGame.h"
 
 #include "VNSaveSubsystem.generated.h"
 
@@ -21,11 +21,28 @@ public:
 
 	UVNSaveSubsystem();
 
+	// Subsystem implementation.
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-
 	virtual void Deinitialize() override;
 
 
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	void Load(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable)
+	void Save();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const UClass* GetSaveGameClass() const;
+
+
+	UFUNCTION(BlueprintCallable)
+	FTableEvents GetEventData(const FGuid& Guid);
+
+	UFUNCTION(BlueprintCallable)
+	void SetEventData(const FGuid& Guid, const FTableEvents& Data);
+
+
 	UPROPERTY(BlueprintReadOnly)
-	UVNSaveManager* SaveManager;
+	TObjectPtr<UVNSaveGame> SaveGame;
 };
