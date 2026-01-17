@@ -6,7 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "SaveGameLibrary.generated.h"
 
-class UVNSaveManager;
+class UVNSaveGame;
 
 /**
  * 
@@ -19,5 +19,5 @@ class GT5_PROJET_API USaveGameLibrary : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(WorldContext="WorldContextObject"))
-	static UVNSaveManager* GetSaveManager(const UObject* WorldContextObject);
+	static UVNSaveGame* GetSaveGame(const UObject* WorldContextObject);
 };
