@@ -2,7 +2,7 @@
 
 
 #include "Widgets/PerformanceBarWidget.h"
-#include "Core/VNChapterSubsystem.h"
+#include "Subsystems/VNChapterSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
 void UPerformanceBarWidget::NativeConstruct()

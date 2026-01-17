@@ -1,20 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/MapCharacter.h"
+#include "Map/VNMapCharacter.h"
 
 #include "Core/VNGamemode.h"
-#include "Systems/VNTileMapLibrary.h"
-#include "Systems/PathfindingLibrary.h"
+#include "Libraries/VNTileMapLibrary.h"
+#include "Libraries/PathfindingLibrary.h"
 
-#include "Map/MapElement.h"
+#include "Map/VNMapEvent.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
-AMapCharacter::AMapCharacter()
+AVNMapCharacter::AVNMapCharacter()
 	: CurrentWaypointIndex(0)
 	, MovementProgress(0.f)
 	, bIsMoving(false)
@@ -28,7 +28,7 @@ AMapCharacter::AMapCharacter()
 }
 
 // Called when the game starts or when spawned
-void AMapCharacter::BeginPlay()
+void AVNMapCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	CharacterZOffset = GetActorLocation().Z;
@@ -42,7 +42,7 @@ void AMapCharacter::BeginPlay()
 }
 
 // Called every frame
-void AMapCharacter::Tick(float DeltaTime)
+void AVNMapCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -68,7 +68,7 @@ void AMapCharacter::Tick(float DeltaTime)
 			FIntPoint finalTile = PathToFollow.Last();
 			AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
 			if (gamemode) {
-				AMapElement* elem = UPathfindingLibrary::GetTileEvent(finalTile, this);
+				AVNMapEvent* elem = UPathfindingLibrary::GetTileEvent(finalTile, this);
 				UE_LOG(LogTemp, Warning, TEXT("Actor: %s"),
 					elem ? (*elem->GetName()) : TEXT("nope..."));
 				if (elem != NULL) {
@@ -114,7 +114,7 @@ void AMapCharacter::Tick(float DeltaTime)
 }
 
 
-void AMapCharacter::MoveTo(int X, int Y)
+void AVNMapCharacter::MoveTo(int X, int Y)
 {
 	FIntPoint StartTile = GetTilePosition();
 	FIntPoint EndTile(X, Y);
@@ -142,14 +142,14 @@ void AMapCharacter::MoveTo(int X, int Y)
 	}
 }
 
-void AMapCharacter::GetTilePosition(int& outX, int& outY) const
+void AVNMapCharacter::GetTilePosition(int& outX, int& outY) const
 {
 	FIntPoint pos = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 	outX = pos.X;
 	outY = pos.Y;
 }
 
-FIntPoint AMapCharacter::GetTilePosition() const
+FIntPoint AVNMapCharacter::GetTilePosition() const
 {
 	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 }

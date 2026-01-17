@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "VNGamemode.generated.h"
 
-class AMapElement;
+class AVNMapEvent;
 
 /**
  * 
@@ -23,10 +23,11 @@ public:
 	void BeginPlay();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TSet<AMapElement*>& GetAllMapElements() { return MapElements; }
+	TSet<AVNMapEvent*>& GetAllMapElements() { return MapElements; }
 
 
 protected:
 
-	TSet<AMapElement*> MapElements;
+	// TODO : Move to chapter subsys (or a map subsys perhaps?)
+	TSet<AVNMapEvent*> MapElements;
 };

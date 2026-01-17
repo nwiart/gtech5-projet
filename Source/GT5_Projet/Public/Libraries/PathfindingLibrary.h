@@ -6,7 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "PathfindingLibrary.generated.h"
 
-class AMapElement;
+class AVNMapEvent;
 
 
 /**
@@ -47,7 +47,7 @@ public:
 	 * @return A pointer to the map event actor, if valid. Otherwise, NULL is returned.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding", meta=(WorldContext="WorldContext"))
-	static AMapElement* GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext);
+	static AVNMapEvent* GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext);
 
 private:
 

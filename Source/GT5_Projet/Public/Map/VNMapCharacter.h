@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
-#include "MapCharacter.generated.h"
+#include "VNMapCharacter.generated.h"
 
 UCLASS()
-class GT5_PROJET_API AMapCharacter : public APaperZDCharacter
+class GT5_PROJET_API AVNMapCharacter : public APaperZDCharacter
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AMapCharacter();
+	AVNMapCharacter();
 
 protected:
 	// Called when the game starts or when spawned
@@ -54,6 +54,5 @@ private:
 	float CharacterZOffset;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float MovementSpeed; 
-
+	float MovementSpeed;
 };

@@ -1,24 +1,24 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Map/MapElement.h"
-#include "Systems/VNTileMapLibrary.h"
+#include "Map/VNMapEvent.h"
+#include "Libraries/VNTileMapLibrary.h"
 #include "Core/VNGamemode.h"
 #include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
-AMapElement::AMapElement()
+AVNMapEvent::AVNMapEvent()
 	: bBlocksMovement(false)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>("SceneRoot");
 }
 
 // Called when the game starts or when spawned
-void AMapElement::BeginPlay()
+void AVNMapEvent::BeginPlay()
 {
 	Super::BeginPlay();
 	
@@ -29,13 +29,13 @@ void AMapElement::BeginPlay()
 }
 
 
-void AMapElement::GetTilePosition(FIntPoint& out) const
+void AVNMapEvent::GetTilePosition(FIntPoint& out) const
 {
 	FIntPoint pos = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 	out = pos;
 }
 
-FIntPoint AMapElement::GetTilePosition() const
+FIntPoint AVNMapEvent::GetTilePosition() const
 {
 	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 }
