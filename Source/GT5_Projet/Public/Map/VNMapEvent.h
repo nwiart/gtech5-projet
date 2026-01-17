@@ -4,19 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MapElement.generated.h"
+#include "VNMapEvent.generated.h"
 
 UCLASS()
-class GT5_PROJET_API AMapElement : public AActor
+class GT5_PROJET_API AVNMapEvent : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	AMapElement();
+	AVNMapEvent();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:

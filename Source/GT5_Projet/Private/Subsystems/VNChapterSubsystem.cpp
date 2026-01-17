@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Core/VNChapterSubsystem.h"
+#include "Subsystems/VNChapterSubsystem.h"
 
 #include "Kismet/GameplayStatics.h"
 

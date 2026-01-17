@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Systems/PathfindingLibrary.h"
+#include "Libraries/PathfindingLibrary.h"
+#include "Libraries/VNTileMapLibrary.h"
+
 #include "Core/VNGamemode.h"
-#include "Map/MapElement.h"
-#include "Systems/VNTileMapLibrary.h"
+#include "Map/VNMapEvent.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
@@ -150,7 +152,7 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 	return IsTileFloor(HitResult.GetActor()) || IsTileEvent(HitResult.GetActor());
 }
 
-AMapElement* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext)
+AVNMapEvent* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext)
 {
 	FHitResult HitResult;
 	bool bHitFloor = FindTileAt(HitResult, TilePosition, WorldContext);
@@ -160,7 +162,7 @@ AMapElement* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, co
 		return NULL;
 	}
 
-	return IsTileEvent(Actor) ? Cast<AMapElement>(Actor) : 0;
+	return IsTileEvent(Actor) ? Cast<AVNMapEvent>(Actor) : 0;
 }
 
 float UPathfindingLibrary::CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B)

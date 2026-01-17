@@ -11,9 +11,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "Systems/VNTileMapLibrary.h"
+#include "Libraries/VNTileMapLibrary.h"
 #include "Character/VNPlayerController.h"
-#include "Character/MapCharacter.h"
+#include "Map/VNMapCharacter.h"
 
 
 // Sets default values

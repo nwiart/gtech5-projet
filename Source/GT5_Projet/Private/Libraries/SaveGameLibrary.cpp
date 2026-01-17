@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Systems/SaveGameLibrary.h"
+#include "Libraries/SaveGameLibrary.h"
 
 #include "Kismet/GameplayStatics.h"
 
-#include "Save/VNSaveSubsystem.h"
+#include "Subsystems/VNSaveSubsystem.h"
 #include "Core/VNGameInstance.h"
 
 
