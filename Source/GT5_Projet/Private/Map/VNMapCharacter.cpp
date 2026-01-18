@@ -66,14 +66,12 @@ void AVNMapCharacter::Tick(float DeltaTime)
 			GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
 			FIntPoint finalTile = PathToFollow.Last();
-			AVNGamemode* gamemode = Cast<AVNGamemode>(UGameplayStatics::GetGameMode(this));
-			if (gamemode) {
-				AVNMapEvent* elem = UPathfindingLibrary::GetTileEvent(finalTile, this);
-				UE_LOG(LogTemp, Warning, TEXT("Actor: %s"),
-					elem ? (*elem->GetName()) : TEXT("nope..."));
-				if (elem != NULL) {
-					elem->OnPlayerHit();
-				}
+
+			AVNMapEvent* elem = UPathfindingLibrary::GetTileEvent(finalTile, this);
+			UE_LOG(LogTemp, Warning, TEXT("Actor: %s"),
+				elem ? (*elem->GetName()) : TEXT("nope..."));
+			if (elem != NULL) {
+				elem->OnPlayerHit();
 			}
 
 			PathToFollow.Empty();

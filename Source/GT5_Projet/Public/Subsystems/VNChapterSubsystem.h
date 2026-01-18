@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+
+#include "Map/VNMapCharacter.h"
+#include "Core/PawnIsometric.h"
+
 #include "VNChapterSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
@@ -34,7 +38,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	bool OpenChapter(FName ChapterName, const UObject* WorldContextObject);
+	bool OpenChapter(FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyConnection(int32 Delta);
@@ -57,6 +61,18 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Connection = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
+	AActor* ManagerActor;
+
+	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
+	AVNMapCharacter* MapCharacter;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Chapter Runtime")
+	APawnIsometric* PawnCamera;
+
+	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
+	FIntPoint PlayerPosition;
 
 	// Called whenever the player connection changed
 	UPROPERTY(BlueprintAssignable)

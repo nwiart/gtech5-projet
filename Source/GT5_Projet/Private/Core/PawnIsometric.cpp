@@ -13,13 +13,14 @@
 
 #include "Libraries/VNTileMapLibrary.h"
 #include "Character/VNPlayerController.h"
+#include "Subsystems/VNChapterSubsystem.h"
 #include "Map/VNMapCharacter.h"
 
 
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0)
+	, cursorActor(0), bIsCursorActive(true)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -45,7 +46,9 @@ void APawnIsometric::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	bIsCursorActive = true;
 	cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
+	cursorActor->SetActorHiddenInGame(true);
 }
 
 // Called every frame
@@ -103,6 +106,7 @@ void APawnIsometric::SetViewCenteredOnTile(const FIntPoint& TilePos)
 
 void APawnIsometric::SetCursorActive(bool bActive)
 {
+	bIsCursorActive = bActive;
 	cursorActor->SetActorHiddenInGame(!bActive);
 }
 
@@ -134,17 +138,17 @@ void APawnIsometric::Input_ZoomCamera(float w)
 
 void APawnIsometric::Input_SelectTile()
 {
-	if (!cursorActor || cursorActor->IsHidden()) return;
+	if (!cursorActor || !bIsCursorActive) return;
+
+	cursorActor->SetActorHiddenInGame(false);
 
 	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
 	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
 
 	// Clicked the same tile.
 	if (tilePos == cursorPosition) {
-		AVNPlayerController* pc = Cast<AVNPlayerController>(GetPlayerState()->GetPlayerController());
-		if (pc) {
-			pc->PlayerCharacter->MoveTo(cursorPosition.X, cursorPosition.Y);
-		}
+		UVNChapterSubsystem* chapterSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+		chapterSubsys->MapCharacter->MoveTo(cursorPosition.X, cursorPosition.Y);
 	}
 
 	cursorPosition = tilePos;

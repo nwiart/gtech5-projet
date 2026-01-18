@@ -74,4 +74,6 @@ private:
 	FVector cameraForwardVector;
 
 	FIntPoint cursorPosition;
+
+	bool bIsCursorActive;
 };
