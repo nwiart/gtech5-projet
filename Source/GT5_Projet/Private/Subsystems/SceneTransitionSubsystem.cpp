@@ -70,7 +70,7 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     // Always send a final 100% (useful if the last poll didn't hit).
     OnLoadingProgressUpdated.Broadcast(1.0f);
 
-    const FName NewLevelName = FName(*FPackageName::ObjectPathToPackageName(PendingLevel.ToString()));
+    const FName NewLevelName = PendingLevel.GetLongPackageFName();
     if (ULevelStreaming *LevelStream = UGameplayStatics::GetStreamingLevel(this, NewLevelName))
     {
         LevelStream->SetShouldBeVisible(true);
@@ -79,10 +79,10 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     // Prevent stacking streamed levels in memory: unload everything except the target.
     for (const TArray<ULevelStreaming*>& StreamingLevels = GetWorld()->GetStreamingLevels(); const ULevelStreaming* LevelStream : StreamingLevels)
     {
-        if (LevelStream && LevelStream->IsLevelLoaded() && LevelStream->GetWorldAssetPackageFName() != NewLevelName)
+        if (LevelStream && LevelStream->IsLevelLoaded() && LevelStream->PackageNameToLoad != NewLevelName)
         {
             const FLatentActionInfo LatentInfo;
-            UGameplayStatics::UnloadStreamLevel(this, LevelStream->GetWorldAssetPackageFName(), LatentInfo, false);
+            UGameplayStatics::UnloadStreamLevel(this, LevelStream->PackageNameToLoad, LatentInfo, false);
         }
     }
 
