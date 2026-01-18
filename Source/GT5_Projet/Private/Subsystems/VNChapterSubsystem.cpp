@@ -5,6 +5,9 @@
 
 #include "Kismet/GameplayStatics.h"
 
+#include "Core/VNGameInstance.h"
+#include "Libraries/VNTileMapLibrary.h"
+
 
 UVNChapterSubsystem::UVNChapterSubsystem()
 {
@@ -20,14 +23,31 @@ void UVNChapterSubsystem::Deinitialize()
 }
 
 
-bool UVNChapterSubsystem::OpenChapter(FName ChapterName, const UObject* WorldContextObject)
+bool UVNChapterSubsystem::OpenChapter(FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject)
 {
 	if (!CurrentChapterName.IsNone()) {
 		UE_LOG(LogTemp, Warning, TEXT("A chapter is already open (or the game's internal state is confused)."));
 		return false;
 	}
 
-	UGameplayStatics::OpenLevel(WorldContextObject, ChapterName);
+	ManagerActor = GetWorld()->SpawnActor(ManagerClass);
+	PawnCamera = GetWorld()->SpawnActor<APawnIsometric>(PawnClass);
+	MapCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(CharacterClass);
+
+	// Place map character at spawn location.
+	PlayerPosition = FIntPoint::ZeroValue;
+	MapCharacter->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PlayerPosition) + FVector(0, 0, 60.0));
+
+	// Possess pawn.
+	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
+	pc->Possess(PawnCamera);
+	
+	// Configure mouse input.
+	FInputModeGameAndUI inputMode;
+	inputMode.SetHideCursorDuringCapture(false);
+	pc->bShowMouseCursor = true;
+	pc->bEnableClickEvents = true;
+	pc->SetInputMode(inputMode);
 
 	Connection = 0;
 

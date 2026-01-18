@@ -91,7 +91,7 @@ void ABaseMinigameGameMode::ReturnToMainGame()
 	// TODO: This should be connected to your main game flow
 	UE_LOG(LogTemp, Warning, TEXT("ReturnToMainGame called - implement level transition logic"));
 
-	UGameplayStatics::OpenLevel(this, FName("Test"), false);
+	UGameplayStatics::OpenLevel(this, FName("Map_Persistent"), false);
 }
 
 UUserWidget* ABaseMinigameGameMode::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder)
