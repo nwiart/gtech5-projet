@@ -43,7 +43,7 @@ void USceneTransitionSubsystem::StartActualLoading()
     LatentInfo.Linkage = 0;
 
     // Non-blocking streaming to avoid freezing the game thread.
-    UGameplayStatics::LoadStreamLevel(this, LevelName, true, false, LatentInfo);
+    UGameplayStatics::LoadStreamLevel(this, LevelName, false, false, LatentInfo);
 
     // Lightweight polling to feed the loading UI.
     GetWorld()->GetTimerManager().SetTimer(ProgressTimerHandle, this, &USceneTransitionSubsystem::CheckLoadProgress, 0.1f, true);
@@ -65,6 +65,8 @@ void USceneTransitionSubsystem::CheckLoadProgress() const
 
 void USceneTransitionSubsystem::OnLoadCompleted()
 {
+    CurrentLevel = PendingLevel;
+
     GetWorld()->GetTimerManager().ClearTimer(ProgressTimerHandle);
 
     // Always send a final 100% (useful if the last poll didn't hit).
@@ -77,7 +79,7 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     }
 
     // Prevent stacking streamed levels in memory: unload everything except the target.
-    for (const TArray<ULevelStreaming*>& StreamingLevels = GetWorld()->GetStreamingLevels(); const ULevelStreaming* LevelStream : StreamingLevels)
+    for (const TArray<ULevelStreaming*>& StreamingLevels = GetWorld()->GetStreamingLevels(); ULevelStreaming* LevelStream : StreamingLevels)
     {
         if (LevelStream && LevelStream->IsLevelLoaded() && LevelStream->PackageNameToLoad != NewLevelName)
         {

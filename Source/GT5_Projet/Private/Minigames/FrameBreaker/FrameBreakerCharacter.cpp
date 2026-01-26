@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/VNChapterSubsystem.h"
 
 AFrameBreakerCharacter::AFrameBreakerCharacter()
 {
@@ -57,7 +58,7 @@ void AFrameBreakerCharacter::BeginPlay()
 	}
 
 	// Add input mapping context
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
@@ -150,7 +151,8 @@ void AFrameBreakerCharacter::SpawnProjectile()
 	}
 
 	// Notify game mode that a knife is being thrown
-	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
 	if (GameMode)
 	{
 		GameMode->OnKnifeThrown();
@@ -202,7 +204,8 @@ bool AFrameBreakerCharacter::CanThrow() const
 		return false;
 
 	// Check if game mode has knives remaining
-	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
 	if (GameMode)
 	{
 		return GameMode->HasKnivesRemaining();

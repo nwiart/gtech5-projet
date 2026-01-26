@@ -8,6 +8,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/VNChapterSubsystem.h"
 
 AProjectileBase::AProjectileBase()
 {
@@ -139,7 +140,8 @@ void AProjectileBase::HandleFrameHit(APictureFrame* Frame, const FHitResult& Hit
 	Frame->Shatter();
 
 	// 7. Notify GameMode
-	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
 	if (GameMode)
 	{
 		GameMode->OnFrameDestroyed(Frame);

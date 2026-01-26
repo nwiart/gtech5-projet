@@ -7,6 +7,8 @@
 #include "Data/MinigameData.h"
 #include "BaseMinigameGameMode.generated.h"
 
+class UUserWidget;
+
 /**
  * Base class for all minigames, providing shared win/lose screen functionality
  * and standardized result handling
@@ -19,15 +21,17 @@ class GT5_PROJET_API ABaseMinigameGameMode : public AGameModeBase
 public:
 	ABaseMinigameGameMode();
 
+	void Initialize();
+
 	// Win/Lose Screen Management
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<class UUserWidget> WinScreenClass;
+	TSubclassOf<UUserWidget> WinScreenClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<class UUserWidget> LoseScreenClass;
+	TSubclassOf<UUserWidget> LoseScreenClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<class UUserWidget> HUDWidgetClass;
+	TSubclassOf<UUserWidget> HUDWidgetClass;
 
 	// Display Properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
@@ -61,15 +65,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	virtual void RestartMinigame();
 
-	UFUNCTION(BlueprintCallable, Category = "Game")
-	virtual void ReturnToMainGame();
-
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type) override;
 
 	// Helper to show any widget
-	class UUserWidget* ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder = 10);
+	UUserWidget* ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder = 10);
 
 	UPROPERTY()
-	class UUserWidget* CurrentResultWidget;
+	UUserWidget* CurrentResultWidget;
+
+	UUserWidget* HUDWidget;
 };

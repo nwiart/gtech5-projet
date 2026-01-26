@@ -65,6 +65,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type reason) override;
 
 public:
 	// Frame management
