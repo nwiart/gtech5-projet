@@ -45,6 +45,13 @@ void AFrameBreakerGameMode::BeginPlay()
 	LoadLevel(CurrentLevelIndex);
 }
 
+void AFrameBreakerGameMode::EndPlay(const EEndPlayReason::Type reason)
+{
+	ClearAllFrames();
+
+	Super::EndPlay(reason);
+}
+
 void AFrameBreakerGameMode::InitializeDefaultLevels()
 {
 	// If no levels configured, create default level

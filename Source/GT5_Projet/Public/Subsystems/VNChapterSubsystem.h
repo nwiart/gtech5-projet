@@ -7,6 +7,7 @@
 
 #include "Map/VNMapCharacter.h"
 #include "Core/PawnIsometric.h"
+#include "Minigames/BaseMinigameGameMode.h"
 
 #include "VNChapterSubsystem.generated.h"
 
@@ -38,7 +39,14 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	bool OpenChapter(FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject);
+	bool OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
+	bool InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
+	void ExitMinigame(const UObject* WorldContextObject);
+
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyConnection(int32 Delta);
@@ -57,10 +65,14 @@ public:
 	FName CurrentChapterName;
 
 	UPROPERTY(BlueprintReadOnly)
+	TSoftObjectPtr<UWorld> CurrentChapterLevel;
+
+	UPROPERTY(BlueprintReadOnly)
 	FGuid LastMinigameGuid;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Connection = 0;
+
 
 	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
 	AActor* ManagerActor;
@@ -73,6 +85,14 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
 	FIntPoint PlayerPosition;
+
+
+	UPROPERTY(BlueprintReadOnly, Category="Minigame Runtime")
+	APawn* MinigamePawn;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Minigame Runtime")
+	ABaseMinigameGameMode* MinigameManager;
+
 
 	// Called whenever the player connection changed
 	UPROPERTY(BlueprintAssignable)

@@ -23,7 +23,7 @@ void UVNChapterSubsystem::Deinitialize()
 }
 
 
-bool UVNChapterSubsystem::OpenChapter(FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject)
+bool UVNChapterSubsystem::OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject)
 {
 	if (!CurrentChapterName.IsNone()) {
 		UE_LOG(LogTemp, Warning, TEXT("A chapter is already open (or the game's internal state is confused)."));
@@ -41,7 +41,7 @@ bool UVNChapterSubsystem::OpenChapter(FName ChapterName, TSubclassOf<AActor> Man
 	// Possess pawn.
 	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
 	pc->Possess(PawnCamera);
-	
+
 	// Configure mouse input.
 	FInputModeGameAndUI inputMode;
 	inputMode.SetHideCursorDuringCapture(false);
@@ -52,9 +52,37 @@ bool UVNChapterSubsystem::OpenChapter(FName ChapterName, TSubclassOf<AActor> Man
 	Connection = 0;
 
 	CurrentChapterName = ChapterName;
+	CurrentChapterLevel = ChapterLevel;
 	LastMinigameGuid.Invalidate();
 	return true;
 }
+
+bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
+{
+	MapCharacter->SetActorHiddenInGame(true);
+
+	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameGameMode>(ManagerClass);
+	MinigamePawn = GetWorld()->SpawnActor<APawn>(PawnClass);
+
+	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
+	pc->Possess(MinigamePawn);
+
+	MinigameManager->Initialize();
+
+	return true;
+}
+
+void UVNChapterSubsystem::ExitMinigame(const UObject* WorldContextObject)
+{
+	MapCharacter->SetActorHiddenInGame(false);
+
+	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
+	pc->Possess(PawnCamera);
+
+	MinigameManager->Destroy();
+	MinigamePawn->Destroy();
+}
+
 
 void UVNChapterSubsystem::ModifyConnection(int32 Delta)
 {
@@ -70,6 +98,7 @@ void UVNChapterSubsystem::TriggerMinigame(FGuid MapEventGuid)
 void UVNChapterSubsystem::NotifyChapterComplete()
 {
 	CurrentChapterName = NAME_None;
+	CurrentChapterLevel.Reset();
 }
 
 

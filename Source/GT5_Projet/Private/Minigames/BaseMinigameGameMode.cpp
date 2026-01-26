@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 
 ABaseMinigameGameMode::ABaseMinigameGameMode()
+	: HUDWidget(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bIsMinigameActive = false;
@@ -14,12 +15,28 @@ ABaseMinigameGameMode::ABaseMinigameGameMode()
 void ABaseMinigameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+}
+
+void ABaseMinigameGameMode::EndPlay(const EEndPlayReason::Type reason)
+{
+	if (HUDWidget)
+	{
+		HUDWidget->RemoveFromParent();
+		HUDWidget = 0;
+	}
+
+	Super::EndPlay(reason);
+}
+
+void ABaseMinigameGameMode::Initialize()
+{
 	bIsMinigameActive = true;
 
 	// Show HUD if configured
 	if (HUDWidgetClass)
 	{
-		ShowWidget(HUDWidgetClass, 0);
+		HUDWidget = ShowWidget(HUDWidgetClass, 0);
 	}
 }
 
@@ -84,14 +101,6 @@ void ABaseMinigameGameMode::RestartMinigame()
 {
 	// Reload current level
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
-}
-
-void ABaseMinigameGameMode::ReturnToMainGame()
-{
-	// TODO: This should be connected to your main game flow
-	UE_LOG(LogTemp, Warning, TEXT("ReturnToMainGame called - implement level transition logic"));
-
-	UGameplayStatics::OpenLevel(this, FName("Map_Persistent"), false);
 }
 
 UUserWidget* ABaseMinigameGameMode::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder)

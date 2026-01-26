@@ -3,13 +3,15 @@
 #include "Minigames/FrameBreaker/FrameBreakerHUD.h"
 #include "Minigames/FrameBreaker/FrameBreakerGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/VNChapterSubsystem.h"
 
 void UFrameBreakerHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	// Cache reference to game mode
-	GameMode = Cast<AFrameBreakerGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
 
 	if (!GameMode)
 	{
