@@ -26,7 +26,7 @@ void UVNChapterSubsystem::Deinitialize()
 bool UVNChapterSubsystem::OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject)
 {
 	if (!CurrentChapterName.IsNone()) {
-		UE_LOG(LogTemp, Warning, TEXT("A chapter is already open (or the game's internal state is confused)."));
+		UE_LOG(LogTemp, Error, TEXT("A chapter is already open (or the game's internal state is confused)."));
 		return false;
 	}
 
