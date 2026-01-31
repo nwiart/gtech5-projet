@@ -30,13 +30,14 @@ bool UVNChapterSubsystem::OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName
 		return false;
 	}
 
+	// Place map character at spawn location.
+	// TODO : Hardcoded character height offset (60.0).
+	PlayerPosition = FIntPoint::ZeroValue;
+	FVector characterLocation = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PlayerPosition) + FVector(0, 0, 60.0);
+
 	ManagerActor = GetWorld()->SpawnActor(ManagerClass);
 	PawnCamera = GetWorld()->SpawnActor<APawnIsometric>(PawnClass);
-	MapCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(CharacterClass);
-
-	// Place map character at spawn location.
-	PlayerPosition = FIntPoint::ZeroValue;
-	MapCharacter->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PlayerPosition) + FVector(0, 0, 60.0));
+	MapCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(CharacterClass, characterLocation, FRotator());
 
 	// Possess pawn.
 	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
@@ -55,6 +56,21 @@ bool UVNChapterSubsystem::OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName
 	CurrentChapterLevel = ChapterLevel;
 	LastMinigameGuid.Invalidate();
 	return true;
+}
+
+void UVNChapterSubsystem::CloseChapter()
+{
+	MapCharacter->Destroy();
+	MapCharacter = 0;
+
+	PawnCamera->Destroy();
+	PawnCamera = 0;
+
+	ManagerActor->Destroy();
+	ManagerActor = 0;
+
+	CurrentChapterName = NAME_None;
+	CurrentChapterLevel.Reset();
 }
 
 bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
@@ -80,7 +96,12 @@ void UVNChapterSubsystem::ExitMinigame(const UObject* WorldContextObject)
 	pc->Possess(PawnCamera);
 
 	MinigameManager->Destroy();
-	MinigamePawn->Destroy();
+	MinigameManager = 0;
+
+	if (MinigamePawn) {
+		MinigamePawn->Destroy();
+		MinigamePawn = 0;
+	}
 }
 
 

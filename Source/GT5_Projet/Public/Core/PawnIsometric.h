@@ -22,6 +22,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type reason) override;
+
 	void Input_PanCameraX(float w);
 	void Input_PanCameraY(float w);
 	void Input_ZoomCamera(float w);

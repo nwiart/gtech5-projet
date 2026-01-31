@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
 	bool OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject);
 
+	UFUNCTION(BlueprintCallable)
+	void CloseChapter();
+
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
 	bool InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject);
 

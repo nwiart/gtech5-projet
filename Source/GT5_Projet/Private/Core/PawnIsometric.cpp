@@ -51,6 +51,13 @@ void APawnIsometric::BeginPlay()
 	cursorActor->SetActorHiddenInGame(true);
 }
 
+void APawnIsometric::EndPlay(const EEndPlayReason::Type reason)
+{
+	cursorActor->Destroy();
+
+	Super::EndPlay(reason);
+}
+
 // Called every frame
 void APawnIsometric::Tick(float DeltaTime)
 {
