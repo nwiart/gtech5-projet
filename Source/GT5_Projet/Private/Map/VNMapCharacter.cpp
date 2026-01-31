@@ -31,6 +31,7 @@ AVNMapCharacter::AVNMapCharacter()
 void AVNMapCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 	CharacterZOffset = GetActorLocation().Z;
 	CurrentWorldPosition = GetActorLocation();
 	TargetWorldPosition = CurrentWorldPosition;
@@ -38,7 +39,6 @@ void AVNMapCharacter::BeginPlay()
 
 	FRotator CurrentRotation = GetActorRotation();
 	SetActorRotation(FRotator(CurrentRotation.Pitch, 40, CurrentRotation.Roll));
-
 }
 
 // Called every frame
@@ -54,6 +54,7 @@ void AVNMapCharacter::Tick(float DeltaTime)
 
 	MovementProgress += DeltaTime * MovementSpeed;
 
+	// Arrived at end of node.
 	if (MovementProgress >= 1.0f)
 	{
 		CurrentWaypointIndex++;
