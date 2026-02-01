@@ -362,13 +362,13 @@ FMinigameResult AFrameBreakerGameMode::BuildMinigameResult_Implementation(bool b
 
 	Result.ConnectionScoreDelta = ConnectionDelta;
 
-	Result.CustomStats.Add(TEXT("Frames Destroyed"),
+	Result.CustomStats.Add(TEXT("Tableaux Détruits"),
 		FText::FromString(FString::Printf(TEXT("%d / %d"), FramesDestroyed, TotalFrames)));
 
-	Result.CustomStats.Add(TEXT("Knives Used"),
+	Result.CustomStats.Add(TEXT("Couteaux Utilisés"),
 		FText::FromString(FString::Printf(TEXT("%d / %d"), TotalKnives - KnivesRemaining, TotalKnives)));
 
-	Result.CustomStats.Add(TEXT("Knives Remaining"),
+	Result.CustomStats.Add(TEXT("Couteaux Restants"),
 		FText::AsNumber(KnivesRemaining));
 
 	return Result;
