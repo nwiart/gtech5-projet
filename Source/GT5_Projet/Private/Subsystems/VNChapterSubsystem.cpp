@@ -7,6 +7,7 @@
 
 #include "Core/VNGameInstance.h"
 #include "Libraries/VNTileMapLibrary.h"
+#include "Subsystems/SceneTransitionSubsystem.h"
 
 
 UVNChapterSubsystem::UVNChapterSubsystem()
@@ -16,6 +17,8 @@ UVNChapterSubsystem::UVNChapterSubsystem()
 
 void UVNChapterSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	USceneTransitionSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<USceneTransitionSubsystem>();
+	subsys->OnLoadingFinished.AddDynamic(this, &UVNChapterSubsystem::OnLevelLoadingDone);
 }
 
 void UVNChapterSubsystem::Deinitialize()
@@ -75,7 +78,7 @@ void UVNChapterSubsystem::CloseChapter()
 
 bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
 {
-	MapCharacter->SetActorHiddenInGame(true);
+	PawnCamera->SetCursorActive(false);
 
 	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameGameMode>(ManagerClass);
 	MinigamePawn = GetWorld()->SpawnActor<APawn>(PawnClass);
@@ -90,7 +93,7 @@ bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> 
 
 void UVNChapterSubsystem::ExitMinigame(const UObject* WorldContextObject)
 {
-	MapCharacter->SetActorHiddenInGame(false);
+	PawnCamera->SetCursorActive(true);
 
 	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
 	pc->Possess(PawnCamera);
@@ -132,4 +135,13 @@ void UVNChapterSubsystem::GetConnectionData(
 	OutMin = ConnectionMinValue;
 	OutMax = ConnectionMaxValue;
 	OutValue = Connection;
+}
+
+
+void UVNChapterSubsystem::OnLevelLoadingDone()
+{
+	USceneTransitionSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<USceneTransitionSubsystem>();
+	if (subsys->CurrentLevel == CurrentChapterLevel) {
+		MapCharacter->Enable();
+	}
 }

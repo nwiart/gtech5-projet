@@ -24,6 +24,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
+	void Enable();
+
+	UFUNCTION(BlueprintCallable)
+	void Disable();
+
+	UFUNCTION(BlueprintCallable)
 	void MoveTo(int X, int Y);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)

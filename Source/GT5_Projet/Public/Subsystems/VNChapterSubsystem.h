@@ -107,5 +107,6 @@ public:
 
 private:
 
-	void ClampAndNotify();
+	UFUNCTION()
+	void OnLevelLoadingDone();
 };

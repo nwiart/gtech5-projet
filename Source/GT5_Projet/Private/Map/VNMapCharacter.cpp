@@ -10,6 +10,7 @@
 #include "Map/VNMapEvent.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -112,6 +113,18 @@ void AVNMapCharacter::Tick(float DeltaTime)
 	}
 }
 
+
+void AVNMapCharacter::Enable()
+{
+	SetActorHiddenInGame(false);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
+void AVNMapCharacter::Disable()
+{
+	SetActorHiddenInGame(true);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
 
 void AVNMapCharacter::MoveTo(int X, int Y)
 {
