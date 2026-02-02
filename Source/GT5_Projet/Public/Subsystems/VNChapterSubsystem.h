@@ -7,7 +7,10 @@
 
 #include "Map/VNMapCharacter.h"
 #include "Core/PawnIsometric.h"
+#include "Core/VNChapterGamemode.h"
 #include "Minigames/BaseMinigameGameMode.h"
+
+#include "Data/ChapterData.h"
 
 #include "VNChapterSubsystem.generated.h"
 
@@ -38,8 +41,8 @@ public:
 	inline int32 GetConnectionMaxValue() const { return ConnectionMaxValue; }
 
 
-	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	bool OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable)
+	bool OpenChapter(const FChapterData& ChapterData);
 
 	UFUNCTION(BlueprintCallable)
 	void CloseChapter();
@@ -64,6 +67,21 @@ public:
 	void GetConnectionData(int32& OutMin, int32& OutMax, int32& OutValue) const;
 
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	AVNChapterGamemode* GetChapterManager() const { return ChapterManager; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	AVNMapCharacter* GetMapCharacter() const { return ChapterManager ? ChapterManager->GetMapCharacter() : 0; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	APawnIsometric* GetPawn() const { return ChapterManager ? ChapterManager->GetPawn() : 0; }
+
+
+public:
+
+	UPROPERTY(BlueprintReadWrite)
+	FChapterData ScheduledChapter;
+
 	UPROPERTY(BlueprintReadOnly)
 	FName CurrentChapterName;
 
@@ -78,16 +96,7 @@ public:
 
 
 	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
-	AActor* ManagerActor;
-
-	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
-	AVNMapCharacter* MapCharacter;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Chapter Runtime")
-	APawnIsometric* PawnCamera;
-
-	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
-	FIntPoint PlayerPosition;
+	AVNChapterGamemode* ChapterManager;
 
 
 	UPROPERTY(BlueprintReadOnly, Category="Minigame Runtime")

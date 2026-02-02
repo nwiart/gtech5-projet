@@ -52,6 +52,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetCursorActive(bool bActive);
 
+	UFUNCTION(BlueprintCallable)
+	void SetCursorHidden(bool bCursorHidden);
+
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
 	UCameraComponent* Camera;
