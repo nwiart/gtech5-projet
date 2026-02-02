@@ -33,7 +33,7 @@ bool UVNChapterSubsystem::OpenChapter(const FChapterData& ChapterData)
 		return false;
 	}
 
-	ChapterManager = GetWorld()->SpawnActor<AVNChapterGamemode>(ChapterData.ManagerClass);
+	ChapterManager = GetWorld()->SpawnActor<AVNChapterManager>(ChapterData.ManagerClass);
 	ChapterManager->Enable();
 
 	Connection = 0;
@@ -53,11 +53,11 @@ void UVNChapterSubsystem::CloseChapter()
 	CurrentChapterLevel.Reset();
 }
 
-bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
+bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameManager> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
 {
 	ChapterManager->Disable();
 
-	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameGameMode>(ManagerClass);
+	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameManager>(ManagerClass);
 	MinigamePawn = GetWorld()->SpawnActor<APawn>(PawnClass);
 
 	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);

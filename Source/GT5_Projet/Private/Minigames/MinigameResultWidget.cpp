@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Minigames/MinigameResultWidget.h"
-#include "Minigames/BaseMinigameGameMode.h"
+#include "Minigames/BaseMinigameManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystems/VNChapterSubsystem.h"
 
@@ -10,7 +10,7 @@ void UMinigameResultWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-	CachedGameMode = Cast<ABaseMinigameGameMode>(subsys->MinigameManager);
+	CachedGameMode = Cast<ABaseMinigameManager>(subsys->MinigameManager);
 	if (CachedGameMode)
 	{
 		InitializeWithResult(CachedGameMode->CurrentResult);

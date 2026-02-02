@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Minigames/BaseMinigameGameMode.h"
+#include "Minigames/BaseMinigameManager.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
-ABaseMinigameGameMode::ABaseMinigameGameMode()
+ABaseMinigameManager::ABaseMinigameManager()
 	: HUDWidget(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -12,13 +12,13 @@ ABaseMinigameGameMode::ABaseMinigameGameMode()
 	CurrentResultWidget = nullptr;
 }
 
-void ABaseMinigameGameMode::BeginPlay()
+void ABaseMinigameManager::BeginPlay()
 {
 	Super::BeginPlay();
 
 }
 
-void ABaseMinigameGameMode::EndPlay(const EEndPlayReason::Type reason)
+void ABaseMinigameManager::EndPlay(const EEndPlayReason::Type reason)
 {
 	if (HUDWidget)
 	{
@@ -29,7 +29,7 @@ void ABaseMinigameGameMode::EndPlay(const EEndPlayReason::Type reason)
 	Super::EndPlay(reason);
 }
 
-void ABaseMinigameGameMode::Initialize()
+void ABaseMinigameManager::Initialize()
 {
 	bIsMinigameActive = true;
 
@@ -40,7 +40,7 @@ void ABaseMinigameGameMode::Initialize()
 	}
 }
 
-void ABaseMinigameGameMode::ShowWinScreen()
+void ABaseMinigameManager::ShowWinScreen()
 {
 	if (WinScreenClass)
 	{
@@ -53,7 +53,7 @@ void ABaseMinigameGameMode::ShowWinScreen()
 	}
 }
 
-void ABaseMinigameGameMode::ShowLoseScreen()
+void ABaseMinigameManager::ShowLoseScreen()
 {
 	if (LoseScreenClass)
 	{
@@ -66,7 +66,7 @@ void ABaseMinigameGameMode::ShowLoseScreen()
 	}
 }
 
-void ABaseMinigameGameMode::OnMinigameComplete_Implementation(bool bSuccess)
+void ABaseMinigameManager::OnMinigameComplete_Implementation(bool bSuccess)
 {
 	bIsMinigameActive = false;
 
@@ -89,7 +89,7 @@ void ABaseMinigameGameMode::OnMinigameComplete_Implementation(bool bSuccess)
 		*MinigameName, bSuccess ? TEXT("Yes") : TEXT("No"), CurrentResult.ConnectionScoreDelta);
 }
 
-FMinigameResult ABaseMinigameGameMode::BuildMinigameResult_Implementation(bool bSuccess)
+FMinigameResult ABaseMinigameManager::BuildMinigameResult_Implementation(bool bSuccess)
 {
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;
@@ -97,13 +97,13 @@ FMinigameResult ABaseMinigameGameMode::BuildMinigameResult_Implementation(bool b
 	return Result;
 }
 
-void ABaseMinigameGameMode::RestartMinigame()
+void ABaseMinigameManager::RestartMinigame()
 {
 	// Reload current level
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
 
-UUserWidget* ABaseMinigameGameMode::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder)
+UUserWidget* ABaseMinigameManager::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, int32 ZOrder)
 {
 	if (!WidgetClass)
 	{

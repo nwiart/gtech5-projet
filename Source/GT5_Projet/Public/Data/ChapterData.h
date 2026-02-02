@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 
-#include "Core/VNChapterGamemode.h"
+#include "Core/VNChapterManager.h"
 
 #include "ChapterData.generated.h"
 
@@ -29,7 +29,7 @@ public:
 	TSoftObjectPtr<UWorld> Level;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chapter")
-	TSubclassOf<AVNChapterGamemode> ManagerClass;
+	TSubclassOf<AVNChapterManager> ManagerClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chapter")
 	bool bIsLocked = false;

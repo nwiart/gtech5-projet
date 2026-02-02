@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Minigames/BaseMinigameGameMode.h"
-#include "FrameBreakerGameMode.generated.h"
+#include "Minigames/BaseMinigameManager.h"
+#include "FrameBreakerManager.generated.h"
 
 class APictureFrame;
 class AFrameBreakerCharacter;
@@ -56,12 +56,12 @@ struct FFrameBreakerLevelConfig
  * FPS game where player throws projectiles to destroy rotating 3D picture frames
  */
 UCLASS()
-class GT5_PROJET_API AFrameBreakerGameMode : public ABaseMinigameGameMode
+class GT5_PROJET_API AFrameBreakerManager : public ABaseMinigameManager
 {
 	GENERATED_BODY()
 
 public:
-	AFrameBreakerGameMode();
+	AFrameBreakerManager();
 
 protected:
 	virtual void BeginPlay() override;
