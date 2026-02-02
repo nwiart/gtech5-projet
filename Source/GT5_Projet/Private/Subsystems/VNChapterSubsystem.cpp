@@ -88,9 +88,17 @@ void UVNChapterSubsystem::ModifyConnection(int32 Delta)
 	OnConnectionChanged.Broadcast(Connection);
 }
 
-void UVNChapterSubsystem::TriggerMinigame(FGuid MapEventGuid)
+void UVNChapterSubsystem::TriggerMinigame(const FMinigameData& MinigameData, FGuid MapEventGuid)
 {
+	ScheduledMinigame = MinigameData;
 	LastMinigameGuid = MapEventGuid;
+
+	if (ChapterManager) {
+		ChapterManager->TriggerMinigame(MinigameData);
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Tried to launch minigame, but no chapter manager is spawned in!"));
+	}
 }
 
 void UVNChapterSubsystem::NotifyChapterComplete()

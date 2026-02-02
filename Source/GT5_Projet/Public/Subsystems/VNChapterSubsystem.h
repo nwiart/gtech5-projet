@@ -11,6 +11,7 @@
 #include "Minigames/BaseMinigameManager.h"
 
 #include "Data/ChapterData.h"
+#include "Data/MinigameData.h"
 
 #include "VNChapterSubsystem.generated.h"
 
@@ -19,6 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	int32,
 	NewValue
 );
+
 
 /**
  * 
@@ -58,7 +60,7 @@ public:
 	void ModifyConnection(int32 Delta);
 
 	UFUNCTION(BlueprintCallable)
-	void TriggerMinigame(FGuid MapEventGuid);
+	void TriggerMinigame(const FMinigameData& MinigameData, FGuid MapEventGuid);
 
 	UFUNCTION(BlueprintCallable)
 	void NotifyChapterComplete();
@@ -83,13 +85,17 @@ public:
 	FChapterData ScheduledChapter;
 
 	UPROPERTY(BlueprintReadOnly)
+	FMinigameData ScheduledMinigame;
+
+	UPROPERTY(BlueprintReadOnly)
+	FGuid LastMinigameGuid;
+
+
+	UPROPERTY(BlueprintReadOnly)
 	FName CurrentChapterName;
 
 	UPROPERTY(BlueprintReadOnly)
 	TSoftObjectPtr<UWorld> CurrentChapterLevel;
-
-	UPROPERTY(BlueprintReadOnly)
-	FGuid LastMinigameGuid;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Connection = 0;

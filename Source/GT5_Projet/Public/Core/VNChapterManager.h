@@ -7,6 +7,7 @@
 
 #include "Map/VNMapCharacter.h"
 #include "Core/PawnIsometric.h"
+#include "Data/MinigameData.h"
 
 #include "VNChapterManager.generated.h"
 
@@ -32,6 +33,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Disable();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void TriggerMinigame(const FMinigameData& Minigame);
+	virtual void TriggerMinigame_Implementation(const FMinigameData& Minigame) { }
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
