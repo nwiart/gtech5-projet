@@ -117,6 +117,13 @@ void APawnIsometric::SetCursorActive(bool bActive)
 	cursorActor->SetActorHiddenInGame(!bActive);
 }
 
+void APawnIsometric::SetCursorHidden(bool bCursorHidden)
+{
+	if (!bIsCursorActive) return;
+
+	cursorActor->SetActorHiddenInGame(bCursorHidden);
+}
+
 
 void APawnIsometric::Input_PanCameraX(float w)
 {
@@ -155,7 +162,7 @@ void APawnIsometric::Input_SelectTile()
 	// Clicked the same tile.
 	if (tilePos == cursorPosition) {
 		UVNChapterSubsystem* chapterSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-		chapterSubsys->MapCharacter->MoveTo(cursorPosition.X, cursorPosition.Y);
+		chapterSubsys->GetMapCharacter()->MoveTo(cursorPosition.X, cursorPosition.Y);
 	}
 
 	cursorPosition = tilePos;

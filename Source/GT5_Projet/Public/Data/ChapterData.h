@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
+
+#include "Core/VNChapterGamemode.h"
+
 #include "ChapterData.generated.h"
 
 /**
@@ -24,6 +27,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chapter")
 	TSoftObjectPtr<UWorld> Level;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chapter")
+	TSubclassOf<AVNChapterGamemode> ManagerClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chapter")
 	bool bIsLocked = false;

@@ -26,51 +26,28 @@ void UVNChapterSubsystem::Deinitialize()
 }
 
 
-bool UVNChapterSubsystem::OpenChapter(TSoftObjectPtr<UWorld> ChapterLevel, FName ChapterName, TSubclassOf<AActor> ManagerClass, TSubclassOf<APawnIsometric> PawnClass, TSubclassOf<AVNMapCharacter> CharacterClass, const UObject* WorldContextObject)
+bool UVNChapterSubsystem::OpenChapter(const FChapterData& ChapterData)
 {
 	if (!CurrentChapterName.IsNone()) {
 		UE_LOG(LogTemp, Error, TEXT("A chapter is already open (or the game's internal state is confused)."));
 		return false;
 	}
 
-	// Place map character at spawn location.
-	// TODO : Hardcoded character height offset (60.0).
-	PlayerPosition = FIntPoint::ZeroValue;
-	FVector characterLocation = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PlayerPosition) + FVector(0, 0, 60.0);
-
-	ManagerActor = GetWorld()->SpawnActor(ManagerClass);
-	PawnCamera = GetWorld()->SpawnActor<APawnIsometric>(PawnClass);
-	MapCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(CharacterClass, characterLocation, FRotator());
-
-	// Possess pawn.
-	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
-	pc->Possess(PawnCamera);
-
-	// Configure mouse input.
-	FInputModeGameAndUI inputMode;
-	inputMode.SetHideCursorDuringCapture(false);
-	pc->bShowMouseCursor = true;
-	pc->bEnableClickEvents = true;
-	pc->SetInputMode(inputMode);
+	ChapterManager = GetWorld()->SpawnActor<AVNChapterGamemode>(ChapterData.ManagerClass);
+	ChapterManager->Enable();
 
 	Connection = 0;
 
-	CurrentChapterName = ChapterName;
-	CurrentChapterLevel = ChapterLevel;
+	CurrentChapterName = FName(ChapterData.Title);
+	CurrentChapterLevel = ChapterData.Level;
 	LastMinigameGuid.Invalidate();
 	return true;
 }
 
 void UVNChapterSubsystem::CloseChapter()
 {
-	MapCharacter->Destroy();
-	MapCharacter = 0;
-
-	PawnCamera->Destroy();
-	PawnCamera = 0;
-
-	ManagerActor->Destroy();
-	ManagerActor = 0;
+	ChapterManager->Destroy();
+	ChapterManager = 0;
 
 	CurrentChapterName = NAME_None;
 	CurrentChapterLevel.Reset();
@@ -78,7 +55,7 @@ void UVNChapterSubsystem::CloseChapter()
 
 bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
 {
-	PawnCamera->SetCursorActive(false);
+	ChapterManager->Disable();
 
 	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameGameMode>(ManagerClass);
 	MinigamePawn = GetWorld()->SpawnActor<APawn>(PawnClass);
@@ -93,11 +70,6 @@ bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> 
 
 void UVNChapterSubsystem::ExitMinigame(const UObject* WorldContextObject)
 {
-	PawnCamera->SetCursorActive(true);
-
-	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
-	pc->Possess(PawnCamera);
-
 	MinigameManager->Destroy();
 	MinigameManager = 0;
 
@@ -105,6 +77,8 @@ void UVNChapterSubsystem::ExitMinigame(const UObject* WorldContextObject)
 		MinigamePawn->Destroy();
 		MinigamePawn = 0;
 	}
+
+	ChapterManager->Enable();
 }
 
 
@@ -141,7 +115,18 @@ void UVNChapterSubsystem::GetConnectionData(
 void UVNChapterSubsystem::OnLevelLoadingDone()
 {
 	USceneTransitionSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<USceneTransitionSubsystem>();
+
+	// If loading back into our current chapter level (likely after completing a minigame).
 	if (subsys->CurrentLevel == CurrentChapterLevel) {
-		MapCharacter->Enable();
+		ChapterManager->Enable();
+	}
+	// If loading the chapter level in (from chapter selection).
+	else if (subsys->CurrentLevel == ScheduledChapter.Level) {
+		OpenChapter(ScheduledChapter);
+
+		// Hide cursor initially when spawning in.
+		if (GetPawn()) {
+			GetPawn()->SetCursorHidden(true);
+		}
 	}
 }
