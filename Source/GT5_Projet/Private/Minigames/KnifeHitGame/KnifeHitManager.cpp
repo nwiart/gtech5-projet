@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Minigames/KnifeHitGame/KnifeHitGameMode.h"
+#include "Minigames/KnifeHitGame/KnifeHitManager.h"
 #include "Minigames/KnifeHitGame/MatchProjectile.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -10,7 +10,7 @@
 #include "Blueprint/UserWidget.h"
 
 
-AKnifeHitGameMode::AKnifeHitGameMode() {
+AKnifeHitManager::AKnifeHitManager() {
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerControllerClass = AKnifeHitPlayerController::StaticClass();
 
@@ -29,7 +29,7 @@ AKnifeHitGameMode::AKnifeHitGameMode() {
 		TEXT("Throw all matches at the rotating target without hitting other matches!"));
 }
 
-void AKnifeHitGameMode::BeginPlay() {
+void AKnifeHitManager::BeginPlay() {
 	Super::BeginPlay();
 
 	RemainingMatches = TotalMatches;
@@ -50,7 +50,7 @@ void AKnifeHitGameMode::BeginPlay() {
 	SpawnReadyMatch();
 }
 
-void AKnifeHitGameMode::Tick(float DeltaTime) {
+void AKnifeHitManager::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	if (bGameActive)
@@ -82,7 +82,7 @@ void AKnifeHitGameMode::Tick(float DeltaTime) {
 	}
 }
 
-void AKnifeHitGameMode::LaunchMatch() {
+void AKnifeHitManager::LaunchMatch() {
 	// Prevent launching if match already in flight
 	if (FlyingMatch)
 	{
@@ -101,7 +101,7 @@ void AKnifeHitGameMode::LaunchMatch() {
 	ReadyMatch = nullptr;
 }
 
-void AKnifeHitGameMode::SpawnReadyMatch() {
+void AKnifeHitManager::SpawnReadyMatch() {
 	if (!MatchClass || !CurrentTarget) return;
 
 	FVector TargetLocation = CurrentTarget->GetActorLocation();
@@ -119,7 +119,7 @@ void AKnifeHitGameMode::SpawnReadyMatch() {
 	}
 }
 
-void AKnifeHitGameMode::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, AMatchProjectile* Match) {
+void AKnifeHitManager::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, AMatchProjectile* Match) {
 	if (!bStillBurning) {
 		OnMatchCollision();
 		return;
@@ -151,7 +151,7 @@ void AKnifeHitGameMode::OnMatchHit(bool bHitCriticalPoint, bool bStillBurning, A
 	}
 }
 
-void AKnifeHitGameMode::OnMatchCollision() {
+void AKnifeHitManager::OnMatchCollision() {
 	bGameActive = false;
 
 	for (AMatchProjectile* Match : StuckMatches) {
@@ -166,11 +166,11 @@ void AKnifeHitGameMode::OnMatchCollision() {
 	OnMinigameComplete(false);
 }
 
-void AKnifeHitGameMode::RestartGame() {
+void AKnifeHitManager::RestartGame() {
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
 
-void AKnifeHitGameMode::CalculateFinalScore() {
+void AKnifeHitManager::CalculateFinalScore() {
 	bGameActive = false;
 
 	// Calculate connection score delta
@@ -195,7 +195,7 @@ void AKnifeHitGameMode::CalculateFinalScore() {
 	OnMinigameComplete(bSuccess);
 }
 
-void AKnifeHitGameMode::CheckTargetComplete() {
+void AKnifeHitManager::CheckTargetComplete() {
 	int32 MatchesStuckSuccessfully = TotalMatches - RemainingMatches;
 
 	if (MatchesStuckSuccessfully == TotalMatches) {
@@ -203,7 +203,7 @@ void AKnifeHitGameMode::CheckTargetComplete() {
 	}
 }
 
-void AKnifeHitGameMode::OnTargetComplete() {
+void AKnifeHitManager::OnTargetComplete() {
 	if (CurrentTarget) {
 		for (AMatchProjectile* Match : StuckMatches) {
 			if (Match) {
@@ -219,7 +219,7 @@ void AKnifeHitGameMode::OnTargetComplete() {
 	}
 }
 
-FMinigameResult AKnifeHitGameMode::BuildMinigameResult_Implementation(bool bSuccess) {
+FMinigameResult AKnifeHitManager::BuildMinigameResult_Implementation(bool bSuccess) {
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;
 	Result.MinigameName = MinigameName;
@@ -247,7 +247,7 @@ FMinigameResult AKnifeHitGameMode::BuildMinigameResult_Implementation(bool bSucc
 	return Result;
 }
 
-void AKnifeHitGameMode::OnFireTimerExpired() {
+void AKnifeHitManager::OnFireTimerExpired() {
 	bGameActive = false;
 
 	if (ReadyMatch)
@@ -266,7 +266,7 @@ void AKnifeHitGameMode::OnFireTimerExpired() {
 	OnMinigameComplete(false);
 }
 
-float AKnifeHitGameMode::CalculateTimeBonusForThrow() const {
+float AKnifeHitManager::CalculateTimeBonusForThrow() const {
 	float Progress = TotalMatches > 0 ? static_cast<float>(TotalMatches - RemainingMatches) / static_cast<float>(TotalMatches) : 1.0f;
 
 	float TimeBonus = FMath::Lerp(MaxBonusTime, MinBonusTime, Progress);

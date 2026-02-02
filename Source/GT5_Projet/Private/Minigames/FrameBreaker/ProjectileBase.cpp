@@ -2,7 +2,7 @@
 
 #include "Minigames/FrameBreaker/ProjectileBase.h"
 #include "Minigames/FrameBreaker/PictureFrame.h"
-#include "Minigames/FrameBreaker/FrameBreakerGameMode.h"
+#include "Minigames/FrameBreaker/FrameBreakerManager.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -141,7 +141,7 @@ void AProjectileBase::HandleFrameHit(APictureFrame* Frame, const FHitResult& Hit
 
 	// 7. Notify GameMode
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
+	AFrameBreakerManager* GameMode = Cast<AFrameBreakerManager>(subsys->MinigameManager);
 	if (GameMode)
 	{
 		GameMode->OnFrameDestroyed(Frame);

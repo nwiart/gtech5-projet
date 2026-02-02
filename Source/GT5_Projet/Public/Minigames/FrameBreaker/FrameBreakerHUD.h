@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "FrameBreakerHUD.generated.h"
 
-class AFrameBreakerGameMode;
+class AFrameBreakerManager;
 
 /**
  * HUD Widget for Frame Breaker Minigame
@@ -24,7 +24,7 @@ public:
 protected:
 	// Reference to game mode (cached for performance)
 	UPROPERTY(BlueprintReadOnly, Category = "Frame Breaker")
-	AFrameBreakerGameMode* GameMode;
+	AFrameBreakerManager* GameMode;
 
 	// Data binding functions (callable from Blueprint)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Frame Breaker|HUD")

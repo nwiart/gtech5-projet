@@ -1,18 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Core/VNChapterGamemode.h"
+#include "Core/VNChapterManager.h"
 
 #include "Kismet/GameplayStatics.h"
 
 #include "Libraries/VNTileMapLibrary.h"
 
 
-AVNChapterGamemode::AVNChapterGamemode()
+AVNChapterManager::AVNChapterManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AVNChapterGamemode::BeginPlay()
+void AVNChapterManager::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -38,7 +38,7 @@ void AVNChapterGamemode::BeginPlay()
 	}
 }
 
-void AVNChapterGamemode::EndPlay(EEndPlayReason::Type Reason)
+void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
 {
 	if (MapCharacter) {
 		MapCharacter->Destroy();
@@ -52,7 +52,7 @@ void AVNChapterGamemode::EndPlay(EEndPlayReason::Type Reason)
 }
 
 
-void AVNChapterGamemode::Enable()
+void AVNChapterManager::Enable()
 {
 	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
 
@@ -76,7 +76,7 @@ void AVNChapterGamemode::Enable()
 	pc->SetInputMode(inputMode);
 }
 
-void AVNChapterGamemode::Disable()
+void AVNChapterManager::Disable()
 {
 	if (PawnCamera) {
 		PawnCamera->SetCursorActive(false);

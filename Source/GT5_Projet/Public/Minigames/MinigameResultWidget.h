@@ -36,5 +36,5 @@ protected:
 	FMinigameResult MinigameResult;
 
 	UPROPERTY()
-	class ABaseMinigameGameMode* CachedGameMode;
+	class ABaseMinigameManager* CachedGameMode;
 };

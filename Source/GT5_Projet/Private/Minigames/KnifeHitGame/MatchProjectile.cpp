@@ -5,7 +5,7 @@
 
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Minigames/KnifeHitGame/KnifeHitGameMode.h"
+#include "Minigames/KnifeHitGame/KnifeHitManager.h"
 #include "Minigames/KnifeHitGame/RotatingTarget.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -52,7 +52,7 @@ void AMatchProjectile::BeginPlay()
 
 	CollisionComp->OnComponentHit.AddDynamic(this, &AMatchProjectile::OnHit);
 
-	GameModeRef = Cast<AKnifeHitGameMode>(UGameplayStatics::GetGameMode(this));
+	GameModeRef = Cast<AKnifeHitManager>(UGameplayStatics::GetGameMode(this));
 }
 
 void AMatchProjectile::Tick(float DeltaTime) {

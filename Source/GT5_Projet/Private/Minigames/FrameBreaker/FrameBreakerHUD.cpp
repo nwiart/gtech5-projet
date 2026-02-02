@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Minigames/FrameBreaker/FrameBreakerHUD.h"
-#include "Minigames/FrameBreaker/FrameBreakerGameMode.h"
+#include "Minigames/FrameBreaker/FrameBreakerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystems/VNChapterSubsystem.h"
 
@@ -11,7 +11,7 @@ void UFrameBreakerHUD::NativeConstruct()
 
 	// Cache reference to game mode
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-	GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
+	GameMode = Cast<AFrameBreakerManager>(subsys->MinigameManager);
 
 	if (!GameMode)
 	{

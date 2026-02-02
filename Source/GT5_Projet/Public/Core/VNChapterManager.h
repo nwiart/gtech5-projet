@@ -8,19 +8,19 @@
 #include "Map/VNMapCharacter.h"
 #include "Core/PawnIsometric.h"
 
-#include "VNChapterGamemode.generated.h"
+#include "VNChapterManager.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GT5_PROJET_API AVNChapterGamemode : public AVNGamemode
+class GT5_PROJET_API AVNChapterManager : public AVNGamemode
 {
 	GENERATED_BODY()
 
 public:
 
-	AVNChapterGamemode();
+	AVNChapterManager();
 
 	virtual void BeginPlay() override;
 

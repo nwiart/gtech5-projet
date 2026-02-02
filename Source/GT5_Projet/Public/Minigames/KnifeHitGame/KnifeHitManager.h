@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Minigames/BaseMinigameGameMode.h"
-#include "KnifeHitGameMode.generated.h"
+#include "Minigames/BaseMinigameManager.h"
+#include "KnifeHitManager.generated.h"
 
 /**
  * Knife Hit minigame - throw matches at a rotating target
  */
 UCLASS()
-class GT5_PROJET_API AKnifeHitGameMode : public ABaseMinigameGameMode
+class GT5_PROJET_API AKnifeHitManager : public ABaseMinigameManager
 {
 	GENERATED_BODY()
 
 public:
-	AKnifeHitGameMode();
+	AKnifeHitManager();
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

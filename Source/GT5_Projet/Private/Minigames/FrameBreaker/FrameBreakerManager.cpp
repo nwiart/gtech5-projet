@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Minigames/FrameBreaker/FrameBreakerGameMode.h"
+#include "Minigames/FrameBreaker/FrameBreakerManager.h"
 #include "Minigames/FrameBreaker/FrameBreakerCharacter.h"
 #include "Minigames/FrameBreaker/PictureFrame.h"
 #include "Minigames/FrameBreaker/FrameRotationComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-AFrameBreakerGameMode::AFrameBreakerGameMode()
+AFrameBreakerManager::AFrameBreakerManager()
 {
 	// Set default pawn class to Frame Breaker Character
 	DefaultPawnClass = AFrameBreakerCharacter::StaticClass();
@@ -17,7 +17,7 @@ AFrameBreakerGameMode::AFrameBreakerGameMode()
 	bIsMinigameActive = true;
 }
 
-void AFrameBreakerGameMode::BeginPlay()
+void AFrameBreakerManager::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -45,14 +45,14 @@ void AFrameBreakerGameMode::BeginPlay()
 	LoadLevel(CurrentLevelIndex);
 }
 
-void AFrameBreakerGameMode::EndPlay(const EEndPlayReason::Type reason)
+void AFrameBreakerManager::EndPlay(const EEndPlayReason::Type reason)
 {
 	ClearAllFrames();
 
 	Super::EndPlay(reason);
 }
 
-void AFrameBreakerGameMode::InitializeDefaultLevels()
+void AFrameBreakerManager::InitializeDefaultLevels()
 {
 	// If no levels configured, create default level
 	if (LevelConfigs.Num() == 0)
@@ -71,7 +71,7 @@ void AFrameBreakerGameMode::InitializeDefaultLevels()
 	}
 }
 
-void AFrameBreakerGameMode::LoadLevel(int32 LevelIndex)
+void AFrameBreakerManager::LoadLevel(int32 LevelIndex)
 {
 	// Validate level index
 	if (LevelIndex < 0 || LevelIndex >= LevelConfigs.Num())
@@ -105,7 +105,7 @@ void AFrameBreakerGameMode::LoadLevel(int32 LevelIndex)
 	SetDifficulty(Config.DifficultyLevel);
 }
 
-void AFrameBreakerGameMode::StartNextLevel()
+void AFrameBreakerManager::StartNextLevel()
 {
 	int32 NextLevel = CurrentLevelIndex + 1;
 
@@ -118,12 +118,12 @@ void AFrameBreakerGameMode::StartNextLevel()
 	LoadLevel(NextLevel);
 }
 
-void AFrameBreakerGameMode::RestartCurrentLevel()
+void AFrameBreakerManager::RestartCurrentLevel()
 {
 	LoadLevel(CurrentLevelIndex);
 }
 
-FFrameBreakerLevelConfig AFrameBreakerGameMode::GetCurrentLevelConfig() const
+FFrameBreakerLevelConfig AFrameBreakerManager::GetCurrentLevelConfig() const
 {
 	if (CurrentLevelIndex >= 0 && CurrentLevelIndex < LevelConfigs.Num())
 	{
@@ -134,7 +134,7 @@ FFrameBreakerLevelConfig AFrameBreakerGameMode::GetCurrentLevelConfig() const
 	return FFrameBreakerLevelConfig();
 }
 
-void AFrameBreakerGameMode::SpawnFramesInCylinder()
+void AFrameBreakerManager::SpawnFramesInCylinder()
 {
 	if (!FrameClass)
 	{
@@ -184,7 +184,7 @@ void AFrameBreakerGameMode::SpawnFramesInCylinder()
 	UE_LOG(LogTemp, Log, TEXT("FrameBreakerGameMode: Spawned %d frames in cylinder"), Frames.Num());
 }
 
-void AFrameBreakerGameMode::ClearAllFrames()
+void AFrameBreakerManager::ClearAllFrames()
 {
 	// Destroy all existing frames
 	for (APictureFrame* Frame : Frames)
@@ -199,7 +199,7 @@ void AFrameBreakerGameMode::ClearAllFrames()
 	UE_LOG(LogTemp, Log, TEXT("FrameBreakerGameMode: Cleared all frames"));
 }
 
-void AFrameBreakerGameMode::OnFrameDestroyed(APictureFrame* Frame)
+void AFrameBreakerManager::OnFrameDestroyed(APictureFrame* Frame)
 {
 	if (!Frame)
 		return;
@@ -221,7 +221,7 @@ void AFrameBreakerGameMode::OnFrameDestroyed(APictureFrame* Frame)
 	}
 }
 
-void AFrameBreakerGameMode::SetDifficulty(int32 Level)
+void AFrameBreakerManager::SetDifficulty(int32 Level)
 {
 	if (Frames.Num() == 0)
 	{
@@ -284,7 +284,7 @@ void AFrameBreakerGameMode::SetDifficulty(int32 Level)
 	UE_LOG(LogTemp, Log, TEXT("FrameBreakerGameMode: Set difficulty to level %d with speed %.1f"), Level, RotationSpeed);
 }
 
-void AFrameBreakerGameMode::OnKnifeThrown()
+void AFrameBreakerManager::OnKnifeThrown()
 {
 	if (!bIsMinigameActive)
 		return;
@@ -301,26 +301,26 @@ void AFrameBreakerGameMode::OnKnifeThrown()
 	}
 }
 
-bool AFrameBreakerGameMode::HasKnivesRemaining() const
+bool AFrameBreakerManager::HasKnivesRemaining() const
 {
 	return KnivesRemaining > 0;
 }
 
-void AFrameBreakerGameMode::OnGameLost()
+void AFrameBreakerManager::OnGameLost()
 {
 	UE_LOG(LogTemp, Log, TEXT("Frame Breaker: DEFEAT! Ran out of knives"));
 
 	OnMinigameComplete(false);
 }
 
-void AFrameBreakerGameMode::OnGameWon()
+void AFrameBreakerManager::OnGameWon()
 {
 	UE_LOG(LogTemp, Log, TEXT("Frame Breaker: VICTORY!"));
 
 	OnMinigameComplete(true);
 }
 
-FMinigameResult AFrameBreakerGameMode::BuildMinigameResult_Implementation(bool bSuccess)
+FMinigameResult AFrameBreakerManager::BuildMinigameResult_Implementation(bool bSuccess)
 {
 	FMinigameResult Result;
 	Result.bSuccess = bSuccess;

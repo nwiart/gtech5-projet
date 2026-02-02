@@ -7,8 +7,8 @@
 
 #include "Map/VNMapCharacter.h"
 #include "Core/PawnIsometric.h"
-#include "Core/VNChapterGamemode.h"
-#include "Minigames/BaseMinigameGameMode.h"
+#include "Core/VNChapterManager.h"
+#include "Minigames/BaseMinigameManager.h"
 
 #include "Data/ChapterData.h"
 
@@ -48,7 +48,7 @@ public:
 	void CloseChapter();
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
-	bool InitializeMinigame(TSubclassOf<ABaseMinigameGameMode> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject);
+	bool InitializeMinigame(TSubclassOf<ABaseMinigameManager> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContextObject"))
 	void ExitMinigame(const UObject* WorldContextObject);
@@ -68,7 +68,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	AVNChapterGamemode* GetChapterManager() const { return ChapterManager; }
+	AVNChapterManager* GetChapterManager() const { return ChapterManager; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AVNMapCharacter* GetMapCharacter() const { return ChapterManager ? ChapterManager->GetMapCharacter() : 0; }
@@ -96,14 +96,14 @@ public:
 
 
 	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
-	AVNChapterGamemode* ChapterManager;
+	AVNChapterManager* ChapterManager;
 
 
 	UPROPERTY(BlueprintReadOnly, Category="Minigame Runtime")
 	APawn* MinigamePawn;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Minigame Runtime")
-	ABaseMinigameGameMode* MinigameManager;
+	ABaseMinigameManager* MinigameManager;
 
 
 	// Called whenever the player connection changed

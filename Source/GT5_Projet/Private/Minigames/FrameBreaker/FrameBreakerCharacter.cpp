@@ -2,7 +2,7 @@
 
 #include "Minigames/FrameBreaker/FrameBreakerCharacter.h"
 #include "Minigames/FrameBreaker/ProjectileBase.h"
-#include "Minigames/FrameBreaker/FrameBreakerGameMode.h"
+#include "Minigames/FrameBreaker/FrameBreakerManager.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -152,7 +152,7 @@ void AFrameBreakerCharacter::SpawnProjectile()
 
 	// Notify game mode that a knife is being thrown
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
+	AFrameBreakerManager* GameMode = Cast<AFrameBreakerManager>(subsys->MinigameManager);
 	if (GameMode)
 	{
 		GameMode->OnKnifeThrown();
@@ -205,7 +205,7 @@ bool AFrameBreakerCharacter::CanThrow() const
 
 	// Check if game mode has knives remaining
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-	AFrameBreakerGameMode* GameMode = Cast<AFrameBreakerGameMode>(subsys->MinigameManager);
+	AFrameBreakerManager* GameMode = Cast<AFrameBreakerManager>(subsys->MinigameManager);
 	if (GameMode)
 	{
 		return GameMode->HasKnivesRemaining();

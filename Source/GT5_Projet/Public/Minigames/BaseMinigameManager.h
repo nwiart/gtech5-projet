@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Data/MinigameData.h"
-#include "BaseMinigameGameMode.generated.h"
+#include "BaseMinigameManager.generated.h"
 
 class UUserWidget;
 
@@ -14,12 +14,12 @@ class UUserWidget;
  * and standardized result handling
  */
 UCLASS(Abstract)
-class GT5_PROJET_API ABaseMinigameGameMode : public AGameModeBase
+class GT5_PROJET_API ABaseMinigameManager : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	ABaseMinigameGameMode();
+	ABaseMinigameManager();
 
 	void Initialize();
 
