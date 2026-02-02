@@ -79,13 +79,16 @@ void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 FVector APawnIsometric::ViewportToWorld(double viewportX, double viewportY) const
 {
+	FVector2D viewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
 	const double halfHeight = Camera->OrthoWidth * 0.5;
+	const double aspectRatio = viewportSize.X / viewportSize.Y;
+
 	FVector off =
-		viewportX * halfHeight * Camera->AspectRatio * Camera->GetRightVector() +
+		viewportX * halfHeight * aspectRatio * Camera->GetRightVector() +
 		viewportY * halfHeight * Camera->GetUpVector();
 
+	// Project point onto Z = 0 plane (ground level).
 	double t = -(off.Z - GetActorLocation().Z) / cameraForwardVector.Z;
-
 	return GetActorLocation() + off + t * cameraForwardVector;
 }
 
