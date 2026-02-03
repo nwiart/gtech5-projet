@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Minigames/BaseMinigameGameMode.h"
+#include "Minigames/BaseMinigameManager.h"
 #include "TileWidget.h"
 #include "MatchingTileGameManager.generated.h"
 
 UCLASS()
-class GT5_PROJET_API AMatchingTileGameManager : public ABaseMinigameGameMode
+class GT5_PROJET_API AMatchingTileGameManager : public ABaseMinigameManager
 {
 	GENERATED_BODY()
 	

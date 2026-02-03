@@ -46,6 +46,6 @@ protected:
 	class UUserWidget* HUDWidget;
 
 private:
-	class AKnifeHitGameMode* GameModeRef;
+	class AKnifeHitManager* GameModeRef;
 
 };

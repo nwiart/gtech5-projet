@@ -67,6 +67,5 @@ private:
 	bool bHasStuck;
     
 	class ARotatingTarget* TargetRef;
-	class AKnifeHitGameMode* GameModeRef;
-
+	class AKnifeHitManager* GameModeRef;
 };

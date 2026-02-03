@@ -29,18 +29,12 @@ public:
 	
 	// Button actions
 	UFUNCTION(BlueprintCallable, Category = "Minigame Result")
-	void OnContinuePressed();
-
-	UFUNCTION(BlueprintCallable, Category = "Minigame Result")
 	void OnRetryPressed();
-
-	UFUNCTION(BlueprintCallable, Category = "Minigame Result")
-	void OnReturnToMainGamePressed();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Minigame Result")
 	FMinigameResult MinigameResult;
 
 	UPROPERTY()
-	class ABaseMinigameGameMode* CachedGameMode;
+	class ABaseMinigameManager* CachedGameMode;
 };

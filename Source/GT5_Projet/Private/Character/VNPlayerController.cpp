@@ -3,10 +3,10 @@
 
 #include "Character/VNPlayerController.h"
 
-#include "Character/MapCharacter.h"
+#include "Map/VNMapCharacter.h"
 
 #include "Core/VNGameInstance.h"
-#include "Systems/VNTileMapLibrary.h"
+#include "Libraries/VNTileMapLibrary.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -30,5 +30,5 @@ void AVNPlayerController::BeginPlay()
 
 	FTransform transform;
 	transform.SetLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(spawn) + FVector(0, 0, 60.0));
-	PlayerCharacter = GetWorld()->SpawnActor<AMapCharacter>(PlayerCharacterClass, transform);
+	PlayerCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(PlayerCharacterClass, transform);
 }

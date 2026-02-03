@@ -26,6 +26,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Loading Events")
 	FOnLoadingProgress OnLoadingProgressUpdated; // Progress %
 
+	UPROPERTY(BlueprintReadOnly)
+	TSoftObjectPtr<UWorld> CurrentLevel;
+
 	// --- Main Function ---
 
 	/**
