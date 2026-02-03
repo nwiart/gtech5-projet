@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "MinigameData.generated.h"
 
+class ABaseMinigameManager;
+
 /**
  * Result data structure for minigames
  * Contains all information needed to display results and update main game state
@@ -59,4 +61,25 @@ struct FMinigameObjective
 		, bIsCompleted(false)
 		, bIsOptional(false)
 	{}
+};
+
+/**
+ * 
+ */
+USTRUCT(BlueprintType)
+struct FMinigameData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FName Name;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString Description;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSoftObjectPtr<UWorld> Level;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<ABaseMinigameManager> ManagerClass;
 };

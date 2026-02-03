@@ -1,14 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Minigames/MinigameResultWidget.h"
-#include "Minigames/BaseMinigameGameMode.h"
+#include "Minigames/BaseMinigameManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/VNChapterSubsystem.h"
 
 void UMinigameResultWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	CachedGameMode = Cast<ABaseMinigameGameMode>(UGameplayStatics::GetGameMode(this));
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	CachedGameMode = Cast<ABaseMinigameManager>(subsys->MinigameManager);
 	if (CachedGameMode)
 	{
 		InitializeWithResult(CachedGameMode->CurrentResult);
@@ -23,33 +25,11 @@ void UMinigameResultWidget::InitializeWithResult_Implementation(const FMinigameR
 		*Result.MinigameName, Result.bSuccess ? TEXT("Yes") : TEXT("No"));
 }
 
-void UMinigameResultWidget::OnContinuePressed()
-{
-	if (CachedGameMode)
-	{
-		CachedGameMode->ReturnToMainGame();
-	}
-
-	// Remove this widget from viewport
-	RemoveFromParent();
-}
-
 void UMinigameResultWidget::OnRetryPressed()
 {
 	if (CachedGameMode)
 	{
 		CachedGameMode->RestartMinigame();
-	}
-
-	// Remove this widget from viewport
-	RemoveFromParent();
-}
-
-void UMinigameResultWidget::OnReturnToMainGamePressed()
-{
-	if (CachedGameMode)
-	{
-		CachedGameMode->ReturnToMainGame();
 	}
 
 	// Remove this widget from viewport

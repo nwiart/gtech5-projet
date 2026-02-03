@@ -6,8 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "VNPlayerController.generated.h"
 
-
-class AMapCharacter;
+class AVNMapCharacter;
 
 /**
  * 
@@ -30,8 +29,8 @@ public:
 	// The character we control on the map.
 	// Not to be mistaken with the Unreal pawn!! The pawn is the isometric camera.
 	UPROPERTY(BlueprintReadOnly)
-	AMapCharacter* PlayerCharacter;
+	AVNMapCharacter* PlayerCharacter;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	TSubclassOf<AMapCharacter> PlayerCharacterClass;
+	TSubclassOf<AVNMapCharacter> PlayerCharacterClass;
 };

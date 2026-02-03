@@ -22,6 +22,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type reason) override;
+
 	void Input_PanCameraX(float w);
 	void Input_PanCameraY(float w);
 	void Input_ZoomCamera(float w);
@@ -50,6 +52,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetCursorActive(bool bActive);
 
+	UFUNCTION(BlueprintCallable)
+	void SetCursorHidden(bool bCursorHidden);
+
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
 	UCameraComponent* Camera;
@@ -74,4 +79,6 @@ private:
 	FVector cameraForwardVector;
 
 	FIntPoint cursorPosition;
+
+	bool bIsCursorActive;
 };

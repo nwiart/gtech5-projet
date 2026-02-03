@@ -5,7 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Minigames/KnifeHitGame/KnifeHitGameMode.h"
+#include "Minigames/KnifeHitGame/KnifeHitManager.h"
 #include "Blueprint/UserWidget.h"
 
 AKnifeHitPlayerController::AKnifeHitPlayerController()
@@ -28,7 +28,7 @@ void AKnifeHitPlayerController::BeginPlay()
 		}
 	}
 
-	GameModeRef = Cast<AKnifeHitGameMode>(UGameplayStatics::GetGameMode(this));
+	GameModeRef = Cast<AKnifeHitManager>(UGameplayStatics::GetGameMode(this));
 
 	// Create and display HUD widget
 	if (HUDWidgetClass)
@@ -69,7 +69,7 @@ void AKnifeHitPlayerController::SetupInputComponent() {
 void AKnifeHitPlayerController::OnLaunchMatch() {
 	if (!GameModeRef)
 	{
-		GameModeRef = Cast<AKnifeHitGameMode>(UGameplayStatics::GetGameMode(this));
+		GameModeRef = Cast<AKnifeHitManager>(UGameplayStatics::GetGameMode(this));
 	}
 
 	if (GameModeRef)
