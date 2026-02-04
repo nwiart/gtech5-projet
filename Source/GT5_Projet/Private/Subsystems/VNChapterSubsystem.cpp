@@ -33,14 +33,15 @@ bool UVNChapterSubsystem::OpenChapter(const FChapterData& ChapterData)
 		return false;
 	}
 
+	CurrentChapterName = FName(ChapterData.Title);
+	CurrentChapterLevel = ChapterData.Level;
+	LastMinigameGuid.Invalidate();
+
 	ChapterManager = GetWorld()->SpawnActor<AVNChapterManager>(ChapterData.ManagerClass);
 	ChapterManager->Enable();
 
 	Connection = 0;
 
-	CurrentChapterName = FName(ChapterData.Title);
-	CurrentChapterLevel = ChapterData.Level;
-	LastMinigameGuid.Invalidate();
 	return true;
 }
 
