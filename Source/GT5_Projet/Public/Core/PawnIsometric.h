@@ -11,6 +11,7 @@ class UCameraComponent;
 class AVNMapCharacter;
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoveCamera, FVector, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnZoomChanged, float, Value);
 
 
@@ -35,6 +36,8 @@ protected:
 	void Input_PanCameraY(float w);
 	void Input_ZoomCamera(float w);
 
+	void Input_PanCameraStart();
+	void Input_PanCameraStop();
 	void Input_SelectTile();
 
 
@@ -87,6 +90,9 @@ public:
 public:
 
 	UPROPERTY(BlueprintAssignable)
+	FOnMoveCamera OnMoveCamera;
+
+	UPROPERTY(BlueprintAssignable)
 	FOnZoomChanged OnZoomChanged;
 
 private:
@@ -100,4 +106,7 @@ private:
 	FIntPoint cursorPosition;
 
 	bool bIsCursorActive;
+
+	bool bIsPanning;
+	bool bIsCameraCentered;
 };

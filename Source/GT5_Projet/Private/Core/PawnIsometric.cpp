@@ -20,7 +20,7 @@
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0), bIsCursorActive(true), PlayerCharacter(0)
+	, cursorActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -62,7 +62,7 @@ void APawnIsometric::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (PlayerCharacter) {
+	if (PlayerCharacter && bIsCameraCentered) {
 		FVector pos = PlayerCharacter->GetActorLocation();
 		pos.Z = 0.0;
 		SetActorLocation(pos);
@@ -74,11 +74,13 @@ void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//PlayerInputComponent->BindAxis("PanCameraX", this, &APawnIsometric::Input_PanCameraX);
-	//PlayerInputComponent->BindAxis("PanCameraY", this, &APawnIsometric::Input_PanCameraY);
+	PlayerInputComponent->BindAxis("PanCameraX", this, &APawnIsometric::Input_PanCameraX);
+	PlayerInputComponent->BindAxis("PanCameraY", this, &APawnIsometric::Input_PanCameraY);
 	PlayerInputComponent->BindAxis("ZoomCamera", this, &APawnIsometric::Input_ZoomCamera);
 
 	PlayerInputComponent->BindAction("SelectTile", EInputEvent::IE_Released, this, &APawnIsometric::Input_SelectTile);
+	PlayerInputComponent->BindAction("PanCamera", EInputEvent::IE_Pressed, this, &APawnIsometric::Input_PanCameraStart);
+	PlayerInputComponent->BindAction("PanCamera", EInputEvent::IE_Released, this, &APawnIsometric::Input_PanCameraStop);
 }
 
 FVector APawnIsometric::ViewportToWorld(double viewportX, double viewportY) const
@@ -108,6 +110,8 @@ void APawnIsometric::SetZoomLevel(float Value)
 
 void APawnIsometric::RecenterViewOnPlayer()
 {
+	bIsCameraCentered = true;
+
 	AVNPlayerController* playerController = Cast<AVNPlayerController>(GetPlayerState()->GetPlayerController());
 	if (!playerController || !playerController->PlayerCharacter) {
 		UE_LOG(LogTemp, Error, TEXT("Couldn't recenter view on player (could not find playerController, or map character isn't spawned yet."));
@@ -139,20 +143,34 @@ void APawnIsometric::SetCursorHidden(bool bCursorHidden)
 
 void APawnIsometric::Input_PanCameraX(float w)
 {
+	if (!bIsPanning) return;
+
+	bIsCameraCentered = false;
+
+	w = -w;   // Invert direction.
 	const FVector off(-w, w, 0.0F);
 	float factor = Camera->OrthoWidth;
 	float speed = factor * CameraSpeed * UGameplayStatics::GetWorldDeltaSeconds(this);
 
 	AddActorWorldOffset(off * speed);
+
+	OnMoveCamera.Broadcast(off);
 }
 
 void APawnIsometric::Input_PanCameraY(float w)
 {
+	if (!bIsPanning) return;
+
+	bIsCameraCentered = false;
+
+	w = -w;   // Invert direction.
 	const FVector off(w, w, 0.0F);
 	float factor = Camera->OrthoWidth / -cameraForwardVector.Z;
 	float speed = factor * CameraSpeed * UGameplayStatics::GetWorldDeltaSeconds(this);
 
 	AddActorWorldOffset(off * speed);
+
+	OnMoveCamera.Broadcast(off);
 }
 
 void APawnIsometric::Input_ZoomCamera(float w)
@@ -163,6 +181,16 @@ void APawnIsometric::Input_ZoomCamera(float w)
 
 	float relativeValue = (Camera->OrthoWidth - CameraMinWidth) / (CameraMaxWidth - CameraMinWidth);
 	OnZoomChanged.Broadcast(relativeValue);
+}
+
+void APawnIsometric::Input_PanCameraStart()
+{
+	bIsPanning = true;
+}
+
+void APawnIsometric::Input_PanCameraStop()
+{
+	bIsPanning = false;
 }
 
 void APawnIsometric::Input_SelectTile()
