@@ -20,7 +20,7 @@
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0), bIsCursorActive(true)
+	, cursorActor(0), bIsCursorActive(true), PlayerCharacter(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -58,11 +58,15 @@ void APawnIsometric::EndPlay(const EEndPlayReason::Type reason)
 	Super::EndPlay(reason);
 }
 
-// Called every frame
 void APawnIsometric::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (PlayerCharacter) {
+		FVector pos = PlayerCharacter->GetActorLocation();
+		pos.Z = 0.0;
+		SetActorLocation(pos);
+	}
 }
 
 // Called to bind functionality to input
@@ -70,8 +74,8 @@ void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("PanCameraX", this, &APawnIsometric::Input_PanCameraX);
-	PlayerInputComponent->BindAxis("PanCameraY", this, &APawnIsometric::Input_PanCameraY);
+	//PlayerInputComponent->BindAxis("PanCameraX", this, &APawnIsometric::Input_PanCameraX);
+	//PlayerInputComponent->BindAxis("PanCameraY", this, &APawnIsometric::Input_PanCameraY);
 	PlayerInputComponent->BindAxis("ZoomCamera", this, &APawnIsometric::Input_ZoomCamera);
 
 	PlayerInputComponent->BindAction("SelectTile", EInputEvent::IE_Released, this, &APawnIsometric::Input_SelectTile);
@@ -95,6 +99,11 @@ FVector APawnIsometric::ViewportToWorld(double viewportX, double viewportY) cons
 FIntPoint APawnIsometric::GetPointedTile(double viewportX, double viewportY) const
 {
 	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(ViewportToWorld(viewportX, viewportY));
+}
+
+void APawnIsometric::SetZoomLevel(float Value)
+{
+	Camera->OrthoWidth = FMath::Lerp(CameraMinWidth, CameraMaxWidth, Value);
 }
 
 void APawnIsometric::RecenterViewOnPlayer()
@@ -151,6 +160,9 @@ void APawnIsometric::Input_ZoomCamera(float w)
 	w = 1.0F / (w * 0.1F + 1.0F);
 
 	Camera->OrthoWidth = FMath::Clamp(Camera->OrthoWidth * w, CameraMinWidth, CameraMaxWidth);
+
+	float relativeValue = (Camera->OrthoWidth - CameraMinWidth) / (CameraMaxWidth - CameraMinWidth);
+	OnZoomChanged.Broadcast(relativeValue);
 }
 
 void APawnIsometric::Input_SelectTile()

@@ -36,6 +36,10 @@ void AVNChapterManager::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Character Class was not specified. No map character will be spawned in."));
 		MapCharacter = 0;
 	}
+
+	if (PawnCamera) {
+		PawnCamera->PlayerCharacter = MapCharacter;
+	}
 }
 
 void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
@@ -52,7 +56,7 @@ void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
 }
 
 
-void AVNChapterManager::Enable()
+void AVNChapterManager::Enable_Implementation()
 {
 	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
 
@@ -76,7 +80,7 @@ void AVNChapterManager::Enable()
 	pc->SetInputMode(inputMode);
 }
 
-void AVNChapterManager::Disable()
+void AVNChapterManager::Disable_Implementation()
 {
 	if (PawnCamera) {
 		PawnCamera->SetCursorActive(false);

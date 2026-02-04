@@ -8,11 +8,18 @@
 
 class UCameraComponent;
 
+class AVNMapCharacter;
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnZoomChanged, float, Value);
+
 
 UCLASS()
 class GT5_PROJET_API APawnIsometric : public APawn
 {
 	GENERATED_BODY()
+
+	friend class AVNChapterManager;
 
 public:
 	// Sets default values for this pawn's properties
@@ -43,6 +50,11 @@ public:
 	// Gets the tile coordinate based on a cursor position in viewport space (-1; 1).
 	FIntPoint GetPointedTile(double viewportX, double viewportY) const;
 
+	// Programmatically set the zoom level.
+	// 0 is zoomed in, 1 is zoomed out.
+	UFUNCTION(BlueprintCallable)
+	void SetZoomLevel(float Value);
+
 	UFUNCTION(BlueprintCallable)
 	void RecenterViewOnPlayer();
 
@@ -72,7 +84,14 @@ public:
 	TSubclassOf<AActor> CursorClass;
 
 
+public:
+
+	UPROPERTY(BlueprintAssignable)
+	FOnZoomChanged OnZoomChanged;
+
 private:
+
+	AVNMapCharacter* PlayerCharacter;
 
 	AActor* cursorActor;
 
