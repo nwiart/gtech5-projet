@@ -13,6 +13,7 @@ class UBoxComponent;
  * 
  * This has no effect on map characters or events, and is only used to limit how far
  * the camera can travel.
+ * Preferably, the bounds should cover all reachable tiles to avoid camera issues.
  */
 UCLASS()
 class GT5_PROJET_API AVNMapBounds : public AActor
@@ -29,6 +30,7 @@ public:
 	// The returned point is transformed back into world space.
 	FVector ClampPoint(const FVector& WorldLocation) const;
 
+	// Get the corners of the view space rect, in world space.
 	void GetViewCorners(TInlineComponentArray<FVector, 4>& OutCorners) const;
 
 	// Get the bounding rectangle in view space (rotated -45 deg).

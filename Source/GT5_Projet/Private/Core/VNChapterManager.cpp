@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerStart.h"
 
 #include "Map/VNMapBounds.h"
+#include "Libraries/UtilsLibrary.h"
 #include "Libraries/VNTileMapLibrary.h"
 #include "Subsystems/VNChapterSubsystem.h"
 
@@ -60,19 +61,12 @@ void AVNChapterManager::Enable_Implementation()
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
 	ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
 
-	// Get map bounds actor.
-	TArray<AActor*> bounds = LevelStream->GetLoadedLevel()->Actors.FilterByPredicate([](const AActor* actor) {
-		return actor && actor->GetClass()->IsChildOf(AVNMapBounds::StaticClass());
-	});
-
 	// Place map character at spawn location.
 	// TODO : Hardcoded character height offset (60.0).
 	if (MapCharacter) {
 		FIntPoint playerSpawnPosition = FIntPoint::ZeroValue;
 
-		TArray<AActor*> starts = LevelStream->GetLoadedLevel()->Actors.FilterByPredicate([](const AActor* actor) {
-			return actor && actor->GetClass() == APlayerStart::StaticClass();
-		});
+		TArray<APlayerStart*> starts; UUtilsLibrary::GetActorsOfClassInStreamedLevel<APlayerStart>(starts, LevelStream, this);
 
 		if (starts.Num() >= 1) {
 			if (starts.Num() > 1) {
@@ -92,7 +86,10 @@ void AVNChapterManager::Enable_Implementation()
 	if (PawnCamera) {
 		pc->Possess(PawnCamera);
 
-		PawnCamera->MapBounds = bounds.IsEmpty() ? 0 : (AVNMapBounds*) bounds[0];
+		// Get map bounds actor.
+		TArray<AVNMapBounds*> bounds; UUtilsLibrary::GetActorsOfClassInStreamedLevel<AVNMapBounds>(bounds, LevelStream, this);
+
+		PawnCamera->MapBounds = bounds.IsEmpty() ? 0 : bounds[0];
 		PawnCamera->SetCursorActive(true);
 	}
 
