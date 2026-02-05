@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 
+class AVNMapBounds;
 class AVNMapCharacter;
 
 
@@ -97,6 +98,7 @@ public:
 
 private:
 
+	AVNMapBounds* MapBounds;
 	AVNMapCharacter* PlayerCharacter;
 
 	AActor* cursorActor;

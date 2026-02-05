@@ -15,15 +15,16 @@
 #include "Character/VNPlayerController.h"
 #include "Subsystems/VNChapterSubsystem.h"
 #include "Map/VNMapCharacter.h"
+#include "Map/VNMapBounds.h"
 
 
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0)
+	, cursorActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
 {
-	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickGroup = ETickingGroup::TG_PostPhysics;
 
 	const FRotator CameraRotation(-30.0F, 45.0F, 0.0F);
 	cameraForwardVector = UKismetMathLibrary::GetForwardVector(CameraRotation);
@@ -154,6 +155,10 @@ void APawnIsometric::Input_PanCameraX(float w)
 
 	AddActorWorldOffset(off * speed);
 
+	if (MapBounds) {
+		SetActorLocation(MapBounds->ClampPoint(GetActorLocation()));
+	}
+
 	OnMoveCamera.Broadcast(off);
 }
 
@@ -169,6 +174,10 @@ void APawnIsometric::Input_PanCameraY(float w)
 	float speed = factor * CameraSpeed * UGameplayStatics::GetWorldDeltaSeconds(this);
 
 	AddActorWorldOffset(off * speed);
+
+	if (MapBounds) {
+		SetActorLocation(MapBounds->ClampPoint(GetActorLocation()));
+	}
 
 	OnMoveCamera.Broadcast(off);
 }

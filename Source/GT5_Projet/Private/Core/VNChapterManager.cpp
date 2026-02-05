@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 
+#include "Map/VNMapBounds.h"
 #include "Libraries/VNTileMapLibrary.h"
 #include "Subsystems/VNChapterSubsystem.h"
 
@@ -56,14 +57,19 @@ void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
 void AVNChapterManager::Enable_Implementation()
 {
 	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
+
+	// Get map bounds actor.
+	TArray<AActor*> bounds = LevelStream->GetLoadedLevel()->Actors.FilterByPredicate([](const AActor* actor) {
+		return actor && actor->GetClass()->IsChildOf(AVNMapBounds::StaticClass());
+	});
 
 	// Place map character at spawn location.
 	// TODO : Hardcoded character height offset (60.0).
 	if (MapCharacter) {
 		FIntPoint playerSpawnPosition = FIntPoint::ZeroValue;
 
-		UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-		ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
 		TArray<AActor*> starts = LevelStream->GetLoadedLevel()->Actors.FilterByPredicate([](const AActor* actor) {
 			return actor && actor->GetClass() == APlayerStart::StaticClass();
 		});
@@ -86,6 +92,7 @@ void AVNChapterManager::Enable_Implementation()
 	if (PawnCamera) {
 		pc->Possess(PawnCamera);
 
+		PawnCamera->MapBounds = bounds.IsEmpty() ? 0 : (AVNMapBounds*) bounds[0];
 		PawnCamera->SetCursorActive(true);
 	}
 
