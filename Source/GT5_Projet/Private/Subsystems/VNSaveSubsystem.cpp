@@ -7,6 +7,9 @@
 #include "Core/VNGameInstance.h"
 
 
+/*static*/ const FString UVNSaveSubsystem::SLOT_NAME = "Slot";
+
+
 UVNSaveSubsystem::UVNSaveSubsystem()
 	: SaveGame(0)
 {
@@ -32,7 +35,12 @@ void UVNSaveSubsystem::Load(const UObject* WorldContextObject)
 		return;
 	}
 
-	SaveGame = (UVNSaveGame*)UGameplayStatics::LoadGameFromSlot("Slot", 0);
+	if (SaveGame != NULL) {
+		SaveGame->ConditionalBeginDestroy();
+	}
+
+	SaveGame = (UVNSaveGame*) UGameplayStatics::LoadGameFromSlot(SLOT_NAME, 0);
+
 	if (SaveGame == NULL || SaveGame->GetClass() != gameInstance->SaveGameClass) {
 		SaveGame = NewObject<UVNSaveGame>(this, gameInstance->SaveGameClass);
 	}
@@ -45,7 +53,21 @@ void UVNSaveSubsystem::Save()
 		return;
 	}
 
-	UGameplayStatics::SaveGameToSlot(SaveGame, "Slot", 0);
+	UGameplayStatics::SaveGameToSlot(SaveGame, SLOT_NAME, 0);
+}
+
+bool UVNSaveSubsystem::DeleteSave()
+{
+	bool res = UGameplayStatics::DeleteGameInSlot(SLOT_NAME, 0);
+	if (res && SaveGame != NULL) {
+		Load(this);
+	}
+	return res;
+}
+
+bool UVNSaveSubsystem::SaveExists() const
+{
+	return UGameplayStatics::DoesSaveGameExist(SLOT_NAME, 0);
 }
 
 const UClass* UVNSaveSubsystem::GetSaveGameClass() const

@@ -72,9 +72,11 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     // Always send a final 100% (useful if the last poll didn't hit).
     OnLoadingProgressUpdated.Broadcast(1.0f);
 
+    // Schedule the new level to be shown.
     const FName NewLevelName = PendingLevel.GetLongPackageFName();
     if (ULevelStreaming *LevelStream = UGameplayStatics::GetStreamingLevel(this, NewLevelName))
     {
+        LevelStream->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
         LevelStream->SetShouldBeVisible(true);
     }
 
@@ -87,7 +89,10 @@ void USceneTransitionSubsystem::OnLoadCompleted()
             UGameplayStatics::UnloadStreamLevel(this, LevelStream->PackageNameToLoad, LatentInfo, false);
         }
     }
+}
 
+void USceneTransitionSubsystem::OnLevelShown()
+{
     // Let the UI play its outro animation (fade out).
     OnLoadingFinished.Broadcast();
 
