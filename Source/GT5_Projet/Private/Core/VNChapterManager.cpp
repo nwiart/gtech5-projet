@@ -20,6 +20,7 @@ void AVNChapterManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Spawn camera pawn and map character (distinct actors!)
 	if (PawnCameraClass != NULL) {
 		PawnCamera = GetWorld()->SpawnActor<APawnIsometric>(PawnCameraClass);
 	}
@@ -39,6 +40,34 @@ void AVNChapterManager::BeginPlay()
 	if (PawnCamera) {
 		PawnCamera->PlayerCharacter = MapCharacter;
 	}
+
+	// Place map character at spawn location.
+	// TODO : Hardcoded character height offset (60.0).
+	if (MapCharacter) {
+		FIntPoint playerSpawnPosition = FIntPoint::ZeroValue;
+
+		UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+		ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
+
+		TArray<APlayerStart*> starts; UUtilsLibrary::GetActorsOfClassInStreamedLevel<APlayerStart>(starts, LevelStream, this);
+
+		if (starts.Num() >= 1) {
+			if (starts.Num() > 1) {
+				UE_LOG(LogTemp, Warning, TEXT("%d player starts found. An arbitrary one will be chosen."), starts.Num());
+			}
+
+			FVector pos = starts[0]->GetActorLocation();
+			playerSpawnPosition = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(pos);
+
+			UE_LOG(LogTemp, Warning, TEXT("Chose player start at world position (%lf, %lf)."), pos.X, pos.Y);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("No player starts found. Defaulting to (0, 0, 0)."));
+		}
+
+		FVector location = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(playerSpawnPosition) + FVector(0, 0, 60.0);
+		MapCharacter->SetActorLocation(location);
+	}
 }
 
 void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
@@ -54,33 +83,11 @@ void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
 	Super::EndPlay(Reason);
 }
 
-
 void AVNChapterManager::Enable_Implementation()
 {
 	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
 	ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
-
-	// Place map character at spawn location.
-	// TODO : Hardcoded character height offset (60.0).
-	if (MapCharacter) {
-		FIntPoint playerSpawnPosition = FIntPoint::ZeroValue;
-
-		TArray<APlayerStart*> starts; UUtilsLibrary::GetActorsOfClassInStreamedLevel<APlayerStart>(starts, LevelStream, this);
-
-		if (starts.Num() >= 1) {
-			if (starts.Num() > 1) {
-				UE_LOG(LogTemp, Warning, TEXT("%d player starts found. An arbitrary one will be chosen."), starts.Num());
-			}
-			playerSpawnPosition = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(starts[0]->GetActorLocation());
-		}
-		else {
-			UE_LOG(LogTemp, Warning, TEXT("No player starts found. Defaulting to (0, 0, 0)."));
-		}
-
-		FVector location = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(playerSpawnPosition) + FVector(0, 0, 60.0);
-		MapCharacter->SetActorLocation(location);
-	}
 
 	// Possess pawn.
 	if (PawnCamera) {
