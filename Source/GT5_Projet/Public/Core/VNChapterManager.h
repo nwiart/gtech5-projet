@@ -28,11 +28,13 @@ public:
 	virtual void EndPlay(EEndPlayReason::Type Reason) override;
 
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Enable();
+	virtual void Enable_Implementation();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Disable();
+	virtual void Disable_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void TriggerMinigame(const FMinigameData& Minigame);

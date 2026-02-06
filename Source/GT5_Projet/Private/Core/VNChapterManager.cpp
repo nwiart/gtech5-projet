@@ -5,6 +5,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 
+#include "Map/VNMapBounds.h"
+#include "Libraries/UtilsLibrary.h"
 #include "Libraries/VNTileMapLibrary.h"
 #include "Subsystems/VNChapterSubsystem.h"
 
@@ -35,6 +37,10 @@ void AVNChapterManager::BeginPlay()
 		MapCharacter = 0;
 	}
 
+	if (PawnCamera) {
+		PawnCamera->PlayerCharacter = MapCharacter;
+	}
+
 	// Place map character at spawn location.
 	// TODO : Hardcoded character height offset (60.0).
 	if (MapCharacter) {
@@ -42,9 +48,8 @@ void AVNChapterManager::BeginPlay()
 
 		UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
 		ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
-		TArray<AActor*> starts = LevelStream->GetLoadedLevel()->Actors.FilterByPredicate([](const AActor* actor) {
-			return actor && actor->GetClass() == APlayerStart::StaticClass();
-			});
+
+		TArray<APlayerStart*> starts; UUtilsLibrary::GetActorsOfClassInStreamedLevel<APlayerStart>(starts, LevelStream, this);
 
 		if (starts.Num() >= 1) {
 			if (starts.Num() > 1) {
@@ -78,15 +83,20 @@ void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
 	Super::EndPlay(Reason);
 }
 
-
-void AVNChapterManager::Enable()
+void AVNChapterManager::Enable_Implementation()
 {
 	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
 
 	// Possess pawn.
 	if (PawnCamera) {
 		pc->Possess(PawnCamera);
 
+		// Get map bounds actor.
+		TArray<AVNMapBounds*> bounds; UUtilsLibrary::GetActorsOfClassInStreamedLevel<AVNMapBounds>(bounds, LevelStream, this);
+
+		PawnCamera->MapBounds = bounds.IsEmpty() ? 0 : bounds[0];
 		PawnCamera->SetCursorActive(true);
 	}
 
@@ -103,7 +113,7 @@ void AVNChapterManager::Enable()
 	pc->SetInputMode(inputMode);
 }
 
-void AVNChapterManager::Disable()
+void AVNChapterManager::Disable_Implementation()
 {
 	if (PawnCamera) {
 		PawnCamera->SetCursorActive(false);
