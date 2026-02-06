@@ -3,8 +3,10 @@
 #include "Core/VNChapterManager.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerStart.h"
 
 #include "Libraries/VNTileMapLibrary.h"
+#include "Subsystems/VNChapterSubsystem.h"
 
 
 AVNChapterManager::AVNChapterManager()
@@ -16,11 +18,6 @@ void AVNChapterManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Place map character at spawn location.
-	// TODO : Hardcoded character height offset (60.0).
-	FIntPoint playerSpawnPosition = FIntPoint::ZeroValue;
-	FVector characterLocation = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(playerSpawnPosition) + FVector(0, 0, 60.0);
-
 	if (PawnCameraClass != NULL) {
 		PawnCamera = GetWorld()->SpawnActor<APawnIsometric>(PawnCameraClass);
 	}
@@ -30,7 +27,7 @@ void AVNChapterManager::BeginPlay()
 	}
 
 	if (CharacterClass != NULL) {
-		MapCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(CharacterClass, characterLocation, FRotator());
+		MapCharacter = GetWorld()->SpawnActor<AVNMapCharacter>(CharacterClass);
 	}
 	else {
 		UE_LOG(LogTemp, Error, TEXT("Character Class was not specified. No map character will be spawned in."));
@@ -55,6 +52,31 @@ void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
 void AVNChapterManager::Enable()
 {
 	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
+
+	// Place map character at spawn location.
+	// TODO : Hardcoded character height offset (60.0).
+	if (MapCharacter) {
+		FIntPoint playerSpawnPosition = FIntPoint::ZeroValue;
+
+		UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+		ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
+		TArray<AActor*> starts = LevelStream->GetLoadedLevel()->Actors.FilterByPredicate([](const AActor* actor) {
+			return actor && actor->GetClass() == APlayerStart::StaticClass();
+		});
+
+		if (starts.Num() >= 1) {
+			if (starts.Num() > 1) {
+				UE_LOG(LogTemp, Warning, TEXT("%d player starts found. An arbitrary one will be chosen."), starts.Num());
+			}
+			playerSpawnPosition = UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(starts[0]->GetActorLocation());
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("No player starts found. Defaulting to (0, 0, 0)."));
+		}
+
+		FVector location = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(playerSpawnPosition) + FVector(0, 0, 60.0);
+		MapCharacter->SetActorLocation(location);
+	}
 
 	// Possess pawn.
 	if (PawnCamera) {

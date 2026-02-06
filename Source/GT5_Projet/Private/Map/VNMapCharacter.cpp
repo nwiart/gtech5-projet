@@ -33,7 +33,7 @@ void AVNMapCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CharacterZOffset = GetActorLocation().Z;
+	CharacterZOffset = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	CurrentWorldPosition = GetActorLocation();
 	TargetWorldPosition = CurrentWorldPosition;
 	GetCharacterMovement()->Velocity = FVector::ZeroVector;
