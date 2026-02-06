@@ -32,6 +32,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Save();
 
+	UFUNCTION(BlueprintCallable)
+	bool DeleteSave();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool SaveExists() const;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	const UClass* GetSaveGameClass() const;
 
@@ -45,4 +51,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UVNSaveGame> SaveGame;
+
+
+private:
+
+	static const FString SLOT_NAME;
 };
