@@ -74,19 +74,16 @@ void USceneTransitionSubsystem::OnLoadCompleted()
 
     // Schedule the new level to be shown.
     const FName NewLevelName = PendingLevel.GetLongPackageFName();
-    if (ULevelStreaming *LevelStream = UGameplayStatics::GetStreamingLevel(this, NewLevelName))
-    {
-        LevelStream->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
-        LevelStream->SetShouldBeVisible(true);
-    }
+    ULevelStreaming* NewLevel = UGameplayStatics::GetStreamingLevel(this, NewLevelName);
+    NewLevel->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
+    NewLevel->SetShouldBeVisible(true);
 
     // Prevent stacking streamed levels in memory: unload everything except the target.
     for (const TArray<ULevelStreaming*>& StreamingLevels = GetWorld()->GetStreamingLevels(); ULevelStreaming* LevelStream : StreamingLevels)
     {
-        if (LevelStream && LevelStream->IsLevelLoaded() && LevelStream->PackageNameToLoad != NewLevelName)
+        if (LevelStream != NewLevel)
         {
-            const FLatentActionInfo LatentInfo;
-            UGameplayStatics::UnloadStreamLevel(this, LevelStream->PackageNameToLoad, LatentInfo, false);
+            LevelStream->SetShouldBeLoaded(false);
         }
     }
 }
