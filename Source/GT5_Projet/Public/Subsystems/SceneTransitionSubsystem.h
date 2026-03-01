@@ -52,4 +52,7 @@ private:
 
 	UFUNCTION()
 	void OnLoadCompleted();
+
+	UFUNCTION()
+	void OnLevelShown();
 };
