@@ -124,7 +124,7 @@ void AVNChapterManager::Disable_Implementation()
 	}
 }
 
-void AVNChapterManager::TravelOnHeightSwitcher(AActor* SwitcherA, AActor* SwitcherB)
+void AVNChapterManager::TravelOnHeightSwitcher_Implementation(AActor* SwitcherA, AActor* SwitcherB)
 {
 	AVNMapCharacter* ch = GetMapCharacter();
 
