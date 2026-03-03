@@ -40,6 +40,9 @@ public:
 	void TriggerMinigame(const FMinigameData& Minigame);
 	virtual void TriggerMinigame_Implementation(const FMinigameData& Minigame) { }
 
+	UFUNCTION(BlueprintCallable)
+	void TravelOnHeightSwitcher(AActor* SwitcherA, AActor* SwitcherB);
+
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AVNMapCharacter* GetMapCharacter() const { return MapCharacter; }

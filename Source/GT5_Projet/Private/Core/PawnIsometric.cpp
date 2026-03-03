@@ -22,6 +22,7 @@
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
 	, cursorActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
+	, CharacterHeightLevel(0.0F)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = ETickingGroup::TG_PostPhysics;
@@ -34,12 +35,12 @@ APawnIsometric::APawnIsometric()
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	Camera->ProjectionMode = ECameraProjectionMode::Orthographic;
 	Camera->OrthoWidth = 1400.0F;
-	Camera->OrthoNearClipPlane = -10000.0F;
+	Camera->OrthoNearClipPlane = -1000.0F;
 	Camera->bAutoCalculateOrthoPlanes = false;
-	Camera->SetRelativeRotation(CameraRotation);
-	Camera->SetRelativeLocation(cameraForwardVector * -100.0F);
 
 	Camera->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	SetActorRotation(CameraRotation);
 }
 
 // Called when the game starts or when spawned
@@ -65,7 +66,10 @@ void APawnIsometric::Tick(float DeltaTime)
 
 	if (PlayerCharacter && bIsCameraCentered) {
 		FVector pos = PlayerCharacter->GetActorLocation();
-		pos.Z = 0.0;
+		pos.Z = CharacterHeightLevel;
+
+		double proj = cameraForwardVector.Dot(pos - GetActorLocation());
+		pos -= cameraForwardVector * proj;
 		SetActorLocation(pos);
 	}
 }
@@ -94,8 +98,8 @@ FVector APawnIsometric::ViewportToWorld(double viewportX, double viewportY) cons
 		viewportX * halfHeight * aspectRatio * Camera->GetRightVector() +
 		viewportY * halfHeight * Camera->GetUpVector();
 
-	// Project point onto Z = 0 plane (ground level).
-	double t = -(off.Z - GetActorLocation().Z) / cameraForwardVector.Z;
+	// Project point onto Z = CharacterHeightLevel plane (ground level).
+	double t = -((off.Z + GetActorLocation().Z) - CharacterHeightLevel) / cameraForwardVector.Z;
 	return GetActorLocation() + off + t * cameraForwardVector;
 }
 
@@ -112,15 +116,6 @@ void APawnIsometric::SetZoomLevel(float Value)
 void APawnIsometric::RecenterViewOnPlayer()
 {
 	bIsCameraCentered = true;
-
-	AVNPlayerController* playerController = Cast<AVNPlayerController>(GetPlayerState()->GetPlayerController());
-	if (!playerController || !playerController->PlayerCharacter) {
-		UE_LOG(LogTemp, Error, TEXT("Couldn't recenter view on player (could not find playerController, or map character isn't spawned yet."));
-		return;
-	}
-
-	FIntPoint tilePos = playerController->PlayerCharacter->GetTilePosition();
-	SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos));
 }
 
 void APawnIsometric::SetViewCenteredOnTile(const FIntPoint& TilePos)
@@ -144,12 +139,18 @@ void APawnIsometric::SetCursorHidden(bool bCursorHidden)
 
 void APawnIsometric::Input_PanCameraX(float w)
 {
+	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
+	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
+
+	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + 0.5));
+
+
 	if (!bIsPanning) return;
 
 	bIsCameraCentered = false;
 
 	w = -w;   // Invert direction.
-	const FVector off(-w, w, 0.0F);
+	const FVector off = Camera->GetRightVector() * w;
 	float factor = Camera->OrthoWidth;
 	float speed = factor * CameraSpeed * UGameplayStatics::GetWorldDeltaSeconds(this);
 
@@ -169,8 +170,8 @@ void APawnIsometric::Input_PanCameraY(float w)
 	bIsCameraCentered = false;
 
 	w = -w;   // Invert direction.
-	const FVector off(w, w, 0.0F);
-	float factor = Camera->OrthoWidth / -cameraForwardVector.Z;
+	const FVector off = Camera->GetUpVector() * w;
+	float factor = Camera->OrthoWidth;
 	float speed = factor * CameraSpeed * UGameplayStatics::GetWorldDeltaSeconds(this);
 
 	AddActorWorldOffset(off * speed);
@@ -202,14 +203,20 @@ void APawnIsometric::Input_PanCameraStop()
 	bIsPanning = false;
 }
 
+#include "Libraries/PathfindingLibrary.h"
+
 void APawnIsometric::Input_SelectTile()
 {
 	if (!cursorActor || !bIsCursorActive) return;
 
-	cursorActor->SetActorHiddenInGame(false);
-
 	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
 	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
+
+	if (!UPathfindingLibrary::IsTileWalkable(tilePos, this)) {
+		return;
+	}
+
+	cursorActor->SetActorHiddenInGame(false);
 
 	// Clicked the same tile.
 	if (tilePos == cursorPosition) {
@@ -218,5 +225,5 @@ void APawnIsometric::Input_SelectTile()
 	}
 
 	cursorPosition = tilePos;
-	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, 0.5));
+	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + 0.5));
 }

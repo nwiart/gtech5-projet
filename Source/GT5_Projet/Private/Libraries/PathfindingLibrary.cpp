@@ -3,6 +3,8 @@
 #include "Libraries/PathfindingLibrary.h"
 #include "Libraries/VNTileMapLibrary.h"
 
+#include "Subsystems/VNChapterSubsystem.h"
+
 #include "Core/VNGamemode.h"
 #include "Map/VNMapEvent.h"
 
@@ -149,6 +151,8 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 		return false;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.GetActor()->GetName());
+
 	return IsTileFloor(HitResult.GetActor()) || IsTileEvent(HitResult.GetActor());
 }
 
@@ -183,12 +187,17 @@ bool UPathfindingLibrary::FindTileAt(FHitResult& OutResult, const FIntPoint& Pos
 		return false;
 	}
 
+	UVNChapterSubsystem* chapterSubsys = UGameplayStatics::GetGameInstance(WorldContext)->GetSubsystem<UVNChapterSubsystem>();
+	if (!chapterSubsys || !chapterSubsys->GetMapCharacter())
+	{
+		return false;
+	}
+
+	const float Z = chapterSubsys->GetPawn()->CharacterHeightLevel;
+	
 	// Perform a downward cast.
 	// Any obstacle obstructing a walkable tile will be hit first, so no need to manually filter.
-	FVector TileWorldPos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(Pos);
-
-	FVector TraceStart = TileWorldPos + FVector(0, 0, 200.0f);
-	FVector TraceEnd = TileWorldPos + FVector(0, 0, -200.0f);
+	const FVector TileWorldPos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(Pos);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.bTraceComplex = false;
@@ -196,8 +205,8 @@ bool UPathfindingLibrary::FindTileAt(FHitResult& OutResult, const FIntPoint& Pos
 
 	return World->LineTraceSingleByChannel(
 		OutResult,
-		TraceStart,
-		TraceEnd,
+		TileWorldPos + FVector(0, 0, Z + 200.0f),
+		TileWorldPos + FVector(0, 0, Z - 50.0f),
 		ECC_Visibility,
 		QueryParams
 	);
