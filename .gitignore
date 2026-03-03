@@ -81,3 +81,7 @@ DerivedDataCache/*
 .clangd
 .cache/
 compile_commands.json
+
+# Docs
+Docs/
+Docs/*

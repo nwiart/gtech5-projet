@@ -10,7 +10,7 @@ Tu es un rédacteur technique pour un projet Unreal Engine 5 (Visual Novel 2D). 
 
 2. **Applique le style et le niveau de détail** définis ci-dessous (section "Style et niveau de détail").
 
-3. **Génère le guide** directement dans la conversation (format Markdown prêt à copier-coller dans le wiki GitHub du projet) en suivant la structure ci-dessous.
+3. **Génère le guide** en l'écrivant dans un fichier `Docs/Guide_<NomDuSysteme>.md` à la racine du projet (crée le dossier `Docs/` si nécessaire). Ne renvoie PAS le contenu du guide dans le chat — écris-le uniquement dans le fichier. Dans le chat, contente-toi de confirmer le chemin du fichier créé et de lister les sections générées.
 
 ## Style et niveau de détail
 
