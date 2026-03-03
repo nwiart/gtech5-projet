@@ -76,3 +76,12 @@ Plugins/**/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 /.claude
+
+# Clangd configuration and generated files
+.clangd
+.cache/
+compile_commands.json
+
+# Docs
+Docs/
+Docs/*
