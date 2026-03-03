@@ -5,6 +5,9 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "Sound/SoundWave.h"
+
+DEFINE_LOG_CATEGORY(LogMusic);
 
 // Static constants
 const FString UMusicSubsystem::MusicSaveSlot = TEXT("MusicSettings");
@@ -43,15 +46,27 @@ void UMusicSubsystem::Deinitialize()
 	// Stop any playing music
 	if (MusicComponent)
 	{
-		MusicComponent->Stop();
-		MusicComponent->DestroyComponent();
+		if (MusicComponent->IsPlaying())
+		{
+			MusicComponent->Stop();
+		}
+		if (MusicComponent->IsRegistered())
+		{
+			MusicComponent->DestroyComponent();
+		}
 		MusicComponent = nullptr;
 	}
 
 	if (CrossfadeComponent)
 	{
-		CrossfadeComponent->Stop();
-		CrossfadeComponent->DestroyComponent();
+		if (CrossfadeComponent->IsPlaying())
+		{
+			CrossfadeComponent->Stop();
+		}
+		if (CrossfadeComponent->IsRegistered())
+		{
+			CrossfadeComponent->DestroyComponent();
+		}
 		CrossfadeComponent = nullptr;
 	}
 
@@ -73,7 +88,7 @@ void UMusicSubsystem::PlayMusic(const FMusicTrackData& TrackData, float FadeInDu
 {
 	if (!TrackData.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("MusicSubsystem: Attempted to play invalid track data"));
+		UE_LOG(LogMusic, Warning, TEXT("MusicSubsystem: Attempted to play invalid track data"));
 		return;
 	}
 
@@ -88,7 +103,7 @@ void UMusicSubsystem::PlayMusic(const FMusicTrackData& TrackData, float FadeInDu
 	UAudioComponent* AudioComp = GetOrCreateAudioComponent();
 	if (!AudioComp)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MusicSubsystem: Failed to create audio component"));
+		UE_LOG(LogMusic, Error, TEXT("MusicSubsystem: Failed to create audio component"));
 		return;
 	}
 
@@ -97,6 +112,16 @@ void UMusicSubsystem::PlayMusic(const FMusicTrackData& TrackData, float FadeInDu
 	AudioComp->bIsUISound = true; // Ensure it plays regardless of pause state
 	AudioComp->bAllowSpatialization = false;
 	AudioComp->bAutoDestroy = false;
+	AudioComp->bIsMusic = true;
+
+	// Apply loop setting from track data
+	// For Sound Waves, set the bLooping property directly on the asset
+	if (USoundWave* SoundWave = Cast<USoundWave>(TrackData.Sound))
+	{
+		SoundWave->bLooping = TrackData.bLoop;
+	}
+	// For MetaSound Sources, set the looping parameter via the audio component
+	AudioComp->SetBoolParameter(FName(TEXT("Looping")), TrackData.bLoop);
 
 	// Setup fade
 	if (FadeInDuration > 0.0f)
@@ -134,7 +159,7 @@ void UMusicSubsystem::PlayMusic(const FMusicTrackData& TrackData, float FadeInDu
 	OnMusicTrackChanged.Broadcast(CurrentTrack);
 	OnMusicPlayStateChanged.Broadcast(true);
 
-	UE_LOG(LogTemp, Display, TEXT("MusicSubsystem: Playing track '%s'"), *TrackData.TrackName.ToString());
+	UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: Playing track '%s'"), *TrackData.TrackName.ToString());
 }
 
 void UMusicSubsystem::StopMusic(float FadeOutDuration)
@@ -178,7 +203,7 @@ void UMusicSubsystem::CrossfadeTo(const FMusicTrackData& NewTrackData, float Cro
 {
 	if (!NewTrackData.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("MusicSubsystem: Attempted crossfade to invalid track"));
+		UE_LOG(LogMusic, Warning, TEXT("MusicSubsystem: Attempted crossfade to invalid track"));
 		return;
 	}
 
@@ -197,7 +222,7 @@ void UMusicSubsystem::CrossfadeTo(const FMusicTrackData& NewTrackData, float Cro
 	UAudioComponent* CrossfadeComp = GetOrCreateCrossfadeComponent();
 	if (!CrossfadeComp)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MusicSubsystem: Failed to create crossfade component"));
+		UE_LOG(LogMusic, Error, TEXT("MusicSubsystem: Failed to create crossfade component"));
 		PlayMusic(NewTrackData, CrossfadeDuration);
 		return;
 	}
@@ -207,6 +232,15 @@ void UMusicSubsystem::CrossfadeTo(const FMusicTrackData& NewTrackData, float Cro
 	CrossfadeComp->bIsUISound = true;
 	CrossfadeComp->bAllowSpatialization = false;
 	CrossfadeComp->bAutoDestroy = false;
+	CrossfadeComp->bIsMusic = true;
+
+	// Apply loop setting from track data
+	if (USoundWave* SoundWave = Cast<USoundWave>(NewTrackData.Sound))
+	{
+		SoundWave->bLooping = NewTrackData.bLoop;
+	}
+	CrossfadeComp->SetBoolParameter(FName(TEXT("Looping")), NewTrackData.bLoop);
+
 	CrossfadeComp->SetVolumeMultiplier(0.0f);
 	CrossfadeComp->Play();
 
@@ -227,7 +261,7 @@ void UMusicSubsystem::CrossfadeTo(const FMusicTrackData& NewTrackData, float Cro
 			true);
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("MusicSubsystem: Crossfading to '%s'"), *NewTrackData.TrackName.ToString());
+	UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: Crossfading to '%s'"), *NewTrackData.TrackName.ToString());
 }
 
 void UMusicSubsystem::PauseMusic()
@@ -307,7 +341,7 @@ void UMusicSubsystem::SaveMusicState()
 
 	if (!SaveGame)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MusicSubsystem: Failed to create save game object"));
+		UE_LOG(LogMusic, Error, TEXT("MusicSubsystem: Failed to create save game object"));
 		return;
 	}
 
@@ -315,11 +349,11 @@ void UMusicSubsystem::SaveMusicState()
 
 	if (UGameplayStatics::SaveGameToSlot(SaveGame, MusicSaveSlot, MusicSaveUserIndex))
 	{
-		UE_LOG(LogTemp, Display, TEXT("MusicSubsystem: Music state saved"));
+		UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: Music state saved"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("MusicSubsystem: Failed to save music state"));
+		UE_LOG(LogMusic, Error, TEXT("MusicSubsystem: Failed to save music state"));
 	}
 }
 
@@ -327,7 +361,7 @@ void UMusicSubsystem::LoadMusicState(bool bAutoPlay)
 {
 	if (!UGameplayStatics::DoesSaveGameExist(MusicSaveSlot, MusicSaveUserIndex))
 	{
-		UE_LOG(LogTemp, Display, TEXT("MusicSubsystem: No saved music state found"));
+		UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: No saved music state found"));
 		return;
 	}
 
@@ -336,7 +370,7 @@ void UMusicSubsystem::LoadMusicState(bool bAutoPlay)
 
 	if (!SaveGame)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MusicSubsystem: Failed to load music save game"));
+		UE_LOG(LogMusic, Error, TEXT("MusicSubsystem: Failed to load music save game"));
 		return;
 	}
 
@@ -346,7 +380,7 @@ void UMusicSubsystem::LoadMusicState(bool bAutoPlay)
 	// Restore parameters
 	StoredParameters = SaveGame->MusicState.Parameters;
 
-	UE_LOG(LogTemp, Display, TEXT("MusicSubsystem: Music state loaded (Volume: %.2f)"), MasterVolume);
+	UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: Music state loaded (Volume: %.2f)"), MasterVolume);
 
 	// Note: We don't auto-restore track playback here because we don't have
 	// access to the sound asset. The game should call RestoreFromSaveState
@@ -377,14 +411,62 @@ void UMusicSubsystem::RestoreFromSaveState(const FMusicSaveState& State, bool bA
 	MasterVolume = State.MasterVolume;
 	StoredParameters = State.Parameters;
 
-	// Note: To fully restore, the caller needs to provide the FMusicTrackData
-	// with the actual sound asset, as we only store the track name
+	ApplyVolume();
+	OnMusicVolumeChanged.Broadcast(MasterVolume);
+
+	UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: State restored (Volume: %.2f, Track: '%s', WasPlaying: %s)"),
+		MasterVolume, *State.CurrentTrackName.ToString(), State.bWasPlaying ? TEXT("true") : TEXT("false"));
+}
+
+void UMusicSubsystem::RestoreFromSaveStateWithTrack(const FMusicSaveState& State, const FMusicTrackData& TrackData, bool bAutoPlay)
+{
+	MasterVolume = State.MasterVolume;
+	StoredParameters = State.Parameters;
+
+	ApplyVolume();
+	OnMusicVolumeChanged.Broadcast(MasterVolume);
+
+	// Resume playback if requested and music was playing when saved
+	if (bAutoPlay && State.bWasPlaying && TrackData.IsValid())
+	{
+		PlayMusic(TrackData, 0.0f);
+
+		// Restore MetaSound parameters to the now-playing audio component
+		if (MusicComponent)
+		{
+			for (const auto& Param : StoredParameters)
+			{
+				MusicComponent->SetFloatParameter(Param.Key, Param.Value);
+			}
+		}
+
+		UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: State restored and playback resumed (Track: '%s')"),
+			*TrackData.TrackName.ToString());
+	}
+	else
+	{
+		UE_LOG(LogMusic, Display, TEXT("MusicSubsystem: State restored without playback (Volume: %.2f)"), MasterVolume);
+	}
 }
 
 // ==================== Protected Methods ====================
 
 UAudioComponent* UMusicSubsystem::GetOrCreateAudioComponent()
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogMusic, Warning, TEXT("MusicSubsystem: No valid world available for audio component"));
+		return nullptr;
+	}
+
+	if (MusicComponent && (!MusicComponent->IsRegistered() || MusicComponent->GetWorld() != World))
+	{
+		MusicComponent->Stop();
+		MusicComponent->DestroyComponent();
+		MusicComponent = nullptr;
+	}
+
 	if (!MusicComponent)
 	{
 		MusicComponent = NewObject<UAudioComponent>(this, TEXT("MusicComponent"));
@@ -392,7 +474,7 @@ UAudioComponent* UMusicSubsystem::GetOrCreateAudioComponent()
 		{
 			MusicComponent->bAutoActivate = false;
 			MusicComponent->bAutoDestroy = false;
-			MusicComponent->RegisterComponent();
+			MusicComponent->RegisterComponentWithWorld(World);
 		}
 	}
 	return MusicComponent;
@@ -400,6 +482,20 @@ UAudioComponent* UMusicSubsystem::GetOrCreateAudioComponent()
 
 UAudioComponent* UMusicSubsystem::GetOrCreateCrossfadeComponent()
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogMusic, Warning, TEXT("MusicSubsystem: No valid world available for crossfade component"));
+		return nullptr;
+	}
+
+	if (CrossfadeComponent && (!CrossfadeComponent->IsRegistered() || CrossfadeComponent->GetWorld() != World))
+	{
+		CrossfadeComponent->Stop();
+		CrossfadeComponent->DestroyComponent();
+		CrossfadeComponent = nullptr;
+	}
+
 	if (!CrossfadeComponent)
 	{
 		CrossfadeComponent = NewObject<UAudioComponent>(this, TEXT("CrossfadeComponent"));
@@ -407,7 +503,7 @@ UAudioComponent* UMusicSubsystem::GetOrCreateCrossfadeComponent()
 		{
 			CrossfadeComponent->bAutoActivate = false;
 			CrossfadeComponent->bAutoDestroy = false;
-			CrossfadeComponent->RegisterComponent();
+			CrossfadeComponent->RegisterComponentWithWorld(World);
 		}
 	}
 	return CrossfadeComponent;

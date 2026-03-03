@@ -12,6 +12,9 @@
 
 class UAudioComponent;
 
+/** Log category for the Music Subsystem */
+DECLARE_LOG_CATEGORY_EXTERN(LogMusic, Log, All);
+
 /** Delegate broadcast when the current music track changes */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnMusicTrackChanged,
@@ -185,11 +188,22 @@ public:
 
 	/**
 	 * Restore from a specific save state.
+	 * Note: This only restores volume and parameters. To also resume playback,
+	 * use the overload that accepts a FMusicTrackData.
 	 * @param State The state to restore
-	 * @param bAutoPlay If true, automatically resume playback
+	 * @param bAutoPlay If true, automatically resume playback (requires TrackData overload)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Music|Save")
 	void RestoreFromSaveState(const FMusicSaveState &State, bool bAutoPlay = true);
+
+	/**
+	 * Restore from a specific save state with the actual track data for playback.
+	 * @param State The state to restore
+	 * @param TrackData The track data with the sound asset to play
+	 * @param bAutoPlay If true, automatically resume playback if music was playing when saved
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Music|Save")
+	void RestoreFromSaveStateWithTrack(const FMusicSaveState &State, const FMusicTrackData &TrackData, bool bAutoPlay = true);
 
 	// ==================== Delegates ====================
 
