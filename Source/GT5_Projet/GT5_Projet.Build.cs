@@ -10,6 +10,9 @@ public class GT5_Projet : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Paper2D", "PaperZD", "Niagara" });
 
+		// MetaSound support for advanced music system
+		PublicDependencyModuleNames.AddRange(new string[] { "MetasoundEngine", "MetasoundFrontend", "AudioMixer" });
+
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Making custom assets.
