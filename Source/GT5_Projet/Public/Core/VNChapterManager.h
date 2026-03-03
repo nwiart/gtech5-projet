@@ -40,8 +40,9 @@ public:
 	void TriggerMinigame(const FMinigameData& Minigame);
 	virtual void TriggerMinigame_Implementation(const FMinigameData& Minigame) { }
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void TravelOnHeightSwitcher(AActor* SwitcherA, AActor* SwitcherB);
+	virtual void TravelOnHeightSwitcher_Implementation(AActor* SwitcherA, AActor* SwitcherB);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
