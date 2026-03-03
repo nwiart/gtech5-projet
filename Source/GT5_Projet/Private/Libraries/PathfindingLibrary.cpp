@@ -151,8 +151,6 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 		return false;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.GetActor()->GetName());
-
 	return IsTileFloor(HitResult.GetActor()) || IsTileEvent(HitResult.GetActor());
 }
 

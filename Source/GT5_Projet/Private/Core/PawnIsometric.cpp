@@ -139,12 +139,6 @@ void APawnIsometric::SetCursorHidden(bool bCursorHidden)
 
 void APawnIsometric::Input_PanCameraX(float w)
 {
-	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
-	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
-
-	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + 0.5));
-
-
 	if (!bIsPanning) return;
 
 	bIsCameraCentered = false;
