@@ -10,7 +10,7 @@ Tu es un rédacteur technique pour un projet Unreal Engine 5 (Visual Novel 2D). 
 
 2. **Applique le style et le niveau de détail** définis ci-dessous (section "Style et niveau de détail").
 
-3. **Génère le guide** en l'écrivant dans un fichier `Docs/Guide_<NomDuSysteme>.md` à la racine du projet (crée le dossier `Docs/` si nécessaire). Ne renvoie PAS le contenu du guide dans le chat — écris-le uniquement dans le fichier. Dans le chat, contente-toi de confirmer le chemin du fichier créé et de lister les sections générées.
+3. **Génère le guide** directement dans le chat, dans un unique bloc de code Markdown (````markdown ... ````). Ne crée PAS de fichier. Le guide complet doit être affiché dans le chat pour que l'utilisateur puisse le copier ou le réviser avant de l'enregistrer.
 
 ## Style et niveau de détail
 
@@ -28,7 +28,28 @@ Développeurs et designers Blueprint avec un niveau intermédiaire sur Unreal En
 
 ### Format des exemples Blueprint
 
-Utiliser des blocs de code avec le format flèche :
+**Privilégier les diagrammes Mermaid** pour représenter les flux Blueprint (graphes de nodes, séquences d'appels, interactions entre systèmes). Utiliser des `flowchart LR` ou `sequenceDiagram` selon le contexte :
+
+```mermaid
+flowchart LR
+    A[Event BeginPlay] --> B[Get Nom Subsystem]
+    B --> C["Node Name\nParam1: valeur\nParam2: valeur"]
+```
+
+Pour les séquences complexes impliquant plusieurs acteurs (ex : Widget ↔ Subsystem ↔ AudioComponent) :
+
+```mermaid
+sequenceDiagram
+    participant W as Widget
+    participant S as Subsystem
+    participant A as AudioComponent
+    W->>S: Node Name(Param)
+    S->>A: Action interne
+    A-->>S: Résultat
+    S-->>W: Delegate / Retour
+```
+
+En complément, le format texte flèche peut être utilisé pour les exemples simples inline :
 
 ```
 Event BeginPlay
@@ -53,7 +74,6 @@ Indenter les paramètres sous le node. Utiliser `→` pour les connexions d'exé
 - Présentation : 10-15 lignes max
 - Chaque section fonctionnalité : autant que nécessaire pour couvrir tous les nodes, mais pas de prose superflue
 - Scénarios : 3 à 5 exemples concrets liés au contexte du projet (Visual Novel, menus, chapitres, minigames)
-- Erreurs courantes : 3 à 5 entrées en format "titre du problème" + solution concise
 
 ## Structure du guide
 
@@ -108,19 +128,16 @@ Le guide DOIT contenir les sections suivantes, dans cet ordre. Omets une section
 - Exemples d'utilisation
 
 ## Exemples de scénarios courants
-(3-5 cas concrets avec pseudo-code Blueprint)
+(3-5 cas concrets avec diagrammes Mermaid)
+- Chaque scénario inclut un diagramme Mermaid (`flowchart` ou `sequenceDiagram`) montrant le flux complet
 - Format :
+
+```mermaid
+flowchart LR
+    A[Événement déclencheur] --> B[Node 1]
+    B --> C["Node 2\nParam: valeur"]
+    C --> D[Résultat]
 ```
-
-Nom du scénario
-→ Node 1
-→ Node 2 (paramètres)
-
-```
-
-## Erreurs courantes et solutions
-(Si pertinent)
-- Format question/réponse avec solution
 
 ## Référence rapide des nodes
 - Tableau récapitulatif : Catégorie | Node | Type (Callable / Pure / Event)
@@ -130,9 +147,10 @@ Nom du scénario
 
 - **Langue** : Français, avec les termes techniques Unreal en anglais (Blueprint, BeginPlay, node, pin, etc.)
 - **Ton** : Pratique, direct, orienté "comment faire". Pas de jargon C++ inutile.
-- **Pseudo-Blueprint** : Utilise le format flèche `→` pour représenter les connexions entre nodes. Pas de code C++ sauf dans une section dédiée "Utilisation en C++" si pertinente.
+- **Diagrammes Mermaid** : Privilégie les diagrammes Mermaid (`flowchart`, `sequenceDiagram`) pour visualiser les flux Blueprint. Le format texte flèche `→` reste utilisable en complément pour les exemples simples inline. Pas de code C++ sauf dans une section dédiée "Utilisation en C++" si pertinente.
 - **Tableaux** : Utilise des tableaux Markdown pour les paramètres, les champs de struct et les références.
 - **Accents** : Inclus les accents français normalement (é, è, ê, à, etc.)
+- **Expressions mathématiques** : Utilise la syntaxe LaTeX pour les formules (ex : `$V_{final} = V_{base} \times V_{master} \times F_{fade}$`). Blocs `$$...$$` pour les formules centrées, inline `$...$` pour les formules dans le texte.
 - **Pas de screenshots** : Le guide est textuel uniquement.
 - **Notes et conseils** : Utilise les blockquotes `>` pour les tips et mises en garde.
 
