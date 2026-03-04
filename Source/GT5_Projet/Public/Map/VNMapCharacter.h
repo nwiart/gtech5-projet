@@ -38,6 +38,12 @@ public:
 	FIntPoint GetTilePosition() const;
 
 
+public:
+
+	// Not necessarily equal to ActorLocation.Z
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	float HeightLevel;
+
 private:
 
 	// Path calculated by A* algorithm
