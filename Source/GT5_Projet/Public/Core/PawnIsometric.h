@@ -87,6 +87,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> CursorClass;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	float CharacterHeightLevel;
+
 
 public:
 
