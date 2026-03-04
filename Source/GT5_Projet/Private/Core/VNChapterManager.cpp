@@ -123,3 +123,16 @@ void AVNChapterManager::Disable_Implementation()
 		MapCharacter->Disable();
 	}
 }
+
+void AVNChapterManager::TravelOnHeightSwitcher_Implementation(AActor* SwitcherA, AActor* SwitcherB)
+{
+	AVNMapCharacter* ch = GetMapCharacter();
+
+	// Teleport character to destination switcher (on the tile in front of it).
+	const FVector Loc = ch->GetActorLocation() - SwitcherA->GetActorLocation() + SwitcherB->GetActorLocation() + (SwitcherB->GetActorForwardVector() * -100.0);
+	ch->SetActorLocation(Loc);
+
+	// Set plane height.
+	GetPawn()->CharacterHeightLevel = SwitcherB->GetActorLocation().Z;
+	ch->HeightLevel = SwitcherB->GetActorLocation().Z;
+}

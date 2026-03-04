@@ -21,6 +21,7 @@ AVNMapCharacter::AVNMapCharacter()
 	, bIsMoving(false)
 	, CharacterZOffset(0.f)
 	, MovementSpeed(3.0f)
+	, HeightLevel(0.0F)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -83,7 +84,7 @@ void AVNMapCharacter::Tick(float DeltaTime)
 		MovementProgress = 0.0f;
 		CurrentWorldPosition = TargetWorldPosition;
 		FVector TilePos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PathToFollow[CurrentWaypointIndex]);
-		TargetWorldPosition = FVector(TilePos.X, TilePos.Y, CharacterZOffset);
+		TargetWorldPosition = FVector(TilePos.X, TilePos.Y, HeightLevel + CharacterZOffset);
 	}
 
 	FVector NewPosition = FMath::Lerp(CurrentWorldPosition, TargetWorldPosition, MovementProgress);
@@ -145,7 +146,7 @@ void AVNMapCharacter::MoveTo(int X, int Y)
 		// Set initial positions
 		CurrentWorldPosition = GetActorLocation();
 		FVector FirstTilePos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PathToFollow[CurrentWaypointIndex]);
-		TargetWorldPosition = FVector(FirstTilePos.X, FirstTilePos.Y, CharacterZOffset);
+		TargetWorldPosition = FVector(FirstTilePos.X, FirstTilePos.Y, CharacterZOffset + HeightLevel);
 	}
 	else
 	{
