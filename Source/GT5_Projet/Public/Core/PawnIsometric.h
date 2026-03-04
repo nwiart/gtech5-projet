@@ -84,8 +84,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")
 	float CameraMaxWidth;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AActor> CursorClass;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> HighlightClass;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	float CharacterHeightLevel;
@@ -105,10 +107,12 @@ private:
 	AVNMapCharacter* PlayerCharacter;
 
 	AActor* cursorActor;
+	AActor* highlightActor;
 
 	FVector cameraForwardVector;
 
 	FIntPoint cursorPosition;
+	FIntPoint hoveredTile;
 
 	bool bIsCursorActive;
 
