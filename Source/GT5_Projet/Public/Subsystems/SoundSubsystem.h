@@ -65,14 +65,13 @@ public:
 
 	/**
 	 * Play a sound effect by its name from the assigned DataTable.
-	 * The bIs2D flag in the DataTable entry determines 2D or 3D playback.
+	 * Uses the bIs2D flag from the DataTable entry to determine 2D or 3D playback.
 	 * For 3D sounds, the Location parameter is used.
 	 * @param SFXName Row name in the DataTable
 	 * @param Location World location for 3D sounds (ignored for 2D)
-	 * @param bIs2D Override: if true, play as 2D regardless of DataTable setting
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Sound|SFX", meta = (AdvancedDisplay = "bIs2D"))
-	void PlaySFXByName(FName SFXName, FVector Location = FVector::ZeroVector, bool bIs2D = true);
+	UFUNCTION(BlueprintCallable, Category = "Sound|SFX")
+	void PlaySFXByName(FName SFXName, FVector Location = FVector::ZeroVector);
 
 	/**
 	 * Play a sound effect by its name at a specific location (always 3D).

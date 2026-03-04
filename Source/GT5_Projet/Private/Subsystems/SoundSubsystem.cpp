@@ -5,6 +5,7 @@
 #include "Components/AudioComponent.h"
 #include "Engine/DataTable.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundAttenuation.h"
 #include "Sound/SoundBase.h"
 
 DEFINE_LOG_CATEGORY(LogSound);
@@ -114,6 +115,20 @@ void USoundSubsystem::PlaySFXAtLocation(const FSFXData& SFXData, FVector Locatio
 	AudioComp->bAutoDestroy = false;
 	AudioComp->SetWorldLocation(Location);
 
+	// Configure attenuation for proper 3D spatialization
+	AudioComp->bOverrideAttenuation = true;
+
+	FSoundAttenuationSettings Attenuation;
+	Attenuation.bAttenuate = true;
+	Attenuation.bSpatialize = true;
+	Attenuation.AttenuationShape = EAttenuationShape::Sphere;
+	Attenuation.AttenuationShapeExtents = FVector(200.0f);
+	Attenuation.FalloffDistance = SFXData.AttenuationRadius;
+	Attenuation.DistanceAlgorithm = EAttenuationDistanceModel::Logarithmic;
+	Attenuation.SpatializationAlgorithm = ESoundSpatializationAlgorithm::SPATIALIZATION_HRTF;
+
+	AudioComp->AdjustAttenuation(Attenuation);
+
 	AudioComp->Play();
 
 	RecordSFXPlay(SFXData.SFXName);
@@ -122,7 +137,7 @@ void USoundSubsystem::PlaySFXAtLocation(const FSFXData& SFXData, FVector Locatio
 		*SFXData.SFXName.ToString(), Location.X, Location.Y, Location.Z);
 }
 
-void USoundSubsystem::PlaySFXByName(FName SFXName, FVector Location, bool bIs2D)
+void USoundSubsystem::PlaySFXByName(FName SFXName, FVector Location)
 {
 	FSFXData Data;
 	if (!GetSFXData(SFXName, Data))
@@ -131,7 +146,7 @@ void USoundSubsystem::PlaySFXByName(FName SFXName, FVector Location, bool bIs2D)
 		return;
 	}
 
-	if (bIs2D)
+	if (Data.bIs2D)
 	{
 		PlaySFX2D(Data);
 	}
