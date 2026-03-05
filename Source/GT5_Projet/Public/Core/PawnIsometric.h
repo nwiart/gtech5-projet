@@ -118,4 +118,7 @@ private:
 
 	bool bIsPanning;
 	bool bIsCameraCentered;
+
+	static const float HIGHLIGHT_Z_OFFSET;
+	static const float CURSOR_Z_OFFSET;
 };

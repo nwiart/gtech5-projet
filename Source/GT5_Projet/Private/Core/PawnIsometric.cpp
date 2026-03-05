@@ -19,6 +19,10 @@
 #include "Map/VNMapBounds.h"
 
 
+const float APawnIsometric::HIGHLIGHT_Z_OFFSET = 0.5;
+const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
+
+
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
@@ -97,7 +101,7 @@ void APawnIsometric::Tick(float DeltaTime)
 			bool valid = UPathfindingLibrary::IsTileWalkable(tilePos, this);
 			highlightActor->SetActorHiddenInGame(!valid);
 			if (valid) {
-				highlightActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + 0.5));	
+				highlightActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + HIGHLIGHT_Z_OFFSET));	
 			}
 		}
 	}
@@ -246,5 +250,5 @@ void APawnIsometric::Input_SelectTile()
 	}
 
 	cursorPosition = tilePos;
-	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + 1.0));
+	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + CURSOR_Z_OFFSET));
 }
