@@ -19,7 +19,6 @@ public:
 
 	FDialogueLine();
 
-
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString Text;
 
@@ -31,6 +30,15 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	bool LeftSide;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bHideName;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bSoloSpeaker;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FString Note;
 };
 
 USTRUCT(BlueprintType)
