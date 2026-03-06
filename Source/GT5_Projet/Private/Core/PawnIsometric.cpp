@@ -12,16 +12,21 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "Libraries/VNTileMapLibrary.h"
+#include "Libraries/PathfindingLibrary.h"
 #include "Character/VNPlayerController.h"
 #include "Subsystems/VNChapterSubsystem.h"
 #include "Map/VNMapCharacter.h"
 #include "Map/VNMapBounds.h"
 
 
+const float APawnIsometric::HIGHLIGHT_Z_OFFSET = 0.5;
+const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
+
+
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
+	, cursorActor(0), highlightActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
 	, CharacterHeightLevel(0.0F)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -50,12 +55,28 @@ void APawnIsometric::BeginPlay()
 	
 	bIsCursorActive = true;
 	cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
-	cursorActor->SetActorHiddenInGame(true);
+	if (cursorActor) {
+		cursorActor->SetActorHiddenInGame(true);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("No cursor actor class provided to APawnIsometric."));
+	}
+
+	highlightActor = GetWorld()->SpawnActor<AActor>(HighlightClass.Get());
+	if (highlightActor) {
+		highlightActor->SetActorHiddenInGame(true);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("No highlight actor class provided to APawnIsometric. Tiles will not be highlighted."));
+	}
 }
 
 void APawnIsometric::EndPlay(const EEndPlayReason::Type reason)
 {
 	cursorActor->Destroy();
+	if (highlightActor) {
+		highlightActor->Destroy();
+	}
 
 	Super::EndPlay(reason);
 }
@@ -64,6 +85,7 @@ void APawnIsometric::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Place camera onto character.
 	if (PlayerCharacter && bIsCameraCentered) {
 		FVector pos = PlayerCharacter->GetActorLocation();
 		pos.Z = CharacterHeightLevel;
@@ -71,6 +93,22 @@ void APawnIsometric::Tick(float DeltaTime)
 		double proj = cameraForwardVector.Dot(pos - GetActorLocation());
 		pos -= cameraForwardVector * proj;
 		SetActorLocation(pos);
+	}
+
+	// Highlight hovered tile.
+	if (highlightActor) {
+		FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
+		FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
+
+		if (hoveredTile != tilePos) {
+			hoveredTile = tilePos;
+
+			bool valid = UPathfindingLibrary::IsTileWalkable(tilePos, this);
+			highlightActor->SetActorHiddenInGame(!valid);
+			if (valid) {
+				highlightActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + HIGHLIGHT_Z_OFFSET));	
+			}
+		}
 	}
 }
 
@@ -197,8 +235,6 @@ void APawnIsometric::Input_PanCameraStop()
 	bIsPanning = false;
 }
 
-#include "Libraries/PathfindingLibrary.h"
-
 void APawnIsometric::Input_SelectTile()
 {
 	if (!cursorActor || !bIsCursorActive) return;
@@ -219,5 +255,5 @@ void APawnIsometric::Input_SelectTile()
 	}
 
 	cursorPosition = tilePos;
-	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + 0.5));
+	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + CURSOR_Z_OFFSET));
 }
