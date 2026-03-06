@@ -43,7 +43,7 @@ private:
 	// Internal variables to store state
 	TSoftObjectPtr<UWorld> PendingLevel;
 	UPROPERTY()
-	UUserWidget *CurrentWidget;
+	UUserWidget* CurrentWidget;
 	FTimerHandle ProgressTimerHandle;
 
 	// Internal functions
