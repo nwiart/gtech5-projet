@@ -1,9 +1,11 @@
 
 #include "Dialogue/DialogueLine.h"
+#include "Dialogue/DialogueCharacter.h"
+
 
 
 FDialogueLine::FDialogueLine()
-	: Character(0), Pose(EDialoguePose::Normal)
+	: Character(0), Pose(EDialoguePose::Normal), LeftSide(true), bHideName(false), bSoloSpeaker(false)
 {
 }
 
