@@ -26,7 +26,7 @@ const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
+	, cursorActor(0), highlightActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
 	, CharacterHeightLevel(0.0F)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -55,7 +55,12 @@ void APawnIsometric::BeginPlay()
 	
 	bIsCursorActive = true;
 	cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
-	cursorActor->SetActorHiddenInGame(true);
+	if (cursorActor) {
+		cursorActor->SetActorHiddenInGame(true);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("No cursor actor class provided to APawnIsometric."));
+	}
 
 	highlightActor = GetWorld()->SpawnActor<AActor>(HighlightClass.Get());
 	if (highlightActor) {
