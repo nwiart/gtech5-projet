@@ -40,6 +40,7 @@ Content/
 # ===== Clangd generated =====
 compile_commands.json
 .clangd
+.cache/
 
 # ===== Other =====
 *.code-workspace
