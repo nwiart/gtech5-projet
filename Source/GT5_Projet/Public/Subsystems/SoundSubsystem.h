@@ -27,7 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
  *
  * Features:
  * - Play SFX in 2D (non-spatialized) or 3D (spatialized at location)
- * - Play SFX by name via DataTable lookup
+ * - Play SFX from typed DataTable row handles
  * - Master SFX volume control with persistence (save/load)
  * - Cooldown system to prevent SFX spam
  * - Pitch and volume randomization for natural variation
@@ -64,23 +64,23 @@ public:
 	void PlaySFXAtLocation(const FSFXData& SFXData, FVector Location);
 
 	/**
-	 * Play a sound effect by its name from the assigned DataTable.
+	 * Play a sound effect from a typed DataTable row handle.
 	 * Uses the bIs2D flag from the DataTable entry to determine 2D or 3D playback.
-	 * For 3D sounds, the Location parameter is used.
-	 * @param SFXName Row name in the DataTable
+	 * If the handle does not specify a DataTable, the subsystem DataTable is used.
+	 * @param SFXHandle Typed handle to a FSFXTableRow entry
 	 * @param Location World location for 3D sounds (ignored for 2D)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Sound|SFX")
-	void PlaySFXByName(FName SFXName, FVector Location = FVector::ZeroVector);
+	void PlaySFXByHandle(const FDataTableRowHandle& SFXHandle, FVector Location = FVector::ZeroVector);
 
 	/**
-	 * Play a sound effect by its name at a specific location (always 3D).
-	 * Convenience function for spatialized DataTable sounds.
-	 * @param SFXName Row name in the DataTable
+	 * Play a sound effect from a typed DataTable row handle at a specific location (always 3D).
+	 * If the handle does not specify a DataTable, the subsystem DataTable is used.
+	 * @param SFXHandle Typed handle to a FSFXTableRow entry
 	 * @param Location World location to play the sound at
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Sound|SFX")
-	void PlaySFXByNameAtLocation(FName SFXName, FVector Location);
+	void PlaySFXByHandleAtLocation(const FDataTableRowHandle& SFXHandle, FVector Location);
 
 	// ==================== Volume Control ====================
 
@@ -102,20 +102,31 @@ public:
 
 	/**
 	 * Assign a DataTable containing FSFXTableRow entries.
-	 * This enables PlaySFXByName() and PlaySFXByNameAtLocation() lookups.
+	 * This enables typed row handle lookups when the handle does not specify a DataTable.
 	 * @param DataTable The DataTable asset with SFX configurations
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Sound|DataTable")
 	void SetSFXDataTable(UDataTable* DataTable);
 
 	/**
-	 * Retrieve SFX data from the assigned DataTable by row name.
-	 * @param SFXName Row name in the DataTable
+	 * Retrieve SFX data from a typed DataTable row handle.
+	 * If the handle does not specify a DataTable, the subsystem DataTable is used.
+	 * @param SFXHandle Typed handle to a FSFXTableRow entry
 	 * @param OutData Output SFX data
-	 * @return True if the SFX was found in the DataTable
+	 * @return True if the SFX row was found
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Sound|DataTable")
-	bool GetSFXData(FName SFXName, FSFXData& OutData) const;
+	bool GetSFXDataFromHandle(const FDataTableRowHandle& SFXHandle, FSFXData& OutData) const;
+
+	/**
+	 * Resolve a typed row handle into SFX configuration and its logical identifier.
+	 * C++ helper used by playback and tests; not exposed to Blueprint.
+	 * @param SFXHandle Typed handle to a FSFXTableRow entry
+	 * @param OutSFXIdentifier Resolved row identifier used for cooldown/logging
+	 * @param OutData Output SFX data payload
+	 * @return True if the SFX row was found
+	 */
+	bool ResolveSFXHandle(const FDataTableRowHandle& SFXHandle, FName& OutSFXIdentifier, FSFXData& OutData) const;
 
 	// ==================== Save/Load ====================
 
@@ -146,18 +157,33 @@ protected:
 	UAudioComponent* AcquirePooledComponent();
 
 	/**
+	 * Play a 2D SFX with an optional logical identifier for cooldown/logging.
+	 * @param SFXIdentifier Resolved row identifier, or NAME_None for direct payload playback
+	 * @param SFXData The SFX configuration to play
+	 */
+	void PlayResolvedSFX2D(FName SFXIdentifier, const FSFXData& SFXData);
+
+	/**
+	 * Play a 3D SFX with an optional logical identifier for cooldown/logging.
+	 * @param SFXIdentifier Resolved row identifier, or NAME_None for direct payload playback
+	 * @param SFXData The SFX configuration to play
+	 * @param Location World location to play the sound at
+	 */
+	void PlayResolvedSFXAtLocation(FName SFXIdentifier, const FSFXData& SFXData, FVector Location);
+
+	/**
 	 * Check if the given SFX is allowed to play (cooldown check).
-	 * @param SFXName The SFX identifier to check
+	 * @param SFXIdentifier The SFX identifier to check
 	 * @param Cooldown The minimum interval between plays
 	 * @return True if the SFX can play (cooldown elapsed or no cooldown)
 	 */
-	bool CanPlaySFX(FName SFXName, float Cooldown) const;
+	bool CanPlaySFX(FName SFXIdentifier, float Cooldown) const;
 
 	/**
 	 * Record that a SFX was just played (update cooldown timestamp).
-	 * @param SFXName The SFX identifier that was played
+	 * @param SFXIdentifier The SFX identifier that was played
 	 */
-	void RecordSFXPlay(FName SFXName);
+	void RecordSFXPlay(FName SFXIdentifier);
 
 	/**
 	 * Calculate the final volume for a SFX with randomization applied.
@@ -178,7 +204,7 @@ private:
 	UPROPERTY()
 	float MasterSFXVolume;
 
-	/** Assigned DataTable for SFX lookup by name */
+	/** Assigned DataTable used as the default source for typed row handle lookups */
 	UPROPERTY()
 	TObjectPtr<UDataTable> SFXDataTable;
 
@@ -189,7 +215,7 @@ private:
 	/** Maximum number of AudioComponents in the pool */
 	static constexpr int32 MaxPoolSize = 16;
 
-	/** Last play time for each SFX (for cooldown tracking) */
+	/** Last play time for each resolved row identifier (for cooldown tracking) */
 	TMap<FName, double> LastPlayTimes;
 
 	/** Save slot name */

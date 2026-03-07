@@ -54,13 +54,18 @@ void USoundSubsystem::Deinitialize()
 
 void USoundSubsystem::PlaySFX2D(const FSFXData& SFXData)
 {
+	PlayResolvedSFX2D(NAME_None, SFXData);
+}
+
+void USoundSubsystem::PlayResolvedSFX2D(FName SFXIdentifier, const FSFXData& SFXData)
+{
 	if (!SFXData.IsValid())
 	{
 		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: Attempted to play invalid SFX data"));
 		return;
 	}
 
-	if (!CanPlaySFX(SFXData.SFXName, SFXData.Cooldown))
+	if (!CanPlaySFX(SFXIdentifier, SFXData.Cooldown))
 	{
 		return;
 	}
@@ -77,13 +82,18 @@ void USoundSubsystem::PlaySFX2D(const FSFXData& SFXData)
 
 	UGameplayStatics::PlaySound2D(World, SFXData.Sound, FinalVolume, FinalPitch);
 
-	RecordSFXPlay(SFXData.SFXName);
+	RecordSFXPlay(SFXIdentifier);
 
 	UE_LOG(LogSound, Verbose, TEXT("SoundSubsystem: Playing 2D SFX '%s' (Vol: %.2f, Pitch: %.2f)"),
-		*SFXData.SFXName.ToString(), FinalVolume, FinalPitch);
+		*SFXIdentifier.ToString(), FinalVolume, FinalPitch);
 }
 
 void USoundSubsystem::PlaySFXAtLocation(const FSFXData& SFXData, FVector Location)
+{
+	PlayResolvedSFXAtLocation(NAME_None, SFXData, Location);
+}
+
+void USoundSubsystem::PlayResolvedSFXAtLocation(FName SFXIdentifier, const FSFXData& SFXData, FVector Location)
 {
 	if (!SFXData.IsValid())
 	{
@@ -91,7 +101,7 @@ void USoundSubsystem::PlaySFXAtLocation(const FSFXData& SFXData, FVector Locatio
 		return;
 	}
 
-	if (!CanPlaySFX(SFXData.SFXName, SFXData.Cooldown))
+	if (!CanPlaySFX(SFXIdentifier, SFXData.Cooldown))
 	{
 		return;
 	}
@@ -103,7 +113,7 @@ void USoundSubsystem::PlaySFXAtLocation(const FSFXData& SFXData, FVector Locatio
 	if (!AudioComp)
 	{
 		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: No available AudioComponent in pool for '%s'"),
-			*SFXData.SFXName.ToString());
+			*SFXIdentifier.ToString());
 		return;
 	}
 
@@ -131,41 +141,45 @@ void USoundSubsystem::PlaySFXAtLocation(const FSFXData& SFXData, FVector Locatio
 
 	AudioComp->Play();
 
-	RecordSFXPlay(SFXData.SFXName);
+	RecordSFXPlay(SFXIdentifier);
 
 	UE_LOG(LogSound, Verbose, TEXT("SoundSubsystem: Playing 3D SFX '%s' at (%.0f, %.0f, %.0f)"),
-		*SFXData.SFXName.ToString(), Location.X, Location.Y, Location.Z);
+		*SFXIdentifier.ToString(), Location.X, Location.Y, Location.Z);
 }
 
-void USoundSubsystem::PlaySFXByName(FName SFXName, FVector Location)
+void USoundSubsystem::PlaySFXByHandle(const FDataTableRowHandle& SFXHandle, FVector Location)
 {
 	FSFXData Data;
-	if (!GetSFXData(SFXName, Data))
+	FName SFXIdentifier = NAME_None;
+	if (!ResolveSFXHandle(SFXHandle, SFXIdentifier, Data))
 	{
-		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: SFX '%s' not found in DataTable"), *SFXName.ToString());
+		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: SFX handle '%s' not found in DataTable"),
+			*SFXHandle.RowName.ToString());
 		return;
 	}
 
 	if (Data.bIs2D)
 	{
-		PlaySFX2D(Data);
+		PlayResolvedSFX2D(SFXIdentifier, Data);
 	}
 	else
 	{
-		PlaySFXAtLocation(Data, Location);
+		PlayResolvedSFXAtLocation(SFXIdentifier, Data, Location);
 	}
 }
 
-void USoundSubsystem::PlaySFXByNameAtLocation(FName SFXName, FVector Location)
+void USoundSubsystem::PlaySFXByHandleAtLocation(const FDataTableRowHandle& SFXHandle, FVector Location)
 {
 	FSFXData Data;
-	if (!GetSFXData(SFXName, Data))
+	FName SFXIdentifier = NAME_None;
+	if (!ResolveSFXHandle(SFXHandle, SFXIdentifier, Data))
 	{
-		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: SFX '%s' not found in DataTable"), *SFXName.ToString());
+		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: SFX handle '%s' not found in DataTable"),
+			*SFXHandle.RowName.ToString());
 		return;
 	}
 
-	PlaySFXAtLocation(Data, Location);
+	PlayResolvedSFXAtLocation(SFXIdentifier, Data, Location);
 }
 
 // ==================== Volume Control ====================
@@ -196,26 +210,36 @@ void USoundSubsystem::SetSFXDataTable(UDataTable* DataTable)
 	}
 }
 
-bool USoundSubsystem::GetSFXData(FName SFXName, FSFXData& OutData) const
+bool USoundSubsystem::GetSFXDataFromHandle(const FDataTableRowHandle& SFXHandle, FSFXData& OutData) const
 {
-	if (!SFXDataTable)
+	FName SFXIdentifier = NAME_None;
+	return ResolveSFXHandle(SFXHandle, SFXIdentifier, OutData);
+}
+
+bool USoundSubsystem::ResolveSFXHandle(const FDataTableRowHandle& SFXHandle, FName& OutSFXIdentifier, FSFXData& OutData) const
+{
+	const UDataTable* DataTable = SFXHandle.DataTable ? SFXHandle.DataTable : SFXDataTable;
+	OutSFXIdentifier = NAME_None;
+	if (!DataTable)
 	{
 		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: No DataTable assigned for SFX lookup"));
 		return false;
 	}
 
-	const FSFXTableRow* Row = SFXDataTable->FindRow<FSFXTableRow>(SFXName, TEXT("SoundSubsystem::GetSFXData"));
+	if (SFXHandle.RowName.IsNone())
+	{
+		UE_LOG(LogSound, Warning, TEXT("SoundSubsystem: Invalid empty SFX row handle"));
+		return false;
+	}
+
+	const FSFXTableRow* Row = DataTable->FindRow<FSFXTableRow>(SFXHandle.RowName, TEXT("SoundSubsystem::GetSFXDataFromHandle"));
 	if (!Row)
 	{
 		return false;
 	}
 
 	OutData = Row->SFXData;
-
-	if (OutData.SFXName.IsNone())
-	{
-		OutData.SFXName = SFXName;
-	}
+	OutSFXIdentifier = SFXHandle.RowName;
 
 	return true;
 }
@@ -335,14 +359,14 @@ UAudioComponent* USoundSubsystem::AcquirePooledComponent()
 	return nullptr;
 }
 
-bool USoundSubsystem::CanPlaySFX(FName SFXName, float Cooldown) const
+bool USoundSubsystem::CanPlaySFX(FName SFXIdentifier, float Cooldown) const
 {
-	if (Cooldown <= 0.0f || SFXName.IsNone())
+	if (Cooldown <= 0.0f || SFXIdentifier.IsNone())
 	{
 		return true;
 	}
 
-	const double* LastTime = LastPlayTimes.Find(SFXName);
+	const double* LastTime = LastPlayTimes.Find(SFXIdentifier);
 	if (!LastTime)
 	{
 		return true;
@@ -358,9 +382,9 @@ bool USoundSubsystem::CanPlaySFX(FName SFXName, float Cooldown) const
 	return (CurrentTime - *LastTime) >= static_cast<double>(Cooldown);
 }
 
-void USoundSubsystem::RecordSFXPlay(FName SFXName)
+void USoundSubsystem::RecordSFXPlay(FName SFXIdentifier)
 {
-	if (SFXName.IsNone())
+	if (SFXIdentifier.IsNone())
 	{
 		return;
 	}
@@ -371,7 +395,7 @@ void USoundSubsystem::RecordSFXPlay(FName SFXName)
 		return;
 	}
 
-	LastPlayTimes.Add(SFXName, World->GetTimeSeconds());
+	LastPlayTimes.Add(SFXIdentifier, World->GetTimeSeconds());
 }
 
 float USoundSubsystem::CalculateFinalVolume(const FSFXData& SFXData) const
