@@ -20,7 +20,6 @@ struct GT5_PROJET_API FSFXData
 
 	FSFXData()
 		: Sound(nullptr)
-		, SFXName(NAME_None)
 		, BaseVolume(1.0f)
 		, PitchMin(1.0f)
 		, PitchMax(1.0f)
@@ -34,10 +33,6 @@ struct GT5_PROJET_API FSFXData
 	/** The sound asset to play (Sound Wave, Sound Cue, or MetaSound Source) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SFX")
 	TObjectPtr<USoundBase> Sound;
-
-	/** Unique identifier name for this SFX */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SFX")
-	FName SFXName;
 
 	/** Base volume level (0.0 to 1.0) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SFX", meta = (ClampMin = "0.0", ClampMax = "1.0"))
@@ -75,7 +70,14 @@ struct GT5_PROJET_API FSFXData
 
 	bool operator==(const FSFXData& Other) const
 	{
-		return SFXName == Other.SFXName && Sound == Other.Sound;
+		return Sound == Other.Sound
+			&& BaseVolume == Other.BaseVolume
+			&& PitchMin == Other.PitchMin
+			&& PitchMax == Other.PitchMax
+			&& VolumeVariation == Other.VolumeVariation
+			&& Cooldown == Other.Cooldown
+			&& bIs2D == Other.bIs2D
+			&& AttenuationRadius == Other.AttenuationRadius;
 	}
 
 	bool operator!=(const FSFXData& Other) const
@@ -87,7 +89,7 @@ struct GT5_PROJET_API FSFXData
 /**
  * DataTable row structure for SFX configuration.
  * Allows defining SFX in a DataTable for centralized management.
- * Row Name is used as the SFX identifier for PlaySFXByName().
+ * Row Name is used as the typed SFX identifier for DataTable row handles.
  */
 USTRUCT(BlueprintType)
 struct GT5_PROJET_API FSFXTableRow : public FTableRowBase
