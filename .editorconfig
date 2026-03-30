@@ -17,6 +17,34 @@ indent_style = tab
 indent_size = 4
 tab_width = 4
 
+# Visual Studio C++ formatting — Allman brace style
+cpp_new_line_before_open_brace_namespace = new_line
+cpp_new_line_before_open_brace_type = new_line
+cpp_new_line_before_open_brace_function = new_line
+cpp_new_line_before_open_brace_block = new_line
+cpp_new_line_before_open_brace_lambda = new_line
+cpp_new_line_before_else = true
+cpp_new_line_before_catch = true
+
+# Indentation
+cpp_indent_braces = false
+cpp_indent_namespace_contents = true
+cpp_indent_case_contents = true
+cpp_indent_case_labels = false
+cpp_indent_access_specifiers = false
+cpp_indent_preprocessor = one_left
+
+# Spacing
+cpp_space_before_function_open_parenthesis = remove
+cpp_space_within_parameter_list_parentheses = false
+cpp_space_after_cast = false
+cpp_space_pointer_reference_alignment = left
+cpp_space_around_binary_operator = insert
+cpp_space_around_assignment_operator = insert
+
+# Wrapping
+cpp_wrap_preserve_blocks = one_liners
+
 # ──────────────────────────────────────────────
 # C# files (UE5 Build.cs / Target.cs)
 # ──────────────────────────────────────────────
