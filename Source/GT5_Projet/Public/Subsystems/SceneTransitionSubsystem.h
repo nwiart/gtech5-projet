@@ -44,7 +44,7 @@ public:
 	* @param LevelToLoad : The "Soft" reference of the level.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Scene Management")
-	void LoadStartLevel(TSoftObjectPtr<UWorld> LevelToLoad);
+	void LoadLevel(TSoftObjectPtr<UWorld> LevelToLoad);
 
 private:
 	// Internal variables to store state

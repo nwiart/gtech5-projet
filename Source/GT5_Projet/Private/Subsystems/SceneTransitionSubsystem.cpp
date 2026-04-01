@@ -32,17 +32,16 @@ void USceneTransitionSubsystem::LoadLevelAsync(const TSoftObjectPtr<UWorld> Leve
     GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &USceneTransitionSubsystem::StartActualLoading, 1.0f, false);
 }
 
-void USceneTransitionSubsystem::LoadStartLevel(const TSoftObjectPtr<UWorld> LevelToLoad)
+void USceneTransitionSubsystem::LoadLevel(const TSoftObjectPtr<UWorld> LevelToLoad)
 {
 	if (LevelToLoad.IsNull())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("LoadLevelAsync : Empty level reference!"));
+		UE_LOG(LogTemp, Warning, TEXT("LoadLevel : Empty level reference!"));
 		return;
 	}
 
 	PendingLevel = LevelToLoad;
 
-	// Create the loading UI (if provided) and keep it above other widgets.
 	CurrentWidget = nullptr;
 
 	// Signal the start of the loading process.
