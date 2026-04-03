@@ -48,11 +48,10 @@ APawnIsometric::APawnIsometric()
 	SetActorRotation(CameraRotation);
 }
 
-// Called when the game starts or when spawned
 void APawnIsometric::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	bIsCursorActive = true;
 	cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
 	if (cursorActor) {
@@ -112,7 +111,6 @@ void APawnIsometric::Tick(float DeltaTime)
 	}
 }
 
-// Called to bind functionality to input
 void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
