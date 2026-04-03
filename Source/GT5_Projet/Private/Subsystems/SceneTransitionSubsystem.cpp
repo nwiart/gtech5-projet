@@ -32,6 +32,25 @@ void USceneTransitionSubsystem::LoadLevelAsync(const TSoftObjectPtr<UWorld> Leve
     GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &USceneTransitionSubsystem::StartActualLoading, 1.0f, false);
 }
 
+void USceneTransitionSubsystem::LoadLevel(const TSoftObjectPtr<UWorld> LevelToLoad)
+{
+	if (LevelToLoad.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LoadLevel : Empty level reference!"));
+		return;
+	}
+
+	PendingLevel = LevelToLoad;
+
+	CurrentWidget = nullptr;
+
+	// Signal the start of the loading process.
+	OnLoadingStarted.Broadcast();
+
+	// Immediately start the loading.
+	StartActualLoading();
+}
+
 void USceneTransitionSubsystem::StartActualLoading()
 {
     const FName LevelName = FName(*FPackageName::ObjectPathToPackageName(PendingLevel.ToString()));
@@ -75,14 +94,19 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     // Schedule the new level to be shown.
     const FName NewLevelName = PendingLevel.GetLongPackageFName();
     ULevelStreaming* NewLevel = UGameplayStatics::GetStreamingLevel(this, NewLevelName);
-    NewLevel->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
-    NewLevel->SetShouldBeVisible(true);
+	if (NewLevel) {
+		NewLevel->OnLevelShown.Clear();
+		NewLevel->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
+		NewLevel->SetShouldBeVisible(true);
+		UE_LOG(LogTemp, Log, TEXT("Level \"%s\" loaded successfully!"), *NewLevelName.ToString());
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Level \"%s\" failed to load for an unknown reason."), *NewLevelName.ToString());
+	}
 
     // Prevent stacking streamed levels in memory: unload everything except the target.
-    for (const TArray<ULevelStreaming*>& StreamingLevels = GetWorld()->GetStreamingLevels(); ULevelStreaming* LevelStream : StreamingLevels)
-    {
-        if (LevelStream != NewLevel)
-        {
+    for (const TArray<ULevelStreaming*>& StreamingLevels = GetWorld()->GetStreamingLevels(); ULevelStreaming* LevelStream : StreamingLevels) {
+        if (LevelStream != NewLevel) {
             LevelStream->SetShouldBeLoaded(false);
         }
     }
@@ -90,6 +114,8 @@ void USceneTransitionSubsystem::OnLoadCompleted()
 
 void USceneTransitionSubsystem::OnLevelShown()
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnLevelShown()"));
+
     // Let the UI play its outro animation (fade out).
     OnLoadingFinished.Broadcast();
 

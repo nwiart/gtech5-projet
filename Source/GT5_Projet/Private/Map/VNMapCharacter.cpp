@@ -59,32 +59,32 @@ void AVNMapCharacter::Tick(float DeltaTime)
 	// Arrived at end of node.
 	if (MovementProgress >= 1.0f)
 	{
+		FIntPoint TilePos = PathToFollow[CurrentWaypointIndex];
 		CurrentWaypointIndex++;
 
-		if (CurrentWaypointIndex >= PathToFollow.Num())
+		// Check for hit event.
+		AVNMapEvent* elem = UPathfindingLibrary::GetTileEvent(TilePos, this);
+
+		// Last point reached.
+		if (CurrentWaypointIndex >= PathToFollow.Num() || elem != NULL)
 		{
 			SetActorLocation(TargetWorldPosition);
 			bIsMoving = false;
 
 			GetCharacterMovement()->Velocity = FVector::ZeroVector;
 
-			FIntPoint finalTile = PathToFollow.Last();
+			PathToFollow.Empty();
 
-			AVNMapEvent* elem = UPathfindingLibrary::GetTileEvent(finalTile, this);
-			UE_LOG(LogTemp, Warning, TEXT("Actor: %s"),
-				elem ? (*elem->GetName()) : TEXT("nope..."));
 			if (elem != NULL) {
 				elem->OnPlayerHit();
 			}
-
-			PathToFollow.Empty();
 			return;
 		}
 
 		MovementProgress = 0.0f;
 		CurrentWorldPosition = TargetWorldPosition;
-		FVector TilePos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PathToFollow[CurrentWaypointIndex]);
-		TargetWorldPosition = FVector(TilePos.X, TilePos.Y, HeightLevel + CharacterZOffset);
+		FVector NextPos = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(PathToFollow[CurrentWaypointIndex]);
+		TargetWorldPosition = FVector(NextPos.X, NextPos.Y, HeightLevel + CharacterZOffset);
 	}
 
 	FVector NewPosition = FMath::Lerp(CurrentWorldPosition, TargetWorldPosition, MovementProgress);
