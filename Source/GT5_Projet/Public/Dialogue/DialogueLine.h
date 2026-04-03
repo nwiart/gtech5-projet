@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 
 #include "Dialogue/DialoguePose.h"
 
@@ -39,6 +40,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString Note;
+
+	/** Optional SFX to play when this line starts (from DT_SFX) */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "SFX",
+		meta = (RowType = "/Script/GT5_Projet.SFXTableRow"))
+	FDataTableRowHandle SFXHandle;
 };
 
 USTRUCT(BlueprintType)

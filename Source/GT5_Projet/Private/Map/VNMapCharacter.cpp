@@ -16,12 +16,12 @@
 
 // Sets default values
 AVNMapCharacter::AVNMapCharacter()
-	: CurrentWaypointIndex(0)
+	: HeightLevel(0.0F)
+	, CurrentWaypointIndex(0)
 	, MovementProgress(0.f)
 	, bIsMoving(false)
 	, CharacterZOffset(0.f)
 	, MovementSpeed(3.0f)
-	, HeightLevel(0.0F)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

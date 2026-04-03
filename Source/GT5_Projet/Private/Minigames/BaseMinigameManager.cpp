@@ -3,6 +3,7 @@
 #include "Minigames/BaseMinigameManager.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/SoundSubsystem.h"
 
 ABaseMinigameManager::ABaseMinigameManager()
 	: HUDWidget(nullptr)
@@ -51,6 +52,14 @@ void ABaseMinigameManager::ShowWinScreen()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("WinScreenClass is not set for %s"), *MinigameName);
 	}
+
+	if (VictorySFX.RowName != NAME_None)
+	{
+		if (USoundSubsystem* SoundSub = GetGameInstance()->GetSubsystem<USoundSubsystem>())
+		{
+			SoundSub->PlaySFXByHandle(VictorySFX);
+		}
+	}
 }
 
 void ABaseMinigameManager::ShowLoseScreen()
@@ -63,6 +72,14 @@ void ABaseMinigameManager::ShowLoseScreen()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("LoseScreenClass is not set for %s"), *MinigameName);
+	}
+
+	if (LoseSFX.RowName != NAME_None)
+	{
+		if (USoundSubsystem* SoundSub = GetGameInstance()->GetSubsystem<USoundSubsystem>())
+		{
+			SoundSub->PlaySFXByHandle(LoseSFX);
+		}
 	}
 }
 
