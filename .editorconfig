@@ -1,0 +1,141 @@
+root = true
+
+# ──────────────────────────────────────────────
+# All files
+# ──────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# ──────────────────────────────────────────────
+# C / C++ source files
+# ──────────────────────────────────────────────
+[*.{cpp,h,c,hpp,inl}]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# Visual Studio C++ formatting — Allman brace style
+cpp_new_line_before_open_brace_namespace = new_line
+cpp_new_line_before_open_brace_type = new_line
+cpp_new_line_before_open_brace_function = new_line
+cpp_new_line_before_open_brace_block = new_line
+cpp_new_line_before_open_brace_lambda = new_line
+cpp_new_line_before_else = true
+cpp_new_line_before_catch = true
+
+# Indentation
+cpp_indent_braces = false
+cpp_indent_namespace_contents = true
+cpp_indent_case_contents = true
+cpp_indent_case_labels = false
+cpp_indent_access_specifiers = false
+cpp_indent_preprocessor = one_left
+
+# Spacing
+cpp_space_before_function_open_parenthesis = remove
+cpp_space_within_parameter_list_parentheses = false
+cpp_space_after_cast = false
+cpp_space_pointer_reference_alignment = left
+cpp_space_around_binary_operator = insert
+cpp_space_around_assignment_operator = insert
+
+# Wrapping
+cpp_wrap_preserve_blocks = one_liners
+
+# ──────────────────────────────────────────────
+# C# files (UE5 Build.cs / Target.cs)
+# ──────────────────────────────────────────────
+[*.cs]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# Allman brace style
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+
+# Indentation
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = flush_left
+
+# Spacing
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_around_binary_operators = before_and_after
+
+# Wrapping
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = true
+
+# .NET code quality
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# ──────────────────────────────────────────────
+# JSON / Unreal project files (UE5 uses tabs)
+# ──────────────────────────────────────────────
+[*.{json,uproject,uplugin}]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# ──────────────────────────────────────────────
+# Config / INI files
+# ──────────────────────────────────────────────
+[*.{ini,cfg}]
+indent_style = space
+indent_size = 2
+
+# ──────────────────────────────────────────────
+# YAML
+# ──────────────────────────────────────────────
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2
+
+# ──────────────────────────────────────────────
+# XML / HTML / UXML
+# ──────────────────────────────────────────────
+[*.{xml,html,uxml}]
+indent_style = space
+indent_size = 2
+
+# ──────────────────────────────────────────────
+# Python (UE5 automation scripts)
+# ──────────────────────────────────────────────
+[*.py]
+indent_style = space
+indent_size = 4
+
+# ──────────────────────────────────────────────
+# Shader files (HLSL / USF / USH)
+# ──────────────────────────────────────────────
+[*.{hlsl,usf,ush}]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# ──────────────────────────────────────────────
+# Markdown
+# ──────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+
+# ──────────────────────────────────────────────
+# Makefiles (require tabs)
+# ──────────────────────────────────────────────
+[Makefile]
+indent_style = tab
