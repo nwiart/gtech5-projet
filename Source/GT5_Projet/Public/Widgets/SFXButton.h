@@ -33,7 +33,11 @@ public:
 	FDataTableRowHandle ClickSFXHandle;
 
 protected:
+	/** Bind hover/click handlers once the underlying SButton exists. */
 	virtual TSharedRef<SWidget> RebuildWidget() override;
+
+	/** Unbind handlers when the SButton is torn down (paired with RebuildWidget). */
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 
 private:
 	/** Called when the button is hovered */

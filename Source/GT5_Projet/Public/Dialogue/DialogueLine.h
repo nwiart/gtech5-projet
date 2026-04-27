@@ -41,7 +41,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString Note;
 
-	/** Optional SFX to play when this line starts (from DT_SFX) */
+	/** Optional SFX to play when this line starts (from DT_SFX).
+	Played from WB_Dialogue Blueprint via USoundSubsystem::PlaySFXByHandle. **/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "SFX",
 		meta = (RowType = "/Script/GT5_Projet.SFXTableRow"))
 	FDataTableRowHandle SFXHandle;

@@ -13,10 +13,22 @@ TSharedRef<SWidget> USFXButton::RebuildWidget()
 {
 	TSharedRef<SWidget> Widget = Super::RebuildWidget();
 
+	// Self-binding: OnHovered/OnClicked live on this UButton instance, so the
+	// delegates and their target share lifetime. AddUniqueDynamic keeps the
+	// bindings idempotent across rebuild cycles.
 	OnHovered.AddUniqueDynamic(this, &USFXButton::HandleHovered);
 	OnClicked.AddUniqueDynamic(this, &USFXButton::HandleClicked);
 
 	return Widget;
+}
+
+void USFXButton::ReleaseSlateResources(bool bReleaseChildren) {
+	// Paired cleanup with RebuildWidget. Not strictly required for self-bindings
+	// (delegate and target die together), but kept for symmetry and clarity.
+	OnHovered.RemoveDynamic(this, &USFXButton::HandleHovered);
+	OnClicked.RemoveDynamic(this, &USFXButton::HandleClicked);
+
+	Super::ReleaseSlateResources(bReleaseChildren);
 }
 
 void USFXButton::HandleHovered()
