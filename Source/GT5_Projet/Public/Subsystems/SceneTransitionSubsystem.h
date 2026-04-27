@@ -39,13 +39,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Scene Management")
 	void LoadLevelAsync(TSoftObjectPtr<UWorld> LevelToLoad, TSubclassOf<UUserWidget> WidgetClass);
 
-	/**
-	* Starts the loading process for the first level, usually a main menu.
-	* @param LevelToLoad : The "Soft" reference of the level.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Scene Management")
-	void LoadLevel(TSoftObjectPtr<UWorld> LevelToLoad);
-
 private:
 	// Internal variables to store state
 	TSoftObjectPtr<UWorld> PendingLevel;

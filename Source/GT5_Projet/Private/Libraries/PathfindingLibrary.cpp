@@ -59,6 +59,14 @@ bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& 
 			break;
 		}
 
+		// Stop on first met event.
+		if (GetTileEvent(CurrentNode->Position, WorldContext) != NULL)
+		{
+			bPathFound = true;
+			EndNode = CurrentNode;
+			break;
+		}
+
 		TInlineComponentArray<FIntPoint, 4> Neighbors;
 		GetNeighbors(Neighbors, CurrentNode->Position);
 		for (const FIntPoint& NeighborPos : Neighbors)
