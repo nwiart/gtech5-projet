@@ -5,12 +5,7 @@
 
 UMapSubsystem::UMapSubsystem()
 {
-
 }
-
-/*void UMapSubsystem::OnWorldBeginPlay(UWorld& InWorld)
-{
-}*/
 
 void UMapSubsystem::Reset()
 {
