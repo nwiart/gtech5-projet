@@ -5,6 +5,8 @@
 #include "MapSubsystem.generated.h"
 
 class ATileField;
+class AVNMapEvent;
+
 
 /**
  * Map subsystem.
@@ -36,6 +38,13 @@ public:
 	void AddTileField(ATileField* field);
 
 	/**
+	 * Add a map event to the map.
+	 * This function is called automatically by every map event instance from
+	 * their BeginPlay().
+	 */
+	void AddMapEvent(AVNMapEvent* mapEvent);
+
+	/**
 	 * Get a list of all existing tiles, represented by their position.
 	 * These are not necessarily walkable tiles (obstacles are ignored).
 	 */
@@ -48,9 +57,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsTileAt(const FIntPoint& TilePos) const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	AVNMapEvent* GetMapEventAt(const FIntPoint& TilePos) const;
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<AVNMapEvent*>& GetAllMapEvents() { return MapEvents; }
+
 
 private:
 
 	// List of all tile fields in the current map. They represent the walkable terrain.
 	TArray<ATileField*> TileFields;
+
+	// List of map events.
+	TArray<AVNMapEvent*> MapEvents;
 };

@@ -21,13 +21,4 @@ public:
 	AVNGamemode();
 
 	void BeginPlay();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TSet<AVNMapEvent*>& GetAllMapElements() { return MapElements; }
-
-
-protected:
-
-	// TODO : Move to chapter subsys (or a map subsys perhaps?)
-	TSet<AVNMapEvent*> MapElements;
 };

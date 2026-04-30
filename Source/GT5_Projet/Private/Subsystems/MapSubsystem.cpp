@@ -1,6 +1,7 @@
 #include "Subsystems/MapSubsystem.h"
 
 #include "Map/TileField.h"
+#include "Map/VNMapEvent.h"
 
 
 UMapSubsystem::UMapSubsystem()
@@ -10,11 +11,17 @@ UMapSubsystem::UMapSubsystem()
 void UMapSubsystem::Reset()
 {
 	TileFields.Empty();
+	MapEvents.Empty();
 }
 
 void UMapSubsystem::AddTileField(ATileField* field)
 {
 	TileFields.Add(field);
+}
+
+void UMapSubsystem::AddMapEvent(AVNMapEvent* mapEvent)
+{
+	MapEvents.Add(mapEvent);
 }
 
 void UMapSubsystem::GetAllTiles(TArray<FIntPoint>& pos) const
@@ -40,4 +47,14 @@ bool UMapSubsystem::IsTileAt(const FIntPoint& TilePos) const
 		return true;
 	}
 	return false;
+}
+
+AVNMapEvent* UMapSubsystem::GetMapEventAt(const FIntPoint& TilePos) const
+{
+	for (AVNMapEvent* me : MapEvents) {
+		if (me->GetTilePosition() == TilePos && !me->bIsInactive) {
+			return me;
+		}
+	}
+	return NULL;
 }
