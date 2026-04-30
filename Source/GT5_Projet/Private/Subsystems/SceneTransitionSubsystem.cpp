@@ -4,6 +4,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LevelStreaming.h"
 
+#include "Subsystems/MapSubsystem.h"
+
 void USceneTransitionSubsystem::LoadLevelAsync(const TSoftObjectPtr<UWorld> LevelToLoad, const TSubclassOf<UUserWidget> WidgetClass)
 {
     if (LevelToLoad.IsNull())
@@ -44,6 +46,8 @@ void USceneTransitionSubsystem::StartActualLoading()
 
     // Non-blocking streaming to avoid freezing the game thread.
     UGameplayStatics::LoadStreamLevel(this, LevelName, false, false, LatentInfo);
+
+	GetWorld()->GetSubsystem<UMapSubsystem>()->Reset();
 
     // Lightweight polling to feed the loading UI.
     GetWorld()->GetTimerManager().SetTimer(ProgressTimerHandle, this, &USceneTransitionSubsystem::CheckLoadProgress, 0.1f, true);

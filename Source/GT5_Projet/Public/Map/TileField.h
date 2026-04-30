@@ -24,6 +24,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsPointInside(const FVector& WorldLocation) const;
 
+	FIntPoint GetStartTile() const;
+
 
 public:
 

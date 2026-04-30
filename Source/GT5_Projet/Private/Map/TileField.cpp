@@ -52,3 +52,9 @@ bool ATileField::IsPointInside(const FVector& WorldLocation) const
 
 	return (WorldLocation.X >= p0.X && WorldLocation.X < p1.X) && (WorldLocation.Y >= p0.Y && WorldLocation.Y < p1.Y);
 }
+
+FIntPoint ATileField::GetStartTile() const
+{
+	FVector loc = this->GetActorLocation();
+	return FIntPoint(FMath::RoundToInt(loc.X / 100.0), FMath::RoundToInt(loc.Y / 100.0));
+}
