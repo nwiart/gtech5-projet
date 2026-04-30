@@ -28,7 +28,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnPlayerHit();
 
+	UFUNCTION(BlueprintCallable)
+	void SetInactive();
+
+
 	// If true, this element blocks character movement (walls, obstacles, etc.)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bBlocksMovement;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	bool bIsInactive;
 };

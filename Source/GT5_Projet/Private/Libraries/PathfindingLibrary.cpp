@@ -5,6 +5,8 @@
 
 #include "Subsystems/VNChapterSubsystem.h"
 
+#include "Subsystems/MapSubsystem.h"
+
 #include "Core/VNGamemode.h"
 #include "Map/VNMapEvent.h"
 
@@ -156,7 +158,9 @@ bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UO
 
 AVNMapEvent* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, const UObject* WorldContext)
 {
-	FHitResult HitResult;
+	UMapSubsystem* subsys = WorldContext->GetWorld()->GetSubsystem<UMapSubsystem>();
+	return subsys ? subsys->GetMapEventAt(TilePosition) : NULL;
+	/*FHitResult HitResult;
 	bool bHitFloor = FindTileAt(HitResult, TilePosition, WorldContext);
 	AActor* Actor = HitResult.GetActor();
 
@@ -164,7 +168,7 @@ AVNMapEvent* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, co
 		return NULL;
 	}
 
-	return IsTileEvent(Actor) ? Cast<AVNMapEvent>(Actor) : 0;
+	return IsTileEvent(Actor) ? Cast<AVNMapEvent>(Actor) : 0;*/
 }
 
 float UPathfindingLibrary::CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B)
