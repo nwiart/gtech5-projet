@@ -73,6 +73,9 @@ void APictureFrame::Shatter()
 		RotationComponent->SetComponentTickEnabled(false);
 	}
 
+	// Let Blueprint handle extra components (e.g. delayed destroy of BP-added meshes)
+	OnShatter();
+
 	// Destroy actor after delay (allow VFX to play)
 	SetLifeSpan(2.0f);
 }
