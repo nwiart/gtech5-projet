@@ -26,8 +26,10 @@ const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
 // Sets default values
 APawnIsometric::APawnIsometric()
 	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
-	, cursorActor(0), highlightActor(0), bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true), PlayerCharacter(0), MapBounds(0)
 	, CharacterHeightLevel(0.0F)
+	, MapBounds(0), PlayerCharacter(0)
+	, cursorActor(0), highlightActor(0)
+	, bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = ETickingGroup::TG_PostPhysics;

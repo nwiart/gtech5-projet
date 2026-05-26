@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Data/MinigameData.h"
+#include "Engine/DataTable.h"
 #include "BaseMinigameManager.generated.h"
 
 class UUserWidget;
@@ -29,6 +30,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> LoseScreenClass;
+
+	// Win/Lose SFX
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	FDataTableRowHandle VictorySFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	FDataTableRowHandle LoseSFX;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> HUDWidgetClass;
