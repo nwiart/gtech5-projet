@@ -33,11 +33,9 @@ void AFrameBreakerManager::BeginPlay()
 		{
 			if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>())
 			{
-				CursorSubsys->SetMode(ECursorMode::Free);
+				CursorSubsys->SetMode(ECursorMode::Locked);
 			}
 		}
-
-		UE_LOG(LogTemp, Log, TEXT("FrameBreakerGameMode: Mouse cursor enabled"));
 	}
 
 	// Initialize default levels if no configs are set
@@ -203,6 +201,9 @@ void AFrameBreakerManager::ClearAllFrames()
 
 void AFrameBreakerManager::OnFrameDestroyed(APictureFrame* Frame)
 {
+	if (!bIsMinigameActive)
+		return;
+
 	if (!Frame)
 		return;
 
@@ -305,7 +306,7 @@ void AFrameBreakerManager::OnKnifeThrown()
 
 bool AFrameBreakerManager::HasKnivesRemaining() const
 {
-	return KnivesRemaining > 0;
+	return bIsMinigameActive && KnivesRemaining > 0;
 }
 
 void AFrameBreakerManager::OnGameLost()

@@ -73,7 +73,13 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     // Schedule the new level to be shown.
     const FName NewLevelName = PendingLevel.GetLongPackageFName();
     ULevelStreaming* NewLevel = UGameplayStatics::GetStreamingLevel(this, NewLevelName);
-    NewLevel->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
+    if (!NewLevel)
+    {
+        UE_LOG(LogTemp, Error, TEXT("SceneTransitionSubsystem: Could not find streaming level '%s'."), *NewLevelName.ToString());
+        return;
+    }
+
+    NewLevel->OnLevelShown.AddUniqueDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
     NewLevel->SetShouldBeVisible(true);
 
     // Prevent stacking streamed levels in memory: unload everything except the target.
