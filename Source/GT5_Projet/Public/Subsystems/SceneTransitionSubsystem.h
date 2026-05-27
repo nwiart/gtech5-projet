@@ -5,6 +5,8 @@
 #include "Blueprint/UserWidget.h"
 #include "SceneTransitionSubsystem.generated.h"
 
+class ULevelStreaming;
+
 // Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLoadingStateChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLoadingProgress, float, Percent);
@@ -43,6 +45,9 @@ private:
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 	FTimerHandle ProgressTimerHandle;
+
+	// Streaming level currently bound to OnLevelShown; held so we can unbind once it fires.
+	TWeakObjectPtr<ULevelStreaming> BoundLevel;
 
 	// Internal functions
 	void StartActualLoading();

@@ -185,6 +185,7 @@ void APawnIsometric::SetViewCenteredOnTile(const FIntPoint& TilePos)
 
 void APawnIsometric::SetCursorActive(bool bActive)
 {
+	const bool bWasActive = bIsCursorActive;
 	bIsCursorActive = bActive;
 	if (cursorActor) {
 		cursorActor->SetActorHiddenInGame(!bActive);
@@ -192,6 +193,12 @@ void APawnIsometric::SetCursorActive(bool bActive)
 
 	if (highlightActor && !bActive) {
 		highlightActor->SetActorHiddenInGame(true);
+	}
+
+	// When re-activating, invalidate the cached tile so Tick re-evaluates and
+	// re-shows the highlight even if the mouse hasn't moved.
+	if (!bWasActive && bActive) {
+		hoveredTile = FIntPoint(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min());
 	}
 }
 

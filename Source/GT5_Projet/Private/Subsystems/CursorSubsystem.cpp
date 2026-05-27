@@ -6,7 +6,9 @@
 void UCursorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	ApplyCursorState();
+	// Don't call ApplyCursorState() here: GameInstance subsystems initialize
+	// before any LocalPlayer/PC exists, so the call would be a no-op. The first
+	// SetMode/SetFocusUI from gameplay code applies the state once a PC is up.
 }
 
 void UCursorSubsystem::SetMode(ECursorMode NewMode)

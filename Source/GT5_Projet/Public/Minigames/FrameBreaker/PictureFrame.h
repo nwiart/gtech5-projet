@@ -47,6 +47,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Frame")
 	void Shatter();
 
+	// Hook for Blueprint to handle extra components on shatter (e.g. delayed destroy of BP-added meshes)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Frame")
+	void OnShatter();
+
 	// Check if frame is destroyed
 	UPROPERTY(BlueprintReadOnly, Category = "Frame")
 	bool bIsDestroyed = false;

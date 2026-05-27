@@ -16,6 +16,13 @@ FIntPoint UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(const FVector& world
 	return FIntPoint(FMath::FloorToInt(worldPos.X / TileSize), FMath::FloorToInt(worldPos.Y / TileSize));
 }
 
+FIntPoint UVNTileMapLibrary::GetNearestTileFromWorldPos(const FVector& worldPos)
+{
+	return FIntPoint(
+		FMath::FloorToInt((worldPos.X + TileHalfSize) / TileSize),
+		FMath::FloorToInt((worldPos.Y + TileHalfSize) / TileSize));
+}
+
 FVector UVNTileMapLibrary::GetWorldPosFromTileCoordinates(const FIntPoint& tileCoords)
 {
 	return FVector(tileCoords.X * TileSize + TileHalfSize, tileCoords.Y * TileSize + TileHalfSize, 0.0);

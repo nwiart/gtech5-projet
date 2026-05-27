@@ -62,22 +62,21 @@ void AVNPlayerController::SetupInputComponent()
 
 void AVNPlayerController::Input_FocusUIStart()
 {
-	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
-	{
-		if (UCursorSubsystem* CursorSub = GameInstance->GetSubsystem<UCursorSubsystem>())
-		{
-			CursorSub->SetFocusUI(true);
-		}
-	}
+	ApplyCursorFocusUI(true);
 }
 
 void AVNPlayerController::Input_FocusUIStop()
 {
-	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
+	ApplyCursorFocusUI(false);
+}
+
+void AVNPlayerController::ApplyCursorFocusUI(bool bFocusUI)
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UCursorSubsystem* CursorSub = GameInstance->GetSubsystem<UCursorSubsystem>())
 		{
-			CursorSub->SetFocusUI(false);
+			CursorSub->SetFocusUI(bFocusUI);
 		}
 	}
 }

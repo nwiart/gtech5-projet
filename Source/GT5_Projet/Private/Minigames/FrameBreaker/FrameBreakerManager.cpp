@@ -33,7 +33,8 @@ void AFrameBreakerManager::BeginPlay()
 		{
 			if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>())
 			{
-				CursorSubsys->SetMode(ECursorMode::Locked);
+				// FrameBreaker is click-based — the cursor must stay visible.
+				CursorSubsys->SetMode(ECursorMode::Free);
 			}
 		}
 	}

@@ -2,8 +2,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LevelStreaming.h"
 
-#include "Subsystems/MapSubsystem.h"
-
 void USceneTransitionSubsystem::LoadLevelAsync(const TSoftObjectPtr<UWorld> LevelToLoad, const TSubclassOf<UUserWidget> WidgetClass)
 {
     if (LevelToLoad.IsNull())
@@ -45,10 +43,10 @@ void USceneTransitionSubsystem::StartActualLoading()
     // Non-blocking streaming to avoid freezing the game thread.
     UGameplayStatics::LoadStreamLevel(this, LevelName, false, false, LatentInfo);
 
-    if (UMapSubsystem* MapSubsys = GetWorld()->GetSubsystem<UMapSubsystem>())
-    {
-        MapSubsys->Reset();
-    }
+    // MapSubsystem state is maintained per-actor: old level's tile fields and
+    // map events deregister themselves from their EndPlay, new level's actors
+    // re-register from their BeginPlay. No manual reset needed here, and doing
+    // one would race with the still-loaded old level.
 
     // Lightweight polling to feed the loading UI.
     GetWorld()->GetTimerManager().SetTimer(ProgressTimerHandle, this, &USceneTransitionSubsystem::CheckLoadProgress, 0.1f, true);
@@ -87,6 +85,7 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     }
 
     NewLevel->OnLevelShown.AddUniqueDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
+    BoundLevel = NewLevel;
     NewLevel->SetShouldBeVisible(true);
 
     // Prevent stacking streamed levels in memory: unload everything except the target.
@@ -101,6 +100,14 @@ void USceneTransitionSubsystem::OnLoadCompleted()
 
 void USceneTransitionSubsystem::OnLevelShown()
 {
+    // Unbind so old ULevelStreaming instances don't keep a delegate pointing
+    // at this subsystem after the transition completes.
+    if (ULevelStreaming* Level = BoundLevel.Get())
+    {
+        Level->OnLevelShown.RemoveDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
+    }
+    BoundLevel.Reset();
+
     // Let the UI play its outro animation (fade out).
     OnLoadingFinished.Broadcast();
 

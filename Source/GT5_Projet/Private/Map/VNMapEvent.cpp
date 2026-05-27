@@ -21,11 +21,22 @@ AVNMapEvent::AVNMapEvent()
 void AVNMapEvent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	UMapSubsystem* subsys = GetWorld()->GetSubsystem<UMapSubsystem>();
 	if (subsys) {
 		subsys->AddMapEvent(this);
 	}
+}
+
+void AVNMapEvent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld()) {
+		if (UMapSubsystem* subsys = World->GetSubsystem<UMapSubsystem>()) {
+			subsys->RemoveMapEvent(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 

@@ -45,4 +45,6 @@ private:
 
 	void Input_FocusUIStart();
 	void Input_FocusUIStop();
+
+	void ApplyCursorFocusUI(bool bFocusUI);
 };
