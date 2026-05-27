@@ -24,29 +24,32 @@ public:
 	UMapSubsystem();
 
 	/**
-	 * Clears all registered tile fields.
+	 * Clears all registered tile fields and map events.
 	 * This is to be called when a new level starts getting loaded (currently
 	 *   in USceneTransitionSubsystem::StartActualLoading()).
+	 * Tile fields and map events from the newly loaded level re-register
+	 * themselves from their BeginPlay().
 	 */
 	void Reset();
 
 	/**
 	 * Add a tile field to the terrain.
 	 * This function is called automatically by every tile field instance from
-	 * their BeginPlay().
+	 * their BeginPlay(). Duplicate registrations are ignored.
 	 */
-	void AddTileField(ATileField* field);
+	void AddTileField(ATileField* TileField);
 
 	/**
 	 * Add a map event to the map.
 	 * This function is called automatically by every map event instance from
-	 * their BeginPlay().
+	 * their BeginPlay(). Duplicate registrations are ignored.
 	 */
-	void AddMapEvent(AVNMapEvent* mapEvent);
+	void AddMapEvent(AVNMapEvent* MapEvent);
 
 	/**
-	 * Get a list of all existing tiles, represented by their position.
-	 * These are not necessarily walkable tiles (obstacles are ignored).
+	 * Append the positions of all existing tiles to the output array.
+	 * Tiles are not necessarily walkable (obstacles are ignored).
+	 * The output array is not cleared by this function.
 	 */
 	UFUNCTION(BlueprintCallable)
 	void GetAllTiles(TArray<FIntPoint>& TilePositions) const;
@@ -62,7 +65,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<AVNMapEvent*>& GetAllMapEvents() { return MapEvents; }
+	const TArray<AVNMapEvent*>& GetAllMapEvents() const { return MapEvents; }
 
 
 private:

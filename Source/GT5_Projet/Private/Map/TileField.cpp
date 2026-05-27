@@ -3,6 +3,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Libraries/VNTileMapLibrary.h"
 #include "Subsystems/MapSubsystem.h"
 
 
@@ -10,26 +11,28 @@
 ATileField::ATileField()
 	: SizeX(10), SizeY(10)
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 
 	Box = CreateDefaultSubobject<UBoxComponent>("Box");
-	Box->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	//Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Box->SetupAttachment(RootComponent);
 
-	this->Tags.Add(TEXT("Floor"));
+	this->Tags.Add(UVNTileMapLibrary::FloorTag);
 }
 
 void ATileField::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	FVector loc = this->GetActorLocation();
-	FVector he(SizeX * 50.0, SizeY * 50.0, 0.0);
-	Box->SetBoxExtent(he);
-	Box->SetRelativeLocation(he + FVector(FMath::RoundToDouble(loc.X / 100.0) * 100.0 - loc.X, FMath::RoundToDouble(loc.Y / 100.0) * 100.0 - loc.Y, 0.0));
+	const FVector Location = GetActorLocation();
+	const FVector Extent(SizeX * UVNTileMapLibrary::TileHalfSize, SizeY * UVNTileMapLibrary::TileHalfSize, 0.0);
+	Box->SetBoxExtent(Extent);
+
+	// Snap the box so its tiles align with the world tile grid, regardless of the actor's raw transform.
+	const double SnapX = FMath::RoundToDouble(Location.X / UVNTileMapLibrary::TileSize) * UVNTileMapLibrary::TileSize - Location.X;
+	const double SnapY = FMath::RoundToDouble(Location.Y / UVNTileMapLibrary::TileSize) * UVNTileMapLibrary::TileSize - Location.Y;
+	Box->SetRelativeLocation(Extent + FVector(SnapX, SnapY, 0.0));
 }
 
 void ATileField::BeginPlay()
@@ -37,24 +40,29 @@ void ATileField::BeginPlay()
 	Super::BeginPlay();
 
 	// Register ourselves as terrain.
-	UMapSubsystem* subsys = this->GetWorld()->GetSubsystem<UMapSubsystem>();
-	if (subsys) {
-		subsys->AddTileField(this);
+	UMapSubsystem* Subsys = GetWorld()->GetSubsystem<UMapSubsystem>();
+	if (Subsys) {
+		Subsys->AddTileField(this);
 	}
 }
 
 
 bool ATileField::IsPointInside(const FVector& WorldLocation) const
 {
-	FVector center = GetActorLocation();
-	FVector p0 = center - Box->GetScaledBoxExtent();
-	FVector p1 = center + Box->GetScaledBoxExtent();
+	// The box is offset in OnConstruction() to snap to the tile grid, so its
+	// world center is not the actor location — use the component's own location.
+	const FVector Center = Box->GetComponentLocation();
+	const FVector Extent = Box->GetScaledBoxExtent();
+	const FVector P0 = Center - Extent;
+	const FVector P1 = Center + Extent;
 
-	return (WorldLocation.X >= p0.X && WorldLocation.X < p1.X) && (WorldLocation.Y >= p0.Y && WorldLocation.Y < p1.Y);
+	return (WorldLocation.X >= P0.X && WorldLocation.X < P1.X) && (WorldLocation.Y >= P0.Y && WorldLocation.Y < P1.Y);
 }
 
 FIntPoint ATileField::GetStartTile() const
 {
-	FVector loc = this->GetActorLocation();
-	return FIntPoint(FMath::RoundToInt(loc.X / 100.0), FMath::RoundToInt(loc.Y / 100.0));
+	const FVector Location = GetActorLocation();
+	return FIntPoint(
+		FMath::RoundToInt(Location.X / UVNTileMapLibrary::TileSize),
+		FMath::RoundToInt(Location.Y / UVNTileMapLibrary::TileSize));
 }

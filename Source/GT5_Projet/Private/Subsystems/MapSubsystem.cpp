@@ -14,23 +14,29 @@ void UMapSubsystem::Reset()
 	MapEvents.Empty();
 }
 
-void UMapSubsystem::AddTileField(ATileField* field)
+void UMapSubsystem::AddTileField(ATileField* TileField)
 {
-	TileFields.Add(field);
+	TileFields.AddUnique(TileField);
 }
 
-void UMapSubsystem::AddMapEvent(AVNMapEvent* mapEvent)
+void UMapSubsystem::AddMapEvent(AVNMapEvent* MapEvent)
 {
-	MapEvents.Add(mapEvent);
+	MapEvents.AddUnique(MapEvent);
 }
 
-void UMapSubsystem::GetAllTiles(TArray<FIntPoint>& pos) const
+void UMapSubsystem::GetAllTiles(TArray<FIntPoint>& TilePositions) const
 {
-	for (ATileField* field : TileFields) {
-		FIntPoint tile0 = field->GetStartTile();
-		for (int x = tile0.X; x < tile0.X + field->SizeX; x++) {
-			for (int y = tile0.Y; y < tile0.Y + field->SizeY; y++) {
-				pos.Add(FIntPoint(x, y));
+	int32 TotalTiles = 0;
+	for (const ATileField* Field : TileFields) {
+		TotalTiles += Field->SizeX * Field->SizeY;
+	}
+	TilePositions.Reserve(TilePositions.Num() + TotalTiles);
+
+	for (const ATileField* Field : TileFields) {
+		const FIntPoint Start = Field->GetStartTile();
+		for (int32 X = Start.X; X < Start.X + Field->SizeX; X++) {
+			for (int32 Y = Start.Y; Y < Start.Y + Field->SizeY; Y++) {
+				TilePositions.Add(FIntPoint(X, Y));
 			}
 		}
 	}
@@ -38,11 +44,11 @@ void UMapSubsystem::GetAllTiles(TArray<FIntPoint>& pos) const
 
 bool UMapSubsystem::IsTileAt(const FIntPoint& TilePos) const
 {
-	for (ATileField* field : TileFields) {
-		FIntPoint p0 = field->GetStartTile();
-		FIntPoint p1 = p0 + FIntPoint(field->SizeX, field->SizeY);
+	for (const ATileField* Field : TileFields) {
+		const FIntPoint P0 = Field->GetStartTile();
+		const FIntPoint P1 = P0 + FIntPoint(Field->SizeX, Field->SizeY);
 
-		if (TilePos.X < p0.X || TilePos.X >= p1.X || TilePos.Y < p0.Y || TilePos.Y >= p1.Y) continue;
+		if (TilePos.X < P0.X || TilePos.X >= P1.X || TilePos.Y < P0.Y || TilePos.Y >= P1.Y) continue;
 
 		return true;
 	}
@@ -51,10 +57,10 @@ bool UMapSubsystem::IsTileAt(const FIntPoint& TilePos) const
 
 AVNMapEvent* UMapSubsystem::GetMapEventAt(const FIntPoint& TilePos) const
 {
-	for (AVNMapEvent* me : MapEvents) {
-		if (me->GetTilePosition() == TilePos && !me->bIsInactive) {
-			return me;
+	for (AVNMapEvent* Event : MapEvents) {
+		if (Event->GetTilePosition() == TilePos && !Event->IsInactive()) {
+			return Event;
 		}
 	}
-	return NULL;
+	return nullptr;
 }

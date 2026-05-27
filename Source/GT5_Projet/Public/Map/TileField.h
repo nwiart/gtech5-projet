@@ -29,12 +29,12 @@ public:
 
 public:
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	UBoxComponent* Box;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int SizeX;
+	int32 SizeX;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int SizeY;
+	int32 SizeY;
 };

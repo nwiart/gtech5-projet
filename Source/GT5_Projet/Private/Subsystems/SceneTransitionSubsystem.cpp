@@ -47,7 +47,10 @@ void USceneTransitionSubsystem::StartActualLoading()
     // Non-blocking streaming to avoid freezing the game thread.
     UGameplayStatics::LoadStreamLevel(this, LevelName, false, false, LatentInfo);
 
-	GetWorld()->GetSubsystem<UMapSubsystem>()->Reset();
+    if (UMapSubsystem* MapSubsys = GetWorld()->GetSubsystem<UMapSubsystem>())
+    {
+        MapSubsys->Reset();
+    }
 
     // Lightweight polling to feed the loading UI.
     GetWorld()->GetTimerManager().SetTimer(ProgressTimerHandle, this, &USceneTransitionSubsystem::CheckLoadProgress, 0.1f, true);

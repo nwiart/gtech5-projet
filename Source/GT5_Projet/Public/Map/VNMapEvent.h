@@ -31,11 +31,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInactive();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsInactive() const { return bIsInactive; }
+
 
 	// If true, this element blocks character movement (walls, obstacles, etc.)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bBlocksMovement;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+private:
+
+	UPROPERTY(VisibleAnywhere)
 	bool bIsInactive;
 };
