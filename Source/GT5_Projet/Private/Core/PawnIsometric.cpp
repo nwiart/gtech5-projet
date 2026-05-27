@@ -29,6 +29,8 @@ APawnIsometric::APawnIsometric()
 	, CharacterHeightLevel(0.0F)
 	, MapBounds(0), PlayerCharacter(0)
 	, cursorActor(0), highlightActor(0)
+	, cursorPosition(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
+	, hoveredTile(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
 	, bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -50,23 +52,32 @@ APawnIsometric::APawnIsometric()
 	SetActorRotation(CameraRotation);
 }
 
-// Called when the game starts or when spawned
 void APawnIsometric::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	bIsCursorActive = true;
-	cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
-	if (cursorActor) {
-		cursorActor->SetActorHiddenInGame(true);
+	if (CursorClass) {
+		cursorActor = GetWorld()->SpawnActor<AActor>(CursorClass.Get(), FTransform::Identity);
+		if (cursorActor) {
+			cursorActor->SetActorHiddenInGame(true);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn cursor actor for APawnIsometric."));
+		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("No cursor actor class provided to APawnIsometric."));
 	}
 
-	highlightActor = GetWorld()->SpawnActor<AActor>(HighlightClass.Get());
-	if (highlightActor) {
-		highlightActor->SetActorHiddenInGame(true);
+	if (HighlightClass) {
+		highlightActor = GetWorld()->SpawnActor<AActor>(HighlightClass.Get());
+		if (highlightActor) {
+			highlightActor->SetActorHiddenInGame(true);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn highlight actor for APawnIsometric."));
+		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("No highlight actor class provided to APawnIsometric. Tiles will not be highlighted."));
@@ -75,9 +86,14 @@ void APawnIsometric::BeginPlay()
 
 void APawnIsometric::EndPlay(const EEndPlayReason::Type reason)
 {
-	cursorActor->Destroy();
+	if (cursorActor) {
+		cursorActor->Destroy();
+		cursorActor = 0;
+	}
+
 	if (highlightActor) {
 		highlightActor->Destroy();
+		highlightActor = 0;
 	}
 
 	Super::EndPlay(reason);
@@ -99,22 +115,26 @@ void APawnIsometric::Tick(float DeltaTime)
 
 	// Highlight hovered tile.
 	if (highlightActor) {
-		FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
-		FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
+		if (!bIsCursorActive) {
+			highlightActor->SetActorHiddenInGame(true);
+		}
+		else {
+			FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
+			FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
 
-		if (hoveredTile != tilePos) {
-			hoveredTile = tilePos;
+			if (hoveredTile != tilePos) {
+				hoveredTile = tilePos;
 
-			bool valid = UPathfindingLibrary::IsTileWalkable(tilePos, this);
-			highlightActor->SetActorHiddenInGame(!valid);
-			if (valid) {
-				highlightActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + HIGHLIGHT_Z_OFFSET));	
+				bool valid = UPathfindingLibrary::IsTileWalkable(tilePos, this);
+				highlightActor->SetActorHiddenInGame(!valid);
+				if (valid) {
+					highlightActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(tilePos) + FVector(0, 0, CharacterHeightLevel + HIGHLIGHT_Z_OFFSET));
+				}
 			}
 		}
 	}
 }
 
-// Called to bind functionality to input
 void APawnIsometric::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -166,14 +186,22 @@ void APawnIsometric::SetViewCenteredOnTile(const FIntPoint& TilePos)
 void APawnIsometric::SetCursorActive(bool bActive)
 {
 	bIsCursorActive = bActive;
-	cursorActor->SetActorHiddenInGame(!bActive);
+	if (cursorActor) {
+		cursorActor->SetActorHiddenInGame(!bActive);
+	}
+
+	if (highlightActor && !bActive) {
+		highlightActor->SetActorHiddenInGame(true);
+	}
 }
 
 void APawnIsometric::SetCursorHidden(bool bCursorHidden)
 {
 	if (!bIsCursorActive) return;
 
-	cursorActor->SetActorHiddenInGame(bCursorHidden);
+	if (cursorActor) {
+		cursorActor->SetActorHiddenInGame(bCursorHidden);
+	}
 }
 
 

@@ -2,7 +2,9 @@
 
 #include "Minigames/BaseMinigameManager.h"
 #include "Blueprint/UserWidget.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/CursorSubsystem.h"
 #include "Subsystems/SoundSubsystem.h"
 
 ABaseMinigameManager::ABaseMinigameManager()
@@ -91,6 +93,14 @@ void ABaseMinigameManager::OnMinigameComplete_Implementation(bool bSuccess)
 	CurrentResult = BuildMinigameResult(bSuccess);
 	CurrentResult.bSuccess = bSuccess;
 	CurrentResult.MinigameName = MinigameName;
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>())
+		{
+			CursorSubsys->SetMode(ECursorMode::Free);
+		}
+	}
 
 	// Show appropriate screen
 	if (bSuccess)

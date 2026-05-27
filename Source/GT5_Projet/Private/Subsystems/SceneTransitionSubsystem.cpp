@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Subsystems/SceneTransitionSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/LevelStreaming.h"
+
+#include "Subsystems/MapSubsystem.h"
 
 void USceneTransitionSubsystem::LoadLevelAsync(const TSoftObjectPtr<UWorld> LevelToLoad, const TSubclassOf<UUserWidget> WidgetClass)
 {
@@ -45,6 +45,11 @@ void USceneTransitionSubsystem::StartActualLoading()
     // Non-blocking streaming to avoid freezing the game thread.
     UGameplayStatics::LoadStreamLevel(this, LevelName, false, false, LatentInfo);
 
+    if (UMapSubsystem* MapSubsys = GetWorld()->GetSubsystem<UMapSubsystem>())
+    {
+        MapSubsys->Reset();
+    }
+
     // Lightweight polling to feed the loading UI.
     GetWorld()->GetTimerManager().SetTimer(ProgressTimerHandle, this, &USceneTransitionSubsystem::CheckLoadProgress, 0.1f, true);
 }
@@ -75,7 +80,13 @@ void USceneTransitionSubsystem::OnLoadCompleted()
     // Schedule the new level to be shown.
     const FName NewLevelName = PendingLevel.GetLongPackageFName();
     ULevelStreaming* NewLevel = UGameplayStatics::GetStreamingLevel(this, NewLevelName);
-    NewLevel->OnLevelShown.AddDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
+    if (!NewLevel)
+    {
+        UE_LOG(LogTemp, Error, TEXT("SceneTransitionSubsystem: Could not find streaming level '%s'."), *NewLevelName.ToString());
+        return;
+    }
+
+    NewLevel->OnLevelShown.AddUniqueDynamic(this, &USceneTransitionSubsystem::OnLevelShown);
     NewLevel->SetShouldBeVisible(true);
 
     // Prevent stacking streamed levels in memory: unload everything except the target.

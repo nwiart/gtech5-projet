@@ -13,8 +13,18 @@ UCLASS()
 class GT5_PROJET_API UVNTileMapLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
+
+	// World units per tile (a tile is a TileSize x TileSize square in world space).
+	static constexpr double TileSize = 100.0;
+	static constexpr double TileHalfSize = 50.0;
+
+	// Tags used to identify map actors during traces and queries.
+	static const FName FloorTag;
+	static const FName EventTag;
+	static const FName ObstacleTag;
+
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static FIntPoint GetTileCoordinatesFromWorldPos(const FVector& worldPos);

@@ -4,9 +4,11 @@
 #include "Minigames/KnifeHitGame/KnifeHitPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Minigames/KnifeHitGame/KnifeHitManager.h"
 #include "Blueprint/UserWidget.h"
+#include "Subsystems/CursorSubsystem.h"
 
 AKnifeHitPlayerController::AKnifeHitPlayerController()
 {
@@ -40,12 +42,13 @@ void AKnifeHitPlayerController::BeginPlay()
 		}
 	}
 
-	// Enable mouse cursor and allow both game and UI input
-	FInputModeGameAndUI InputMode;
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputMode.SetHideCursorDuringCapture(false);
-	SetInputMode(InputMode);
-	bShowMouseCursor = true;
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
+	{
+		if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>())
+		{
+			CursorSubsys->SetMode(ECursorMode::Free);
+		}
+	}
 }
 
 void AKnifeHitPlayerController::SetupInputComponent() {
@@ -77,5 +80,3 @@ void AKnifeHitPlayerController::OnLaunchMatch() {
 		GameModeRef->LaunchMatch();
 	}
 }
-
-

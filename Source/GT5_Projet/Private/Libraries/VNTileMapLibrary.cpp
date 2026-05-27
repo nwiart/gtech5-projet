@@ -6,14 +6,19 @@
 #include "Kismet/GameplayStatics.h"
 
 
+const FName UVNTileMapLibrary::FloorTag = FName(TEXT("Floor"));
+const FName UVNTileMapLibrary::EventTag = FName(TEXT("Event"));
+const FName UVNTileMapLibrary::ObstacleTag = FName(TEXT("Obstacle"));
+
+
 FIntPoint UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(const FVector& worldPos)
 {
-	return FIntPoint(FMath::FloorToInt(worldPos.X / 100.0), FMath::FloorToInt(worldPos.Y / 100.0));
+	return FIntPoint(FMath::FloorToInt(worldPos.X / TileSize), FMath::FloorToInt(worldPos.Y / TileSize));
 }
 
 FVector UVNTileMapLibrary::GetWorldPosFromTileCoordinates(const FIntPoint& tileCoords)
 {
-	return FVector(tileCoords.X * 100 + 50, tileCoords.Y * 100 + 50, 0.0);
+	return FVector(tileCoords.X * TileSize + TileHalfSize, tileCoords.Y * TileSize + TileHalfSize, 0.0);
 }
 
 

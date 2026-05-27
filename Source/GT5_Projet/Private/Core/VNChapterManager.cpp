@@ -4,11 +4,13 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "Engine/GameInstance.h"
 
 #include "Map/VNMapBounds.h"
 #include "Libraries/UtilsLibrary.h"
 #include "Libraries/VNTileMapLibrary.h"
 #include "Subsystems/VNChapterSubsystem.h"
+#include "Subsystems/CursorSubsystem.h"
 
 
 AVNChapterManager::AVNChapterManager()
@@ -106,11 +108,12 @@ void AVNChapterManager::Enable_Implementation()
 	}
 
 	// Configure mouse input.
-	FInputModeGameAndUI inputMode;
-	inputMode.SetHideCursorDuringCapture(false);
-	pc->bShowMouseCursor = true;
 	pc->bEnableClickEvents = true;
-	pc->SetInputMode(inputMode);
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this)) {
+		if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>()) {
+			CursorSubsys->SetMode(ECursorMode::Free);
+		}
+	}
 }
 
 void AVNChapterManager::Disable_Implementation()
