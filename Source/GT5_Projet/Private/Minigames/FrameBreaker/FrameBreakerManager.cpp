@@ -4,7 +4,9 @@
 #include "Minigames/FrameBreaker/FrameBreakerCharacter.h"
 #include "Minigames/FrameBreaker/PictureFrame.h"
 #include "Minigames/FrameBreaker/FrameRotationComponent.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/CursorSubsystem.h"
 
 AFrameBreakerManager::AFrameBreakerManager()
 {
@@ -21,21 +23,19 @@ void AFrameBreakerManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Show mouse cursor
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PC)
 	{
-		PC->bShowMouseCursor = true;
 		PC->bEnableClickEvents = true;
 		PC->bEnableMouseOverEvents = true;
 
-		// Set input mode to Game and UI (allows both game input and UI interaction)
-		FInputModeGameAndUI InputMode;
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		InputMode.SetHideCursorDuringCapture(false);
-		PC->SetInputMode(InputMode);
-
-		UE_LOG(LogTemp, Log, TEXT("FrameBreakerGameMode: Mouse cursor enabled"));
+		if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this))
+		{
+			if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>())
+			{
+				CursorSubsys->SetMode(ECursorMode::Locked);
+			}
+		}
 	}
 
 	// Initialize default levels if no configs are set
@@ -201,6 +201,9 @@ void AFrameBreakerManager::ClearAllFrames()
 
 void AFrameBreakerManager::OnFrameDestroyed(APictureFrame* Frame)
 {
+	if (!bIsMinigameActive)
+		return;
+
 	if (!Frame)
 		return;
 
@@ -303,7 +306,7 @@ void AFrameBreakerManager::OnKnifeThrown()
 
 bool AFrameBreakerManager::HasKnivesRemaining() const
 {
-	return KnivesRemaining > 0;
+	return bIsMinigameActive && KnivesRemaining > 0;
 }
 
 void AFrameBreakerManager::OnGameLost()
@@ -373,4 +376,3 @@ FMinigameResult AFrameBreakerManager::BuildMinigameResult_Implementation(bool bS
 
 	return Result;
 }
-

@@ -7,10 +7,9 @@
 #include "VNPlayerController.generated.h"
 
 class AVNMapCharacter;
+class UInputMappingContext;
+class UInputAction;
 
-/**
- * 
- */
 UCLASS()
 class GT5_PROJET_API AVNPlayerController : public APlayerController
 {
@@ -24,6 +23,8 @@ protected:
 
 	void BeginPlay() override;
 
+	virtual void SetupInputComponent() override;
+
 public:
 
 	// The character we control on the map.
@@ -33,4 +34,15 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	TSubclassOf<AVNMapCharacter> PlayerCharacterClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputMappingContext* CursorMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* FocusUIAction;
+
+private:
+
+	void Input_FocusUIStart();
+	void Input_FocusUIStop();
 };
