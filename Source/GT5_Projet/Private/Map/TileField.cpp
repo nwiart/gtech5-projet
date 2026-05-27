@@ -7,6 +7,11 @@
 #include "Subsystems/MapSubsystem.h"
 
 
+// A small positive Z half-extent so the collision volume is not degenerate;
+// pathfinding's downward line trace covers ~250 world units so anything > 0 hits.
+static constexpr double TileFieldBoxZHalfExtent = 10.0;
+
+
 // Sets default values
 ATileField::ATileField()
 	: SizeX(10), SizeY(10)
@@ -17,6 +22,12 @@ ATileField::ATileField()
 
 	Box = CreateDefaultSubobject<UBoxComponent>("Box");
 	Box->SetupAttachment(RootComponent);
+	// Explicit query-only collision: pathfinding line-traces against the box,
+	// no physics interaction needed. Don't rely on engine default profile —
+	// it can be overridden in Blueprint subclasses and silently break traces.
+	Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Box->SetCollisionObjectType(ECC_WorldStatic);
+	Box->SetCollisionResponseToAllChannels(ECR_Block);
 
 	this->Tags.Add(UVNTileMapLibrary::FloorTag);
 }
@@ -26,13 +37,19 @@ void ATileField::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	const FVector Location = GetActorLocation();
-	const FVector Extent(SizeX * UVNTileMapLibrary::TileHalfSize, SizeY * UVNTileMapLibrary::TileHalfSize, 0.0);
+	const FVector Extent(
+		SizeX * UVNTileMapLibrary::TileHalfSize,
+		SizeY * UVNTileMapLibrary::TileHalfSize,
+		TileFieldBoxZHalfExtent);
 	Box->SetBoxExtent(Extent);
 
-	// Snap the box so its tiles align with the world tile grid, regardless of the actor's raw transform.
-	const double SnapX = FMath::RoundToDouble(Location.X / UVNTileMapLibrary::TileSize) * UVNTileMapLibrary::TileSize - Location.X;
-	const double SnapY = FMath::RoundToDouble(Location.Y / UVNTileMapLibrary::TileSize) * UVNTileMapLibrary::TileSize - Location.Y;
-	Box->SetRelativeLocation(Extent + FVector(SnapX, SnapY, 0.0));
+	// Snap the box so its tiles align with the world tile grid, regardless of
+	// the actor's raw transform. Use the shared snap helper so GetStartTile and
+	// this snap agree across platforms.
+	const FIntPoint NearestTile = UVNTileMapLibrary::GetNearestTileFromWorldPos(Location);
+	const double SnapX = NearestTile.X * UVNTileMapLibrary::TileSize - Location.X;
+	const double SnapY = NearestTile.Y * UVNTileMapLibrary::TileSize - Location.Y;
+	Box->SetRelativeLocation(FVector(Extent.X + SnapX, Extent.Y + SnapY, 0.0));
 }
 
 void ATileField::BeginPlay()
@@ -44,6 +61,17 @@ void ATileField::BeginPlay()
 	if (Subsys) {
 		Subsys->AddTileField(this);
 	}
+}
+
+void ATileField::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld()) {
+		if (UMapSubsystem* Subsys = World->GetSubsystem<UMapSubsystem>()) {
+			Subsys->RemoveTileField(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 
@@ -61,8 +89,5 @@ bool ATileField::IsPointInside(const FVector& WorldLocation) const
 
 FIntPoint ATileField::GetStartTile() const
 {
-	const FVector Location = GetActorLocation();
-	return FIntPoint(
-		FMath::RoundToInt(Location.X / UVNTileMapLibrary::TileSize),
-		FMath::RoundToInt(Location.Y / UVNTileMapLibrary::TileSize));
+	return UVNTileMapLibrary::GetNearestTileFromWorldPos(GetActorLocation());
 }

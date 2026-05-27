@@ -25,10 +25,8 @@ public:
 
 	/**
 	 * Clears all registered tile fields and map events.
-	 * This is to be called when a new level starts getting loaded (currently
-	 *   in USceneTransitionSubsystem::StartActualLoading()).
-	 * Tile fields and map events from the newly loaded level re-register
-	 * themselves from their BeginPlay().
+	 * Actors normally deregister themselves from EndPlay; this is a manual
+	 * reset for edge cases (e.g. force-clear during editor PIE teardown).
 	 */
 	void Reset();
 
@@ -40,11 +38,23 @@ public:
 	void AddTileField(ATileField* TileField);
 
 	/**
+	 * Remove a tile field from the terrain.
+	 * Called automatically by every tile field instance from their EndPlay().
+	 */
+	void RemoveTileField(ATileField* TileField);
+
+	/**
 	 * Add a map event to the map.
 	 * This function is called automatically by every map event instance from
 	 * their BeginPlay(). Duplicate registrations are ignored.
 	 */
 	void AddMapEvent(AVNMapEvent* MapEvent);
+
+	/**
+	 * Remove a map event from the map.
+	 * Called automatically by every map event instance from their EndPlay().
+	 */
+	void RemoveMapEvent(AVNMapEvent* MapEvent);
 
 	/**
 	 * Append the positions of all existing tiles to the output array.
@@ -71,8 +81,17 @@ public:
 private:
 
 	// List of all tile fields in the current map. They represent the walkable terrain.
+	// UPROPERTY so the GC nulls entries when an actor is destroyed instead of leaving
+	// dangling pointers.
+	UPROPERTY()
 	TArray<ATileField*> TileFields;
 
-	// List of map events.
+	// List of map events. UPROPERTY for the same reason as TileFields.
+	UPROPERTY()
 	TArray<AVNMapEvent*> MapEvents;
+
+	// Index of map events keyed by tile, kept in sync with MapEvents for O(1) lookup
+	// in GetMapEventAt (called once per A* node during pathfinding).
+	UPROPERTY()
+	TMap<FIntPoint, AVNMapEvent*> MapEventsByTile;
 };

@@ -29,6 +29,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static FIntPoint GetTileCoordinatesFromWorldPos(const FVector& worldPos);
 
+	// Returns the integer tile coordinate nearest to a world position. Uses
+	// floor-of-(value + half-tile), which is deterministic across platforms
+	// (FMath::RoundToInt's tie-breaking can vary).
+	static FIntPoint GetNearestTileFromWorldPos(const FVector& worldPos);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static FVector GetWorldPosFromTileCoordinates(const FIntPoint& tileCoords);
 
