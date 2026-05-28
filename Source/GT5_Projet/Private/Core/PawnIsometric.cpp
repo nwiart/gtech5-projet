@@ -22,6 +22,8 @@
 const float APawnIsometric::HIGHLIGHT_Z_OFFSET = 0.5;
 const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
 
+const float APawnIsometric::DOUBLE_CLICK_TIME = 0.25F;
+
 
 // Sets default values
 APawnIsometric::APawnIsometric()
@@ -32,7 +34,7 @@ APawnIsometric::APawnIsometric()
 	, cursorPosition(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
 	, hoveredTile(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
 	, cameraMode(ECameraMode::PLAYER), moveViewTime(-1.0F)
-	, bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true)
+	, bIsCursorActive(true), bIsPanning(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = ETickingGroup::TG_PostPhysics;
@@ -192,9 +194,6 @@ void APawnIsometric::SetZoomLevel(float Value)
 
 void APawnIsometric::RecenterViewOnPlayer()
 {
-	if (bIsCameraCentered) return;
-	bIsCameraCentered = true;
-
 	cameraMode = ECameraMode::PLAYER;
 
 	moveViewTime = 0.0F;
@@ -250,7 +249,6 @@ void APawnIsometric::Input_PanCameraX(float w)
 {
 	if (!bIsPanning) return;
 
-	bIsCameraCentered = false;
 	cameraMode = ECameraMode::FREE;
 	moveViewTime = -1.0F;
 
@@ -272,7 +270,6 @@ void APawnIsometric::Input_PanCameraY(float w)
 {
 	if (!bIsPanning) return;
 
-	bIsCameraCentered = false;
 	cameraMode = ECameraMode::FREE;
 	moveViewTime = -1.0F;
 
@@ -316,6 +313,11 @@ void APawnIsometric::Input_SelectTile()
 {
 	if (!cursorActor || !bIsCursorActive) return;
 
+	// Double click detection.
+	double clickTime = UGameplayStatics::GetRealTimeSeconds(this);
+	const bool doubleClick = (clickTime - lastClickTime < DOUBLE_CLICK_TIME);
+	lastClickTime = clickTime;
+
 	FVector2D mousePos = UVNTileMapLibrary::GetMousePositionInViewport(this);
 	FIntPoint tilePos = GetPointedTile(mousePos.X, mousePos.Y);
 
@@ -323,16 +325,29 @@ void APawnIsometric::Input_SelectTile()
 		return;
 	}
 
-	// Clicked the same tile.
-	if (tilePos == cursorPosition && !cursorActor->IsHidden()) {
+	// Clicked the same tile (undefined if cursor is hidden).
+	const bool sameTile = (tilePos == cursorPosition && !cursorActor->IsHidden());
+	if (sameTile) {
 		UVNChapterSubsystem* chapterSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
 		chapterSubsys->GetMapCharacter()->MoveTo(cursorPosition.X, cursorPosition.Y);
+
+		this->RecenterViewOnPlayer();
+	}
+
+	// Setup (or clear) a timer for auto-centering the camera on the clicked tile.
+	if (doubleClick || sameTile) {
+		GetWorld()->GetTimerManager().ClearTimer(singleClickHandle);
 	}
 	else {
-		this->FocusViewOnTile(tilePos);
+		GetWorld()->GetTimerManager().SetTimer<APawnIsometric>(singleClickHandle, this, &APawnIsometric::AutoFocusOnTile, 1.0F, false, DOUBLE_CLICK_TIME);
 	}
 
 	cursorPosition = tilePos;
 	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + CURSOR_Z_OFFSET));
 	cursorActor->SetActorHiddenInGame(false);
+}
+
+void APawnIsometric::AutoFocusOnTile()
+{
+	this->FocusViewOnTile(cursorPosition);
 }

@@ -49,6 +49,8 @@ protected:
 	void Input_PanCameraStop();
 	void Input_SelectTile();
 
+	void AutoFocusOnTile();
+
 
 public:
 	// Called every frame
@@ -136,12 +138,16 @@ private:
 	float moveViewTime;
 	float moveViewDuration;
 
+	FTimerHandle singleClickHandle;
+	double lastClickTime;
+
 
 	bool bIsCursorActive;
 
 	bool bIsPanning;
-	bool bIsCameraCentered;
 
 	static const float HIGHLIGHT_Z_OFFSET;
 	static const float CURSOR_Z_OFFSET;
+
+	static const float DOUBLE_CLICK_TIME;
 };
