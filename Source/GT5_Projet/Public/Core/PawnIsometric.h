@@ -131,9 +131,10 @@ private:
 	// Used to transition the camera to the player character smoothly.
 	// A negative timer means no transition in progress.
 	ECameraMode cameraMode;
-	FVector moveToPlayerStart;
-	FVector moveToPlayerEnd;
-	float moveToPlayerTime;
+	FVector moveViewStart;
+	FVector moveViewEnd;
+	float moveViewTime;
+	float moveViewDuration;
 
 
 	bool bIsCursorActive;
@@ -143,6 +144,4 @@ private:
 
 	static const float HIGHLIGHT_Z_OFFSET;
 	static const float CURSOR_Z_OFFSET;
-
-	static const float CAMERA_MOVE_DURATION;
 };
