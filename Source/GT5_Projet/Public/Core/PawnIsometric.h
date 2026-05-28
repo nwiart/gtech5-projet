@@ -114,6 +114,11 @@ private:
 	FIntPoint cursorPosition;
 	FIntPoint hoveredTile;
 
+	// Used to transition the camera to the player character smoothly.
+	// A negative timer means no transition in progress.
+	FVector moveToPlayerStart;
+	float moveToPlayerTime;
+
 	bool bIsCursorActive;
 
 	bool bIsPanning;

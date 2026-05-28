@@ -31,6 +31,7 @@ APawnIsometric::APawnIsometric()
 	, cursorActor(0), highlightActor(0)
 	, cursorPosition(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
 	, hoveredTile(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
+	, moveToPlayerTime(-1.0F)
 	, bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -108,9 +109,22 @@ void APawnIsometric::Tick(float DeltaTime)
 		FVector pos = PlayerCharacter->GetActorLocation();
 		pos.Z = CharacterHeightLevel;
 
-		double proj = cameraForwardVector.Dot(pos - GetActorLocation());
-		pos -= cameraForwardVector * proj;
-		SetActorLocation(pos);
+		if (moveToPlayerTime >= 0.0F) {
+			moveToPlayerTime += DeltaTime;
+
+			if (moveToPlayerTime >= 1.0F) {
+				moveToPlayerTime = -1.0F;
+				SetActorLocation(pos);
+			}
+			else {
+				float t = 1.0F - (FMath::Cos(PI * moveToPlayerTime) * 0.5F + 0.5F);
+				FVector interpPos = moveToPlayerStart + t * (pos - moveToPlayerStart);
+				SetActorLocation(interpPos);
+			}
+		}
+		else {
+			SetActorLocation(pos);
+		}
 	}
 
 	// Highlight hovered tile.
@@ -175,6 +189,11 @@ void APawnIsometric::SetZoomLevel(float Value)
 
 void APawnIsometric::RecenterViewOnPlayer()
 {
+	if (bIsCameraCentered) return;
+
+	moveToPlayerTime = 0.0F;
+	moveToPlayerStart = GetActorLocation();
+
 	bIsCameraCentered = true;
 }
 
@@ -217,6 +236,7 @@ void APawnIsometric::Input_PanCameraX(float w)
 	if (!bIsPanning) return;
 
 	bIsCameraCentered = false;
+	moveToPlayerTime = -1.0F;
 
 	w = -w;   // Invert direction.
 	const FVector off = Camera->GetRightVector() * w;
@@ -237,6 +257,7 @@ void APawnIsometric::Input_PanCameraY(float w)
 	if (!bIsPanning) return;
 
 	bIsCameraCentered = false;
+	moveToPlayerTime = -1.0F;
 
 	w = -w;   // Invert direction.
 	const FVector off = Camera->GetUpVector() * w;
