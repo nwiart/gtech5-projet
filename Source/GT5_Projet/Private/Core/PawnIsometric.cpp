@@ -303,6 +303,8 @@ void APawnIsometric::Input_ZoomCamera(float w)
 void APawnIsometric::Input_PanCameraStart()
 {
 	bIsPanning = true;
+
+	cursorActor->SetActorHiddenInGame(true);
 }
 
 void APawnIsometric::Input_PanCameraStop()
@@ -321,10 +323,8 @@ void APawnIsometric::Input_SelectTile()
 		return;
 	}
 
-	cursorActor->SetActorHiddenInGame(false);
-
 	// Clicked the same tile.
-	if (tilePos == cursorPosition) {
+	if (tilePos == cursorPosition && !cursorActor->IsHidden()) {
 		UVNChapterSubsystem* chapterSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
 		chapterSubsys->GetMapCharacter()->MoveTo(cursorPosition.X, cursorPosition.Y);
 	}
@@ -334,4 +334,5 @@ void APawnIsometric::Input_SelectTile()
 
 	cursorPosition = tilePos;
 	cursorActor->SetActorLocation(UVNTileMapLibrary::GetWorldPosFromTileCoordinates(cursorPosition) + FVector(0, 0, CharacterHeightLevel + CURSOR_Z_OFFSET));
+	cursorActor->SetActorHiddenInGame(false);
 }
