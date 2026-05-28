@@ -5,15 +5,16 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 
-#include "Map/VNMapCharacter.h"
-#include "Core/PawnIsometric.h"
-#include "Core/VNChapterManager.h"
-#include "Minigames/BaseMinigameManager.h"
-
 #include "Data/ChapterData.h"
 #include "Data/MinigameData.h"
 
 #include "VNChapterSubsystem.generated.h"
+
+class ABaseMinigameManager;
+class APawn;
+class APawnIsometric;
+class AVNChapterManager;
+class AVNMapCharacter;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FOnConnectionChanged,
@@ -73,10 +74,10 @@ public:
 	AVNChapterManager* GetChapterManager() const { return ChapterManager; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	AVNMapCharacter* GetMapCharacter() const { return ChapterManager ? ChapterManager->GetMapCharacter() : 0; }
+	AVNMapCharacter* GetMapCharacter() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	APawnIsometric* GetPawn() const { return ChapterManager ? ChapterManager->GetPawn() : 0; }
+	APawnIsometric* GetPawn() const;
 
 
 public:
@@ -124,4 +125,7 @@ private:
 
 	UFUNCTION()
 	void OnLevelLoadingDone();
+
+	bool SpawnMinigameRuntime(TSubclassOf<ABaseMinigameManager> ManagerClass, TSubclassOf<APawn> PawnClass);
+	void DestroyMinigameRuntime();
 };
