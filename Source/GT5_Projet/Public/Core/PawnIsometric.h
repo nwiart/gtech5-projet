@@ -16,6 +16,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoveCamera, FVector, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnZoomChanged, float, Value);
 
 
+UENUM()
+enum class ECameraMode
+{
+	PLAYER,   // Follows player.
+	TILE,     // Focuses on a tile, non-moving.
+	FREE,     // Not constrained, controlled by player.
+};
+
 UCLASS()
 class GT5_PROJET_API APawnIsometric : public APawn
 {
@@ -59,9 +67,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetZoomLevel(float Value);
 
+	// Transitions the camera to be centered on the player.
 	UFUNCTION(BlueprintCallable)
 	void RecenterViewOnPlayer();
 
+	// Transitions the camera to be centered on a tile position.
+	UFUNCTION(BlueprintCallable)
+	void FocusViewOnTile(const FIntPoint& TilePos);
+
+	// Moves the camera on a tile position, without transition (teleport).
 	UFUNCTION(BlueprintCallable)
 	void SetViewCenteredOnTile(const FIntPoint& TilePos);
 
@@ -116,8 +130,11 @@ private:
 
 	// Used to transition the camera to the player character smoothly.
 	// A negative timer means no transition in progress.
+	ECameraMode cameraMode;
 	FVector moveToPlayerStart;
+	FVector moveToPlayerEnd;
 	float moveToPlayerTime;
+
 
 	bool bIsCursorActive;
 
@@ -126,4 +143,6 @@ private:
 
 	static const float HIGHLIGHT_Z_OFFSET;
 	static const float CURSOR_Z_OFFSET;
+
+	static const float CAMERA_MOVE_DURATION;
 };

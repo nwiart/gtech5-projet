@@ -22,6 +22,8 @@
 const float APawnIsometric::HIGHLIGHT_Z_OFFSET = 0.5;
 const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
 
+const float APawnIsometric::CAMERA_MOVE_DURATION = 0.3f;
+
 
 // Sets default values
 APawnIsometric::APawnIsometric()
@@ -31,7 +33,7 @@ APawnIsometric::APawnIsometric()
 	, cursorActor(0), highlightActor(0)
 	, cursorPosition(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
 	, hoveredTile(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min())
-	, moveToPlayerTime(-1.0F)
+	, cameraMode(ECameraMode::PLAYER), moveToPlayerTime(-1.0F)
 	, bIsCursorActive(true), bIsPanning(false), bIsCameraCentered(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -104,26 +106,29 @@ void APawnIsometric::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Place camera onto character.
-	if (PlayerCharacter && bIsCameraCentered) {
-		FVector pos = PlayerCharacter->GetActorLocation();
-		pos.Z = CharacterHeightLevel;
+	// Camera move / transition.
+	if (cameraMode != ECameraMode::FREE) {
+		// Place camera continuously onto character.
+		if (PlayerCharacter && cameraMode == ECameraMode::PLAYER) {
+			moveToPlayerEnd = PlayerCharacter->GetActorLocation();
+			moveToPlayerEnd.Z = CharacterHeightLevel;
+		}
 
 		if (moveToPlayerTime >= 0.0F) {
-			moveToPlayerTime += DeltaTime;
+			moveToPlayerTime += DeltaTime / CAMERA_MOVE_DURATION;
 
 			if (moveToPlayerTime >= 1.0F) {
 				moveToPlayerTime = -1.0F;
-				SetActorLocation(pos);
+				SetActorLocation(moveToPlayerEnd);
 			}
 			else {
 				float t = 1.0F - (FMath::Cos(PI * moveToPlayerTime) * 0.5F + 0.5F);
-				FVector interpPos = moveToPlayerStart + t * (pos - moveToPlayerStart);
+				FVector interpPos = moveToPlayerStart + t * (moveToPlayerEnd - moveToPlayerStart);
 				SetActorLocation(interpPos);
 			}
 		}
 		else {
-			SetActorLocation(pos);
+			SetActorLocation(moveToPlayerEnd);
 		}
 	}
 
@@ -190,11 +195,21 @@ void APawnIsometric::SetZoomLevel(float Value)
 void APawnIsometric::RecenterViewOnPlayer()
 {
 	if (bIsCameraCentered) return;
+	bIsCameraCentered = true;
+
+	cameraMode = ECameraMode::PLAYER;
 
 	moveToPlayerTime = 0.0F;
 	moveToPlayerStart = GetActorLocation();
+}
 
-	bIsCameraCentered = true;
+void APawnIsometric::FocusViewOnTile(const FIntPoint& TilePos)
+{
+	cameraMode = ECameraMode::TILE;
+
+	moveToPlayerTime = 0.0F;
+	moveToPlayerStart = GetActorLocation();
+	moveToPlayerEnd = UVNTileMapLibrary::GetWorldPosFromTileCoordinates(TilePos);
 }
 
 void APawnIsometric::SetViewCenteredOnTile(const FIntPoint& TilePos)
@@ -236,6 +251,7 @@ void APawnIsometric::Input_PanCameraX(float w)
 	if (!bIsPanning) return;
 
 	bIsCameraCentered = false;
+	cameraMode = ECameraMode::FREE;
 	moveToPlayerTime = -1.0F;
 
 	w = -w;   // Invert direction.
@@ -257,6 +273,7 @@ void APawnIsometric::Input_PanCameraY(float w)
 	if (!bIsPanning) return;
 
 	bIsCameraCentered = false;
+	cameraMode = ECameraMode::FREE;
 	moveToPlayerTime = -1.0F;
 
 	w = -w;   // Invert direction.
@@ -310,6 +327,9 @@ void APawnIsometric::Input_SelectTile()
 	if (tilePos == cursorPosition) {
 		UVNChapterSubsystem* chapterSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
 		chapterSubsys->GetMapCharacter()->MoveTo(cursorPosition.X, cursorPosition.Y);
+	}
+	else {
+		this->FocusViewOnTile(tilePos);
 	}
 
 	cursorPosition = tilePos;
