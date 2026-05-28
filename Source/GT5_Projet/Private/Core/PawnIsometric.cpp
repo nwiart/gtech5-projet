@@ -25,7 +25,7 @@ const float APawnIsometric::CURSOR_Z_OFFSET = 1.0;
 
 // Sets default values
 APawnIsometric::APawnIsometric()
-	: CameraSpeed(1.0F), CameraMinWidth(200.0F), CameraMaxWidth(4000.0F)
+	: CameraSpeed(1.0F), CameraMinWidth(500.0F), CameraMaxWidth(1000.0F)
 	, CharacterHeightLevel(0.0F)
 	, MapBounds(0), PlayerCharacter(0)
 	, cursorActor(0), highlightActor(0)
