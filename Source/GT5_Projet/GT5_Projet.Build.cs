@@ -15,12 +15,6 @@ public class GT5_Projet : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		// Making custom assets.
-		if (Target.bBuildEditor) {
-			PublicDependencyModuleNames.AddRange(new[] { "AssetDefinition", "UnrealEd", });
-			PrivateDefinitions.Add("EDITOR_BUILD");
-		}
-
 		// UMG UI support
 		PublicDependencyModuleNames.AddRange(new string[] { "UMG", "Slate", "SlateCore" });
 		
