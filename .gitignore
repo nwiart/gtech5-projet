@@ -79,8 +79,7 @@ DerivedDataCache/*
 # Local Documentation files
 Docs/
 
-# Cursor
+# Agentic Development
 .cursor/
-
-# MCP
 Plugins/UnrealMCP/
+AGENTS.md
