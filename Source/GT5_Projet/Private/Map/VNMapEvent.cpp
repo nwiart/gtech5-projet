@@ -51,6 +51,11 @@ FIntPoint AVNMapEvent::GetTilePosition() const
 	return UVNTileMapLibrary::GetTileCoordinatesFromWorldPos(GetActorLocation());
 }
 
+void AVNMapEvent::OnPlayerHit_Implementation()
+{
+	OnTrigger.Broadcast();
+}
+
 void AVNMapEvent::SetInactive()
 {
 	bIsInactive = true;

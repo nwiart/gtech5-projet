@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "VNMapEvent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapEventTrigger);
+
+
 UCLASS()
 class GT5_PROJET_API AVNMapEvent : public AActor
 {
@@ -27,8 +30,9 @@ public:
 	FIntPoint GetTilePosition() const;
 
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnPlayerHit();
+	virtual void OnPlayerHit_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	void SetInactive();
@@ -40,6 +44,9 @@ public:
 	// If true, this element blocks character movement (walls, obstacles, etc.)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bBlocksMovement;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMapEventTrigger OnTrigger;
 
 private:
 
