@@ -1,8 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Libraries/PathfindingLibrary.h"
+#include "Libraries/GridPathfinding.h"
 #include "Libraries/VNTileMapLibrary.h"
 
+#include "Core/PawnIsometric.h"
 #include "Subsystems/VNChapterSubsystem.h"
 
 #include "Subsystems/MapSubsystem.h"
@@ -16,131 +18,24 @@
 
 bool UPathfindingLibrary::FindPath(const FIntPoint& StartTile, const FIntPoint& EndTile, TArray<FIntPoint>& OutPath, const UObject* WorldContext, int32 MaxSearchDistance)
 {
-	OutPath.Empty();
-
-	if (StartTile == EndTile)
+	FGridPathfinding::FIsWalkable IsWalkable;
+	IsWalkable.BindLambda([WorldContext](const FIntPoint& TilePosition)
 	{
-		OutPath.Add(StartTile);
-		return true;
-	}
+		FHitResult HitResult;
+		const bool bHit = FindTileAt(HitResult, TilePosition, WorldContext);
+		DebugLogTile(HitResult, TilePosition);
 
-	TMap<FIntPoint, FAStarNode*> AllNodes;
-	TArray<FAStarNode*> OpenSet;
-	TSet<FIntPoint> ClosedSet;
+		AActor* HitActor = HitResult.GetActor();
+		return bHit && HitActor && (IsTileFloor(HitActor) || IsTileEvent(HitActor));
+	});
 
-	FAStarNode* StartNode = new FAStarNode(StartTile, 0.f, CalculateManhattanDistance(StartTile, EndTile), nullptr);
-	AllNodes.Add(StartTile, StartNode);
-	OpenSet.Add(StartNode);
-
-	int32 SearchCount = 0;
-	bool bPathFound = false;
-	FAStarNode* EndNode = nullptr;
-
-	while (OpenSet.Num() > 0 && SearchCount < MaxSearchDistance && !bPathFound)
+	FGridPathfinding::FIsTerminal IsTerminal;
+	IsTerminal.BindLambda([WorldContext](const FIntPoint& TilePosition)
 	{
-		SearchCount++;
+		return GetTileEvent(TilePosition, WorldContext) != nullptr;
+	});
 
-		int32 LowestFCostIndex = 0;
-		for (int32 i = 1; i < OpenSet.Num(); i++)
-		{
-			if (OpenSet[i]->FCost < OpenSet[LowestFCostIndex]->FCost ||
-				(OpenSet[i]->FCost == OpenSet[LowestFCostIndex]->FCost && OpenSet[i]->HCost < OpenSet[LowestFCostIndex]->HCost))
-			{
-				LowestFCostIndex = i;
-			}
-		}
-
-		FAStarNode* CurrentNode = OpenSet[LowestFCostIndex];
-		OpenSet.RemoveAt(LowestFCostIndex);
-		ClosedSet.Add(CurrentNode->Position);
-
-		if (CurrentNode->Position == EndTile)
-		{
-			bPathFound = true;
-			EndNode = CurrentNode;
-			break;
-		}
-
-		// Stop on first met event.
-		if (GetTileEvent(CurrentNode->Position, WorldContext) != nullptr)
-		{
-			bPathFound = true;
-			EndNode = CurrentNode;
-			break;
-		}
-
-		TInlineComponentArray<FIntPoint, 4> Neighbors;
-		GetNeighbors(Neighbors, CurrentNode->Position);
-		for (const FIntPoint& NeighborPos : Neighbors)
-		{
-			// Skip if already evaluated
-			if (ClosedSet.Contains(NeighborPos))
-			{
-				continue;
-			}
-
-			FHitResult HitResult;
-			bool bHit = FindTileAt(HitResult, NeighborPos, WorldContext);
-			DebugLogTile(HitResult, NeighborPos);
-
-			if (!bHit || HitResult.GetActor() == nullptr)
-			{
-				continue;
-			}
-
-			// Check if the tile is walkable
-			if (!IsTileFloor(HitResult.GetActor()) && !IsTileEvent(HitResult.GetActor()))
-			{
-				continue;
-			}
-
-			// Calculate new G cost (1.0 for orthogonal movement)
-			float NewGCost = CurrentNode->GCost + 1.0f;
-
-			// Check if neighbor is already in open set
-			FAStarNode** ExistingNodePtr = AllNodes.Find(NeighborPos);
-			FAStarNode* NeighborNode = nullptr;
-
-			if (ExistingNodePtr != nullptr)
-			{
-				NeighborNode = *ExistingNodePtr;
-				// If we found a better path, update it
-				if (NewGCost < NeighborNode->GCost)
-				{
-					NeighborNode->GCost = NewGCost;
-					NeighborNode->FCost = NeighborNode->GCost + NeighborNode->HCost;
-					NeighborNode->Parent = CurrentNode;
-				}
-			}
-			else
-			{
-				// Create new node
-				float HCost = CalculateManhattanDistance(NeighborPos, EndTile);
-				NeighborNode = new FAStarNode(NeighborPos, NewGCost, HCost, CurrentNode);
-				AllNodes.Add(NeighborPos, NeighborNode);
-				OpenSet.Add(NeighborNode);
-			}
-		}
-	}
-
-	// Reconstruct path if found
-	if (bPathFound && EndNode != nullptr)
-	{
-		FAStarNode* CurrentNode = EndNode;
-		while (CurrentNode != nullptr)
-		{
-			OutPath.Insert(CurrentNode->Position, 0);
-			CurrentNode = CurrentNode->Parent;
-		}
-	}
-
-	// Cleanup allocated nodes
-	for (auto& Pair : AllNodes)
-	{
-		delete Pair.Value;
-	}
-
-	return bPathFound;
+	return FGridPathfinding::FindPath(StartTile, EndTile, OutPath, IsWalkable, IsTerminal, MaxSearchDistance);
 }
 
 bool UPathfindingLibrary::IsTileWalkable(const FIntPoint& TilePosition, const UObject* WorldContext)
@@ -171,11 +66,6 @@ AVNMapEvent* UPathfindingLibrary::GetTileEvent(const FIntPoint& TilePosition, co
 
 	UMapSubsystem* Subsys = World->GetSubsystem<UMapSubsystem>();
 	return Subsys ? Subsys->GetMapEventAt(TilePosition) : nullptr;
-}
-
-float UPathfindingLibrary::CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B)
-{
-	return FMath::Abs(A.X - B.X) + FMath::Abs(A.Y - B.Y);
 }
 
 bool UPathfindingLibrary::FindTileAt(FHitResult& OutResult, const FIntPoint& Pos, const UObject* WorldContext)
@@ -224,14 +114,6 @@ bool UPathfindingLibrary::IsTileFloor(AActor* HitActor)
 bool UPathfindingLibrary::IsTileEvent(AActor* HitActor)
 {
 	return HitActor->ActorHasTag(UVNTileMapLibrary::EventTag);
-}
-
-void UPathfindingLibrary::GetNeighbors(TInlineComponentArray<FIntPoint, 4>& outNeighbors, const FIntPoint& Position)
-{
-	outNeighbors.Add(FIntPoint(Position.X + 1, Position.Y));     // Right
-	outNeighbors.Add(FIntPoint(Position.X - 1, Position.Y));     // Left
-	outNeighbors.Add(FIntPoint(Position.X, Position.Y + 1));     // Up
-	outNeighbors.Add(FIntPoint(Position.X, Position.Y - 1));     // Down
 }
 
 void UPathfindingLibrary::DebugLogTile(const FHitResult& HitResult, const FIntPoint& TilePosition)

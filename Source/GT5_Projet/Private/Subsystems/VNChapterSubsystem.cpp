@@ -4,8 +4,12 @@
 
 #include "Kismet/GameplayStatics.h"
 
+#include "Core/PawnIsometric.h"
+#include "Core/VNChapterManager.h"
 #include "Core/VNGameInstance.h"
 #include "Libraries/VNTileMapLibrary.h"
+#include "Map/VNMapCharacter.h"
+#include "Minigames/BaseMinigameManager.h"
 #include "Subsystems/SceneTransitionSubsystem.h"
 
 
@@ -55,13 +59,18 @@ void UVNChapterSubsystem::CloseChapter()
 
 bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameManager> ManagerClass, TSubclassOf<APawn> PawnClass, const UObject* WorldContextObject)
 {
-	ChapterManager->Disable();
+	if (ChapterManager) {
+		ChapterManager->Disable();
+	}
 
-	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameManager>(ManagerClass);
-	MinigamePawn = GetWorld()->SpawnActor<APawn>(PawnClass);
+	if (!SpawnMinigameRuntime(ManagerClass, PawnClass)) {
+		return false;
+	}
 
 	APlayerController* pc = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
-	pc->Possess(MinigamePawn);
+	if (pc && MinigamePawn) {
+		pc->Possess(MinigamePawn);
+	}
 
 	MinigameManager->Initialize();
 
@@ -70,17 +79,12 @@ bool UVNChapterSubsystem::InitializeMinigame(TSubclassOf<ABaseMinigameManager> M
 
 void UVNChapterSubsystem::ExitMinigame(const UObject* WorldContextObject)
 {
-	MinigameManager->Destroy();
-	MinigameManager = 0;
+	DestroyMinigameRuntime();
 
-	if (MinigamePawn) {
-		MinigamePawn->Destroy();
-		MinigamePawn = 0;
+	if (ChapterManager) {
+		ChapterManager->Enable();
 	}
-
-	ChapterManager->Enable();
 }
-
 
 void UVNChapterSubsystem::ModifyConnection(int32 Delta)
 {
@@ -101,6 +105,33 @@ void UVNChapterSubsystem::TriggerMinigame(const FMinigameData& MinigameData, FGu
 	}
 }
 
+void UVNChapterSubsystem::DestroyMinigameRuntime()
+{
+	if (MinigameManager) {
+		MinigameManager->Destroy();
+		MinigameManager = 0;
+	}
+
+	if (MinigamePawn) {
+		MinigamePawn->Destroy();
+		MinigamePawn = 0;
+	}
+}
+
+bool UVNChapterSubsystem::SpawnMinigameRuntime(TSubclassOf<ABaseMinigameManager> ManagerClass, TSubclassOf<APawn> PawnClass)
+{
+	MinigameManager = GetWorld()->SpawnActor<ABaseMinigameManager>(ManagerClass);
+	MinigamePawn = GetWorld()->SpawnActor<APawn>(PawnClass);
+
+	if (!MinigameManager || !MinigamePawn) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn minigame runtime actors."));
+		DestroyMinigameRuntime();
+		return false;
+	}
+
+	return true;
+}
+
 void UVNChapterSubsystem::NotifyChapterComplete()
 {
 	CurrentChapterName = NAME_None;
@@ -117,6 +148,16 @@ void UVNChapterSubsystem::GetConnectionData(
 	OutMin = ConnectionMinValue;
 	OutMax = ConnectionMaxValue;
 	OutValue = Connection;
+}
+
+AVNMapCharacter* UVNChapterSubsystem::GetMapCharacter() const
+{
+	return ChapterManager ? ChapterManager->GetMapCharacter() : 0;
+}
+
+APawnIsometric* UVNChapterSubsystem::GetPawn() const
+{
+	return ChapterManager ? ChapterManager->GetPawn() : 0;
 }
 
 

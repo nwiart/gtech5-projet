@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerStart.h"
 #include "Engine/GameInstance.h"
 
+#include "Core/PawnIsometric.h"
+#include "Map/VNMapCharacter.h"
 #include "Map/VNMapBounds.h"
 #include "Libraries/UtilsLibrary.h"
 #include "Libraries/VNTileMapLibrary.h"
@@ -22,7 +24,67 @@ void AVNChapterManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Spawn camera pawn and map character (distinct actors!)
+	SpawnChapterActors();
+	PlaceCharacterAtPlayerStart();
+}
+
+void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
+{
+	if (MapCharacter) {
+		MapCharacter->Destroy();
+	}
+
+	if (PawnCamera) {
+		PawnCamera->Destroy();
+	}
+
+	Super::EndPlay(Reason);
+}
+
+void AVNChapterManager::Enable_Implementation()
+{
+	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
+	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
+	ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
+
+	if (PawnCamera && pc) {
+		pc->Possess(PawnCamera);
+	}
+	ConfigureCameraBounds(LevelStream);
+
+	if (MapCharacter) {
+		MapCharacter->Enable();
+	}
+
+	ConfigureMapInput(pc);
+}
+
+void AVNChapterManager::Disable_Implementation()
+{
+	if (PawnCamera) {
+		PawnCamera->SetCursorActive(false);
+	}
+
+	if (MapCharacter) {
+		MapCharacter->Disable();
+	}
+}
+
+void AVNChapterManager::TravelOnHeightSwitcher_Implementation(AActor* SwitcherA, AActor* SwitcherB)
+{
+	AVNMapCharacter* ch = GetMapCharacter();
+
+	// Teleport character to destination switcher (on the tile in front of it).
+	const FVector Loc = ch->GetActorLocation() - SwitcherA->GetActorLocation() + SwitcherB->GetActorLocation() + (SwitcherB->GetActorForwardVector() * -100.0);
+	ch->SetActorLocation(Loc);
+
+	// Set plane height.
+	GetPawn()->SetCharacterHeightLevel(SwitcherB->GetActorLocation().Z);
+	ch->HeightLevel = SwitcherB->GetActorLocation().Z;
+}
+
+void AVNChapterManager::SpawnChapterActors()
+{
 	if (PawnCameraClass != NULL) {
 		PawnCamera = GetWorld()->SpawnActor<APawnIsometric>(PawnCameraClass);
 	}
@@ -40,9 +102,12 @@ void AVNChapterManager::BeginPlay()
 	}
 
 	if (PawnCamera) {
-		PawnCamera->PlayerCharacter = MapCharacter;
+		PawnCamera->SetMapCharacter(MapCharacter);
 	}
+}
 
+void AVNChapterManager::PlaceCharacterAtPlayerStart()
+{
 	// Place map character at spawn location.
 	// TODO : Hardcoded character height offset (60.0).
 	if (MapCharacter) {
@@ -72,70 +137,24 @@ void AVNChapterManager::BeginPlay()
 	}
 }
 
-void AVNChapterManager::EndPlay(EEndPlayReason::Type Reason)
+void AVNChapterManager::ConfigureCameraBounds(ULevelStreaming* LevelStream)
 {
-	if (MapCharacter) {
-		MapCharacter->Destroy();
-	}
-
 	if (PawnCamera) {
-		PawnCamera->Destroy();
-	}
-
-	Super::EndPlay(Reason);
-}
-
-void AVNChapterManager::Enable_Implementation()
-{
-	APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0);
-	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();
-	ULevelStreaming* LevelStream = UGameplayStatics::GetStreamingLevel(this, subsys->CurrentChapterLevel.GetLongPackageFName());
-
-	// Possess pawn.
-	if (PawnCamera) {
-		pc->Possess(PawnCamera);
-
-		// Get map bounds actor.
 		TArray<AVNMapBounds*> bounds; UUtilsLibrary::GetActorsOfClassInStreamedLevel<AVNMapBounds>(bounds, LevelStream, this);
 
-		PawnCamera->MapBounds = bounds.IsEmpty() ? 0 : bounds[0];
+		PawnCamera->SetMapBounds(bounds.IsEmpty() ? 0 : bounds[0]);
 		PawnCamera->SetCursorActive(true);
 	}
+}
 
-	// Show map character.
-	if (MapCharacter) {
-		MapCharacter->Enable();
+void AVNChapterManager::ConfigureMapInput(APlayerController* PlayerController) const
+{
+	if (PlayerController) {
+		PlayerController->bEnableClickEvents = true;
 	}
-
-	// Configure mouse input.
-	pc->bEnableClickEvents = true;
 	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this)) {
 		if (UCursorSubsystem* CursorSubsys = GameInstance->GetSubsystem<UCursorSubsystem>()) {
 			CursorSubsys->SetMode(ECursorMode::Free);
 		}
 	}
-}
-
-void AVNChapterManager::Disable_Implementation()
-{
-	if (PawnCamera) {
-		PawnCamera->SetCursorActive(false);
-	}
-
-	if (MapCharacter) {
-		MapCharacter->Disable();
-	}
-}
-
-void AVNChapterManager::TravelOnHeightSwitcher_Implementation(AActor* SwitcherA, AActor* SwitcherB)
-{
-	AVNMapCharacter* ch = GetMapCharacter();
-
-	// Teleport character to destination switcher (on the tile in front of it).
-	const FVector Loc = ch->GetActorLocation() - SwitcherA->GetActorLocation() + SwitcherB->GetActorLocation() + (SwitcherB->GetActorForwardVector() * -100.0);
-	ch->SetActorLocation(Loc);
-
-	// Set plane height.
-	GetPawn()->CharacterHeightLevel = SwitcherB->GetActorLocation().Z;
-	ch->HeightLevel = SwitcherB->GetActorLocation().Z;
 }
