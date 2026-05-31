@@ -51,39 +51,10 @@ public:
 
 private:
 
-	// A* Node structure for pathfinding
-	struct FAStarNode
-	{
-		FIntPoint Position;
-		float GCost; // Distance from start
-		float HCost; // Heuristic distance to end
-		float FCost; // Total cost (G + H)
-		FAStarNode* Parent;
-
-		FAStarNode()
-			: Position(0, 0), GCost(0.f), HCost(0.f), FCost(0.f), Parent(nullptr)
-		{
-		}
-
-		FAStarNode(const FIntPoint& InPosition, float InGCost, float InHCost, FAStarNode* InParent = nullptr)
-			: Position(InPosition), GCost(InGCost), HCost(InHCost), FCost(InGCost + InHCost), Parent(InParent)
-		{
-		}
-
-		bool operator<(const FAStarNode& Other) const
-		{
-			return FCost < Other.FCost;
-		}
-	};
-
-	static float CalculateManhattanDistance(const FIntPoint& A, const FIntPoint& B);
-
 	static bool FindTileAt(FHitResult& OutResult, const FIntPoint& TilePosition, const UObject* WorldContext);
 
 	static bool IsTileFloor(AActor* HitActor);
 	static bool IsTileEvent(AActor* HitActor);
-
-	static void GetNeighbors(TInlineComponentArray<FIntPoint, 4>& out, const FIntPoint& Position);
 
 	static void DebugLogTile(const FHitResult& HitResult, const FIntPoint& TilePosition);
 };

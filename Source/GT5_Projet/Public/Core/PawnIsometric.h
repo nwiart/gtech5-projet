@@ -29,8 +29,6 @@ class GT5_PROJET_API APawnIsometric : public APawn
 {
 	GENERATED_BODY()
 
-	friend class AVNChapterManager;
-
 public:
 	// Sets default values for this pawn's properties
 	APawnIsometric();
@@ -86,6 +84,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCursorHidden(bool bCursorHidden);
+
+	void SetMapCharacter(AVNMapCharacter* InPlayerCharacter);
+	void SetMapBounds(AVNMapBounds* InMapBounds);
+	void SetCharacterHeightLevel(float InCharacterHeightLevel);
 
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Camera")

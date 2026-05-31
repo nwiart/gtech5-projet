@@ -244,6 +244,21 @@ void APawnIsometric::SetCursorHidden(bool bCursorHidden)
 	}
 }
 
+void APawnIsometric::SetMapCharacter(AVNMapCharacter* InPlayerCharacter)
+{
+	PlayerCharacter = InPlayerCharacter;
+}
+
+void APawnIsometric::SetMapBounds(AVNMapBounds* InMapBounds)
+{
+	MapBounds = InMapBounds;
+}
+
+void APawnIsometric::SetCharacterHeightLevel(float InCharacterHeightLevel)
+{
+	CharacterHeightLevel = InCharacterHeightLevel;
+}
+
 
 void APawnIsometric::Input_PanCameraX(float w)
 {

@@ -5,11 +5,14 @@
 #include "CoreMinimal.h"
 #include "Core/VNGamemode.h"
 
-#include "Map/VNMapCharacter.h"
-#include "Core/PawnIsometric.h"
 #include "Data/MinigameData.h"
 
 #include "VNChapterManager.generated.h"
+
+class APawnIsometric;
+class APlayerController;
+class AVNMapCharacter;
+class ULevelStreaming;
 
 /**
  * 
@@ -66,4 +69,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category="Chapter Runtime")
 	APawnIsometric* PawnCamera;
+
+private:
+	void SpawnChapterActors();
+	void PlaceCharacterAtPlayerStart();
+	void ConfigureCameraBounds(ULevelStreaming* LevelStream);
+	void ConfigureMapInput(APlayerController* PlayerController) const;
 };
