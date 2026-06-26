@@ -39,6 +39,9 @@ public:
 	bool bSoloSpeaker;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bIsShaking;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString Note;
 
 	/** Optional SFX to play when this line starts (from DT_SFX).
