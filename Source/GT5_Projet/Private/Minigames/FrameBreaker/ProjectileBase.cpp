@@ -8,7 +8,9 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/GameInstance.h"
 #include "Subsystems/VNChapterSubsystem.h"
+#include "Subsystems/SoundSubsystem.h"
 
 AProjectileBase::AProjectileBase()
 {
@@ -136,8 +138,23 @@ void AProjectileBase::HandleFrameHit(APictureFrame* Frame, const FHitResult& Hit
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShatterSound, Hit.Location);
 	}
 
-	// 6. Destroy the frame
-	Frame->Shatter();
+	// 5b. Hit feedback: play the knife-impact SFX through the sound subsystem
+	if (HitSFX.RowName != NAME_None)
+	{
+		if (UGameInstance* GI = UGameplayStatics::GetGameInstance(this))
+		{
+			if (USoundSubsystem* SoundSub = GI->GetSubsystem<USoundSubsystem>())
+			{
+				SoundSub->PlaySFXByHandle(HitSFX, Hit.Location);
+			}
+		}
+	}
+
+	// 6. Destroy the frame (pass the throw direction so it topples that way)
+	const FVector ImpulseDir = (ProjectileMovement && !ProjectileMovement->Velocity.IsNearlyZero())
+		? ProjectileMovement->Velocity.GetSafeNormal()
+		: GetActorForwardVector();
+	Frame->Shatter(ImpulseDir, Hit.Location);
 
 	// 7. Notify GameMode
 	UVNChapterSubsystem* subsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UVNChapterSubsystem>();

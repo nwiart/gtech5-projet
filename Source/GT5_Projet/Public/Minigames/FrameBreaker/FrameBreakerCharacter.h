@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Engine/DataTable.h"
 #include "InputActionValue.h"
 #include "FrameBreakerCharacter.generated.h"
 
@@ -72,8 +73,10 @@ public:
 	TSubclassOf<UCameraShakeBase> ThrowShake;
 
 	// Sounds
+	// SFX played through USoundSubsystem when a knife leaves the hand.
+	// Points to a FSFXTableRow entry (see DT_SFX).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
-	USoundBase* ThrowSound;
+	FDataTableRowHandle ThrowSFX;
 
 	// Called by animation notify to spawn projectile
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
