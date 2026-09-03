@@ -186,14 +186,14 @@ void AMatchingTileGameManager::CheckEndConditions()
 {
     if (Tiles.Num() == 0)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("You win !"));
+        // GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("You win !"));
         OnMinigameComplete(true);
         return;
     }
 
     if (!HasAnyPossibleMatch())
     {
-        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("You loose !"));
+        // GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("You loose !"));
         OnMinigameComplete(false);
         return;
     }

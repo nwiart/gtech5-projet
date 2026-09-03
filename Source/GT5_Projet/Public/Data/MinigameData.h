@@ -6,6 +6,7 @@
 #include "MinigameData.generated.h"
 
 class ABaseMinigameManager;
+class APawn;
 
 /**
  * Result data structure for minigames
@@ -82,4 +83,7 @@ struct FMinigameData
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<ABaseMinigameManager> ManagerClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<APawn> PawnClass;
 };
