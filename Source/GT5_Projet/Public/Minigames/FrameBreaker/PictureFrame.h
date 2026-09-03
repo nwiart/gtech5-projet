@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class UFrameRotationComponent;
 class UNiagaraSystem;
 class USoundBase;
+class UMaterialInstanceDynamic;
 
 /**
  * Picture Frame Actor
@@ -59,6 +60,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frame|Hit Reaction", meta = (ClampMin = "0.0"))
 	float ScalePunchStrength = 0.12f;
 
+	// --- Life drain (the painting fades out, leaving the frame) ---
+
+	// Spawned attached to the canvas the moment the frame is hit, so the wisps
+	// follow the frame while it is still orbiting. Should last ~VanishDelay.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frame|Life Drain")
+	UNiagaraSystem* LifeDrainFX;
+
+	// Scalar parameter driven 0 -> 1 on the canvas materials as the image fades.
+	// Add it to the painting material (desaturate, then fade to a blank canvas).
+	// Harmless if the material does not have it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frame|Life Drain")
+	FName LifeDrainParamName = TEXT("LifeDrain");
+
+	// How long the image takes to fade away (seconds). Independent of VanishDelay:
+	// the frame can already be falling while the painting keeps draining, which
+	// makes the fade read as a transition instead of a cut.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Frame|Life Drain", meta = (ClampMin = "0.0"))
+	float LifeDrainDuration = 1.0f;
+
 	// --- Physics fall (frame drops to the ground when shattered) ---
 
 	// If true, the frame detaches and drops with physics instead of just hiding.
@@ -105,6 +125,9 @@ private:
 	void UpdateHitReaction(float DeltaSeconds);
 	void EndHitReaction();
 
+	// Drive the life-drain parameter on every canvas material.
+	void SetLifeDrain(float Value);
+
 	// Detach the frame mesh and let it drop with physics.
 	// Returns false if the mesh has no simple collision to simulate.
 	bool StartPhysicsFall();
@@ -112,7 +135,16 @@ private:
 	FTimerHandle VanishTimerHandle;
 
 	bool bHitReacting = false;
+	bool bPunchActive = false;
 	float HitReactionElapsed = 0.0f;
 	FVector FrameBaseScale = FVector::OneVector;
 	FVector PendingHitImpulseDir = FVector::ZeroVector;
+
+	// Painting canvas meshes (static mesh components authored in Blueprint
+	// under FrameMesh) and their dynamic materials.
+	UPROPERTY()
+	TArray<TObjectPtr<UStaticMeshComponent>> CanvasMeshes;
+
+	UPROPERTY()
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> CanvasMIDs;
 };
