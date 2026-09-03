@@ -67,17 +67,10 @@ void AMatchingTileGameManager::CheckMatch()
 
     if (FirstSelectedTile->TypeID == SecondSelectedTile->TypeID)
     {
-        if (AreTilesConnected(FirstSelectedTile, SecondSelectedTile))
-        {
-            UE_LOG(LogTemp, Log, TEXT("Tiles match and are connected!"));
-            ClearMatchedTiles();
-            CheckEndConditions();
-            // anim
-        }
-        else
-        {
-            UE_LOG(LogTemp, Log, TEXT("Tiles match but not connected!"));
-        }
+        UE_LOG(LogTemp, Log, TEXT("Tiles match!"));
+        ClearMatchedTiles();
+        CheckEndConditions();
+        // anim
     }
     else
     {
@@ -86,86 +79,6 @@ void AMatchingTileGameManager::CheckMatch()
 
     FirstSelectedTile = nullptr;
     SecondSelectedTile = nullptr;
-}
-
-
-bool AMatchingTileGameManager::AreTilesConnected(UTileWidget* A, UTileWidget* B)
-{
-    /*  int32 dx = FMath::Abs(TileA->Col - TileB->Col);
-   int32 dy = FMath::Abs(TileA->Row - TileB->Row);
-    return (dx <= 1 && dy <= 1);*/
-
-    if (!A || !B) return false;
-    if (A->TypeID != B->TypeID) return false;
-
-    const int ax = A->Col;
-    const int ay = A->Row;
-    const int bx = B->Col;
-    const int by = B->Row;
-
-    auto IsEmpty = [&](int x, int y)
-        {
-            for (UTileWidget* T : Tiles)
-            {
-                if (T->Col == x && T->Row == y)
-                {
-                    return T->TypeID == -1;
-                }
-            }
-            return true;
-        };
-
-    // Adjacent check
-    if (FMath::Abs(ax - bx) <= 1 && FMath::Abs(ay - by) <= 1)
-        return true;
-
-    // Same Row 
-    if (ay == by)
-    {
-        int start = FMath::Min(ax, bx) + 1;
-        int end = FMath::Max(ax, bx);
-        bool clear = true;
-
-        for (int x = start; x < end; x++)
-            if (!IsEmpty(x, ay)) clear = false;
-
-        if (clear) return true;
-    }
-
-    //  Same Column
-    if (ax == bx)
-    {
-        int start = FMath::Min(ay, by) + 1;
-        int end = FMath::Max(ay, by);
-        bool clear = true;
-
-        for (int y = start; y < end; y++)
-            if (!IsEmpty(ax, y)) clear = false;
-
-        if (clear) return true;
-    }
-
-    // Diagonal
-    if (FMath::Abs(ax - bx) == FMath::Abs(ay - by))
-    {
-        int dx = (bx > ax) ? 1 : -1;
-        int dy = (by > ay) ? 1 : -1;
-
-        int x = ax + dx;
-        int y = ay + dy;
-
-        bool clear = true;
-        while (x != bx)
-        {
-            if (!IsEmpty(x, y)) clear = false;
-            x += dx;
-            y += dy;
-        }
-
-        if (clear) return true;
-    }
-
-    return false;
 }
 
 
@@ -211,10 +124,7 @@ bool AMatchingTileGameManager::HasAnyPossibleMatch()
             if (!A || !B)
                 continue;
 
-            if (A->TypeID != B->TypeID)
-                continue;
-
-            if (AreTilesConnected(A, B))
+            if (A->TypeID == B->TypeID)
                 return true;
         }
     }

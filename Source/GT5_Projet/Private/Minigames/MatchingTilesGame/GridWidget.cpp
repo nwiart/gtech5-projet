@@ -19,6 +19,7 @@ void UGridWidget::NativeConstruct()
     {
         Generator = NewObject<UGridGeneratorComponent>(this);
         Generator->MapDataTable = MapDataTable;
+        Generator->TileTypeDataTable = TileTypeDataTable;
     }
 
     int32 Width = 0;

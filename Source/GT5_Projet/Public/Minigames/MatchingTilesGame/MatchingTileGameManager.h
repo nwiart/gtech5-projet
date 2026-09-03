@@ -44,7 +44,6 @@ private:
     UTileWidget* SecondSelectedTile = nullptr;
 
     void CheckMatch();
-    bool AreTilesConnected(UTileWidget* TileA, UTileWidget* TileB);
     void ClearMatchedTiles();
     bool HasAnyPossibleMatch();
     void CheckEndConditions();
