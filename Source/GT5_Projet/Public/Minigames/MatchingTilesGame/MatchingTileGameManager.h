@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "Minigames/BaseMinigameManager.h"
 #include "TileWidget.h"
 #include "MatchingTileGameManager.generated.h"
@@ -32,6 +33,11 @@ public:
 
 	virtual FMinigameResult BuildMinigameResult_Implementation(bool bSuccess) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	FDataTableRowHandle MatchSFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	FDataTableRowHandle MismatchSFX;
 
 private:
     UPROPERTY()

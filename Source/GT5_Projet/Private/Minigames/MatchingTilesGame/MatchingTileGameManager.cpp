@@ -3,6 +3,7 @@
 
 #include "Minigames/MatchingTilesGame/MatchingTileGameManager.h"
 #include <Kismet/GameplayStatics.h>
+#include "Subsystems/SoundSubsystem.h"
 
 // Sets default values
 AMatchingTileGameManager::AMatchingTileGameManager()
@@ -65,16 +66,25 @@ void AMatchingTileGameManager::CheckMatch()
     if (!FirstSelectedTile || !SecondSelectedTile)
         return;
 
+    USoundSubsystem* SoundSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<USoundSubsystem>();
+
     if (FirstSelectedTile->TypeID == SecondSelectedTile->TypeID)
     {
         UE_LOG(LogTemp, Log, TEXT("Tiles match!"));
+        if (SoundSubsys)
+        {
+            SoundSubsys->PlaySFXByHandle(MatchSFX);
+        }
         ClearMatchedTiles();
         CheckEndConditions();
-        // anim
     }
     else
     {
         UE_LOG(LogTemp, Log, TEXT("Tiles do not match."));
+        if (SoundSubsys)
+        {
+            SoundSubsys->PlaySFXByHandle(MismatchSFX);
+        }
     }
 
     FirstSelectedTile = nullptr;
@@ -86,8 +96,8 @@ void AMatchingTileGameManager::ClearMatchedTiles()
 {
     if (FirstSelectedTile && SecondSelectedTile)
     {
-        FirstSelectedTile->SetVisibility(ESlateVisibility::Hidden);
-        SecondSelectedTile->SetVisibility(ESlateVisibility::Hidden);
+        FirstSelectedTile->PlayDisappearAnimation();
+        SecondSelectedTile->PlayDisappearAnimation();
 
         Tiles.Remove(FirstSelectedTile);
         Tiles.Remove(SecondSelectedTile);

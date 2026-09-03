@@ -32,4 +32,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FIntPoint PlayerTilePosition;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	class UDataTable* SFXDataTable;
 };
