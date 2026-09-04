@@ -16,5 +16,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     UDataTable* MapDataTable;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UDataTable* TileTypeDataTable;
+
     void LoadMap(FName RowName, int32& OutWidth, int32& OutHeight, TArray<int32>& OutTiles);
 };

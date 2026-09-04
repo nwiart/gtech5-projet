@@ -19,6 +19,7 @@ void UGridWidget::NativeConstruct()
     {
         Generator = NewObject<UGridGeneratorComponent>(this);
         Generator->MapDataTable = MapDataTable;
+        Generator->TileTypeDataTable = TileTypeDataTable;
     }
 
     int32 Width = 0;
@@ -51,9 +52,10 @@ void UGridWidget::BuildGrid(int32 Width, int32 Height, const TArray<int32>& Tile
     UE_LOG(LogTemp, Log, TEXT("size %f"), FinalTileSize);
     AllTiles.Empty();
 
-    GameManager = Cast<AMatchingTileGameManager>(UGameplayStatics::GetGameMode(this));
+    GameManager = Cast<AMatchingTileGameManager>(UGameplayStatics::GetActorOfClass(this, AMatchingTileGameManager::StaticClass()));
     if (!GameManager)
     {
+        UE_LOG(LogTemp, Error, TEXT("MatchingTileGameManager not found in the world!"));
         return;
     }
 

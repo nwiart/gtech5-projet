@@ -7,6 +7,7 @@
 #include <Components/Button.h>
 #include <Components/SizeBox.h>
 #include "Blueprint/UserWidget.h"
+#include "Engine/DataTable.h"
 #include "TileWidget.generated.h"
 
 /**
@@ -44,7 +45,20 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Tile")
     FTileClickedEvent OnTileClicked;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    FDataTableRowHandle ClickSFX;
+
+    UPROPERTY(Transient, meta = (BindWidgetAnimOptional), BlueprintReadOnly, Category = "Tile")
+    class UWidgetAnimation* DisappearAnim;
+
+    // Plays DisappearAnim if the WBP defines one; otherwise hides the tile immediately.
+    UFUNCTION(BlueprintCallable, Category = "Tile")
+    void PlayDisappearAnimation();
+
 private:
     UFUNCTION()
     void HandleClick();
+
+    UFUNCTION()
+    void OnDisappearAnimationFinished();
 };
