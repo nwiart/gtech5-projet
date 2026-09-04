@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Engine/DataTable.h"
 #include "ProjectileBase.generated.h"
 
 class UStaticMeshComponent;
@@ -77,6 +78,11 @@ public:
 	// Audio
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* ShatterSound;
+
+	// SFX played through USoundSubsystem when the knife hits a target frame.
+	// Points to a FSFXTableRow entry (see DT_SFX).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	FDataTableRowHandle HitSFX;
 
 	// Launch projectile toward target
 	UFUNCTION(BlueprintCallable, Category = "Projectile")

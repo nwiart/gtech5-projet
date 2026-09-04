@@ -129,6 +129,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Frame Breaker")
 	void OnFrameDestroyed(APictureFrame* Frame);
 
+	// Fired on every successful knife -> frame hit, for HUD feedback (hitmarker flash, etc.).
+	// Bind this in the FrameBreaker HUD widget.
+	UFUNCTION(BlueprintImplementableEvent, Category = "Frame Breaker")
+	void OnFrameHitFeedback();
+
 	// Knife management
 	UFUNCTION(BlueprintCallable, Category = "Frame Breaker")
 	void OnKnifeThrown();

@@ -208,6 +208,9 @@ void AFrameBreakerManager::OnFrameDestroyed(APictureFrame* Frame)
 	if (!Frame)
 		return;
 
+	// HUD hit feedback (hitmarker)
+	OnFrameHitFeedback();
+
 	FramesDestroyed++;
 
 	// Apply score multiplier from current level config

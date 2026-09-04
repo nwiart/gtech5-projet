@@ -10,7 +10,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/GameInstance.h"
 #include "Subsystems/VNChapterSubsystem.h"
+#include "Subsystems/SoundSubsystem.h"
 
 AFrameBreakerCharacter::AFrameBreakerCharacter()
 {
@@ -127,9 +129,16 @@ void AFrameBreakerCharacter::PlayThrowAnimation()
 		SpawnProjectile();
 	}
 
-	if (ThrowSound)
+	// Throw start feedback: play the "throw" SFX through the sound subsystem
+	if (ThrowSFX.RowName != NAME_None)
 	{
-		UGameplayStatics::PlaySound2D(GetWorld(), ThrowSound);
+		if (UGameInstance* GI = UGameplayStatics::GetGameInstance(this))
+		{
+			if (USoundSubsystem* SoundSub = GI->GetSubsystem<USoundSubsystem>())
+			{
+				SoundSub->PlaySFXByHandle(ThrowSFX);
+			}
+		}
 	}
 
 	if (ThrowShake)
