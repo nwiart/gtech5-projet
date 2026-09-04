@@ -5,6 +5,9 @@
 #include "Components/Image.h"
 #include <Components/SizeBox.h>
 #include "Blueprint/WidgetTree.h"
+#include "Kismet/GameplayStatics.h"
+#include "Subsystems/SoundSubsystem.h"
+#include "Animation/WidgetAnimation.h"
 
 void UTileWidget::NativeConstruct()
 {
@@ -30,9 +33,38 @@ void UTileWidget::NativeConstruct()
         WidgetTree->RootWidget = TileButton;
 
      TileButton->OnClicked.AddDynamic(this, &UTileWidget::HandleClick);
+
+    if (DisappearAnim)
+    {
+        FWidgetAnimationDynamicEvent FinishedDelegate;
+        FinishedDelegate.BindDynamic(this, &UTileWidget::OnDisappearAnimationFinished);
+        BindToAnimationFinished(DisappearAnim, FinishedDelegate);
+    }
 }
 
 void UTileWidget::HandleClick()
 {
+    if (USoundSubsystem* SoundSubsys = UGameplayStatics::GetGameInstance(this)->GetSubsystem<USoundSubsystem>())
+    {
+        SoundSubsys->PlaySFXByHandle(ClickSFX);
+    }
+
     OnTileClicked.Broadcast(this);
+}
+
+void UTileWidget::PlayDisappearAnimation()
+{
+    if (DisappearAnim)
+    {
+        PlayAnimation(DisappearAnim);
+    }
+    else
+    {
+        SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void UTileWidget::OnDisappearAnimationFinished()
+{
+    SetVisibility(ESlateVisibility::Hidden);
 }

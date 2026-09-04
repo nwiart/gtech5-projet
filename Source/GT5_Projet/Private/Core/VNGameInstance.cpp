@@ -3,6 +3,7 @@
 #include "Core/VNGameInstance.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/SoundSubsystem.h"
 
 
 UVNGameInstance::UVNGameInstance()
@@ -12,6 +13,11 @@ UVNGameInstance::UVNGameInstance()
 void UVNGameInstance::Init()
 {
 	Super::Init();
+
+	if (USoundSubsystem* SoundSubsys = GetSubsystem<USoundSubsystem>())
+	{
+		SoundSubsys->SetSFXDataTable(SFXDataTable);
+	}
 }
 
 void UVNGameInstance::Shutdown()
