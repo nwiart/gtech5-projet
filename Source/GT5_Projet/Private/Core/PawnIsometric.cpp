@@ -220,12 +220,18 @@ void APawnIsometric::SetCursorActive(bool bActive)
 {
 	const bool bWasActive = bIsCursorActive;
 	bIsCursorActive = bActive;
-	if (cursorActor) {
-		cursorActor->SetActorHiddenInGame(!bActive);
-	}
 
-	if (highlightActor && !bActive) {
-		highlightActor->SetActorHiddenInGame(true);
+	// Force the cursor and highlight to hide if deactivating.
+	// Also stop panning.
+	if (!bActive) {
+		if (cursorActor) {
+			cursorActor->SetActorHiddenInGame(!bActive);
+		}
+		if (highlightActor) {
+			highlightActor->SetActorHiddenInGame(true);
+		}
+
+		bIsPanning = false;
 	}
 
 	// When re-activating, invalidate the cached tile so Tick re-evaluates and
@@ -314,6 +320,8 @@ void APawnIsometric::Input_ZoomCamera(float w)
 
 void APawnIsometric::Input_PanCameraStart()
 {
+	if (!bIsCursorActive) return;
+
 	bIsPanning = true;
 
 	cursorActor->SetActorHiddenInGame(true);
